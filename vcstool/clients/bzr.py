@@ -22,7 +22,7 @@ class BzrClient(VcsClientBase):
         return cmd
 
     def log(self, command):
-        cmd = [BzrClient._executable, 'log', '--limit %d' % command.limit]
+        cmd = [BzrClient._executable, 'log', '--limit', '%d' % command.limit]
         return cmd
 
     def pull(self, _command):

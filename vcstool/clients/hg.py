@@ -25,7 +25,7 @@ class HgClient(VcsClientBase):
         return cmd
 
     def log(self, command):
-        cmd = [HgClient._executable, 'log', '--limit %d' % command.limit]
+        cmd = [HgClient._executable, 'log', '--limit', '%d' % command.limit]
         return cmd
 
     def pull(self, _command):

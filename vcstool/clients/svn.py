@@ -26,7 +26,7 @@ class SvnClient(VcsClientBase):
         return cmd
 
     def log(self, command):
-        cmd = [SvnClient._executable, 'log', '-%d' % command.limit]
+        cmd = [SvnClient._executable, 'log', '--limit', '%d' % command.limit]
         return cmd
 
     def pull(self, _command):

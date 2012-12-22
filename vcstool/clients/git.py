@@ -22,6 +22,9 @@ class GitClient(VcsClientBase):
 
     def diff(self, command):
         cmd = [GitClient._executable, 'diff']
+        self._check_auto_color()
+        if GitClient._config_color_is_auto:
+            cmd = [cmd[0]] + ['-c', 'color.ui=always'] + cmd[1:]
         if command.context:
             cmd += ['--unified=%d' % command.context]
         return cmd
@@ -43,16 +46,19 @@ class GitClient(VcsClientBase):
         return cmd
 
     def status(self, command):
-        # check if user uses colorization
-        if GitClient._config_color_is_auto is None:
-            output = subprocess.check_output([GitClient._executable, 'config', '--get', 'color.ui'], shell=False)
-            GitClient._config_color_is_auto = output.strip() == 'auto'
         cmd = [GitClient._executable, 'status']
+        self._check_auto_color()
         if GitClient._config_color_is_auto:
             cmd = [cmd[0]] + ['-c', 'color.ui=always'] + cmd[1:]
         if command.quiet:
             cmd += ['--untracked-files=no']
         return cmd
+
+    def _check_auto_color(self):
+        # check if user uses colorization
+        if GitClient._config_color_is_auto is None:
+            output = subprocess.check_output([GitClient._executable, 'config', '--get', 'color.ui'], shell=False)
+            GitClient._config_color_is_auto = output.strip() == 'auto'
 
 
 if not GitClient._executable:

@@ -63,11 +63,13 @@ def execute(command):
         client = job['client']
         print(ansi('bluef') + '=== ' + ansi('boldon') + client.path + ansi('boldoff') + ' (' + client.type + ') ===' + ansi('reset'))
         output = job['stdout'].rstrip()
+        if job['retcode'] != 0:
+            if not output:
+                output = 'Failed with retcode %d' % job['retcode']
+            output = ansi('redf') + output + ansi('reset')
+        elif not job['cmd']:
+            output = ansi('yellowf') + output + ansi('reset')
         if output:
-            if job['retcode'] != 0:
-                output = ansi('redf') + output + ansi('reset')
-            elif not job['cmd']:
-                output = ansi('yellowf') + output + ansi('reset')
             print(output)
 
 

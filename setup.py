@@ -23,11 +23,11 @@ Currently it supports git, hg, svn and bzr.''',
     test_suite='test',
     entry_points={
         'console_scripts': [
-            'vcstool-diff = vcstool.command.diff:main',
-            'vcstool-pull = vcstool.command.pull:main',
-            'vcstool-push = vcstool.command.push:main',
-            'vcstool-remotes = vcstool.command.remotes:main',
-            'vcstool-status = vcstool.command.status:main',
+            'vcs-diff = vcstool.command.diff:main',
+            'vcs-pull = vcstool.command.pull:main',
+            'vcs-push = vcstool.command.push:main',
+            'vcs-remotes = vcstool.command.remotes:main',
+            'vcs-status = vcstool.command.status:main',
         ]
     }
 )

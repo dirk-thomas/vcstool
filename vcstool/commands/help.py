@@ -24,9 +24,9 @@ def main(args=None):
             print('  %s' % client('.').type)
         return 0
 
-    print('usage: vcstool COMMAND [<args>]')
+    print('usage: vcs COMMAND [<args>]')
     print('')
-    print('The vcstool commands are:')
+    print('The vcs commands are:')
     max_len = max([len(cmd.command) for cmd in vcstool_commands])
     for cmd in vcstool_commands:
         print('  %s%s   %s' % (cmd.command, ' ' * (max_len - len(cmd.command)), cmd.help))

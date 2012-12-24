@@ -1,7 +1,7 @@
 vcstool
 =======
 
-The vcstool script enables batch commands on multiple different version control system (VCS) repositories.
+The vcs script enables batch commands on multiple different version control system (VCS) repositories.
 
 Installing
 ----------

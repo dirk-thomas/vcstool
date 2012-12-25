@@ -19,7 +19,7 @@ class PushCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Push changes from the working copy to the repository')
+    parser = argparse.ArgumentParser(description='Push changes from the working copy to the repository', prog='vcs push')
     group = parser.add_argument_group('"push" command parameters')
     return parser
 

@@ -19,7 +19,7 @@ class PullCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Bring changes from the repository into the working copy')
+    parser = argparse.ArgumentParser(description='Bring changes from the repository into the working copy', prog='vcs pull')
     group = parser.add_argument_group('"pull" command parameters')
     return parser
 

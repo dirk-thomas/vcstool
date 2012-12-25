@@ -20,7 +20,7 @@ class StatusCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Show the working tree status')
+    parser = argparse.ArgumentParser(description='Show the working tree status', prog='vcs status')
     group = parser.add_argument_group('"status" command parameters')
     group.add_argument('-q', '--quiet', action='store_true', default=False, help="Don't show unversioned items")
     return parser

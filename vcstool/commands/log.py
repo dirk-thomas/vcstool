@@ -20,7 +20,7 @@ class LogCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Show commit logs')
+    parser = argparse.ArgumentParser(description='Show commit logs', prog='vcs log')
     group = parser.add_argument_group('"log" command parameters')
     group.add_argument('-l', '--limit', metavar='N', type=int, default=3, help='Limit number of logs')
     return parser

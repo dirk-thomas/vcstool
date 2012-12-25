@@ -20,7 +20,7 @@ class DiffCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Show changes in the working tree')
+    parser = argparse.ArgumentParser(description='Show changes in the working tree', prog='vcs diff')
     group = parser.add_argument_group('"diff" command parameters')
     group.add_argument('--context', metavar='N', type=int, help='Generate diffs with <n> lines of context')
     return parser

@@ -3,8 +3,20 @@ import os
 from . import vcstool_clients
 
 
-def find_repositories(path):
+def find_repositories(paths):
     repos = []
+    visited = []
+    for path in paths:
+        _find_repositories(path, repos, visited)
+    return repos
+
+
+def _find_repositories(path, repos, visited):
+    abs_path = os.path.abspath(path)
+    if abs_path in visited:
+        return
+    visited.append(abs_path)
+
     client = get_vcs_client(path)
     if client:
         repos.append(client)
@@ -17,8 +29,7 @@ def find_repositories(path):
             subpath = os.path.join(path, name)
             if not os.path.isdir(subpath):
                 continue
-            repos += find_repositories(subpath)
-    return repos
+            _find_repositories(subpath, repos, visited)
 
 
 def get_vcs_client(path):

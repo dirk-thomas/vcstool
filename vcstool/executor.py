@@ -7,8 +7,8 @@ from .crawler import find_repositories
 
 def execute(command):
     # determine repositories
-    clients = find_repositories(command.path)
-    if command.repos:
+    clients = find_repositories(command.paths)
+    if command.output_repos:
         ordered_clients = dict((client.path, client) for client in clients)
         for k in sorted(ordered_clients.keys()):
             client = ordered_clients[k]

@@ -59,6 +59,60 @@ class SvnClient(VcsClientBase):
             cmd += ['--unified=%d' % command.context]
         return self._run_command(cmd)
 
+    def export(self, _command):
+        cmd_info = [SvnClient._executable, 'info', '--xml']
+        result_info = self._run_command(cmd_info)
+        if result_info['returncode']:
+            result_info['output'] = 'Could not determine url: %s' % result_info['output']
+            return result_info
+        info = result_info['output']
+
+        try:
+            root = fromstring(info)
+            entry = root.find('entry')
+            url = entry.findtext('url')
+        except Exception as e:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Could not determine url from xml: %s" % e,
+                'returncode': 1
+            }
+
+        return {
+            'cmd': ' '.join(cmd_info),
+            'cwd': self.path,
+            'output': url,
+            'returncode': 0,
+            'export_data': {'url': url}
+        }
+
+    def import_(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        not_exist = self._create_path()
+        if not_exist:
+            return not_exist
+
+        cmd_checkout = [SvnClient._executable, '--non-interactive', 'checkout', command.url, '.']
+        result_checkout = self._run_command(cmd_checkout)
+        if result_checkout['returncode']:
+            result_checkout['output'] = "Could not checkout repository '%s': %s" % (command.url, result_checkout['output'])
+            return result_checkout
+
+        return {
+            'cmd': ' '.join(cmd_checkout),
+            'cwd': self.path,
+            'output': result_checkout['output'],
+            'returncode': 0
+        }
+
     def log(self, command):
         cmd = [SvnClient._executable, 'log', '--limit', '%d' % command.limit]
         return self._run_command(cmd)

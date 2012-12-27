@@ -1,9 +1,7 @@
-import os
 try:
     import queue
 except ImportError:
     import Queue as queue
-import subprocess
 import sys
 import threading
 
@@ -23,7 +21,7 @@ def generate_jobs(clients, command):
     return jobs
 
 
-def execute_jobs(jobs, show_commands=False, show_progress=False):
+def execute_jobs(jobs, show_progress=False):
     results = []
 
     job_queue = queue.Queue()
@@ -88,7 +86,7 @@ class Worker(threading.Thread):
         try:
             method = getattr(job['client'], method_name)
             return method(job['command'])
-        except AttributeError as e:
+        except AttributeError:
             return {
                 'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
                 'output': "Command '%s' not implemented for client '%s'" % (job['command'].__class__.command, job['client'].__class__.type),

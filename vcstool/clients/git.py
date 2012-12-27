@@ -1,3 +1,4 @@
+import copy
 import os
 
 from .vcs_base import find_executable, VcsClientBase
@@ -28,6 +29,117 @@ class GitClient(VcsClientBase):
         if command.context:
             cmd += ['--unified=%d' % command.context]
         return self._run_command(cmd)
+
+    def export(self, _command):
+        result_url = self._get_url()
+        if result_url['returncode']:
+            return result_url
+        url = result_url['output']
+
+        cmd_ref = [GitClient._executable, 'rev-parse', '--abbrev-ref', 'HEAD']
+        result_ref = self._run_command(cmd_ref)
+        if result_ref['returncode']:
+            result_ref['output'] = 'Could not determine ref: %s' % result_ref['output']
+            return result_ref
+        ref = result_ref['output']
+
+        return {
+            'cmd': '%s && %s' % (result_url['cmd'], ' '.join(cmd_ref)),
+            'cwd': self.path,
+            'output': '\n'.join([url, ref]),
+            'returncode': 0,
+            'export_data': {'url': url, 'version': ref}
+        }
+
+    def _get_url(self):
+        cmd_remote = [GitClient._executable, 'remote', 'show']
+        result_remote = self._run_command(cmd_remote)
+        if result_remote['returncode']:
+            result_remote['output'] = 'Could not determine remote: %s' % result_remote['output']
+            return result_remote
+        remote = result_remote['output']
+
+        cmd_url_tpl = [GitClient._executable, 'config', '--get', 'remote.%s.url']
+        cmd_url = copy.copy(cmd_url_tpl)
+        cmd_url[-1] = cmd_url[-1] % remote
+        result_url = self._run_command(cmd_url)
+        if result_url['returncode']:
+            result_url['output'] = 'Could not determine remote url: %s' % result_url['output']
+            return result_url
+        url = result_url['output']
+
+        cmd = copy.copy(cmd_url_tpl)
+        cmd[-1] = cmd[-1] % ('`%s`' % ' '.join(cmd_remote))
+        return {
+            'cmd': ' '.join(cmd),
+            'cwd': self.path,
+            'output': url,
+            'returncode': 0
+        }
+
+    def import_(self, command):
+        if not command.url or not command.version:
+            if not command.url and not command.version:
+                value_missing = "'url' and 'version'"
+            elif not command.url:
+                value_missing = "'url'"
+            else:
+                value_missing = "'version'"
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': 'Repository data lacks the %s value' % value_missing,
+                'returncode': 1
+            }
+
+        not_exist = self._create_path()
+        if not_exist:
+            return not_exist
+
+        if GitClient.is_repository(self.path):
+            # verify that existing repository is the same
+            result_url = self._get_url()
+            if result_url['returncode']:
+                return result_url
+            url = result_url['output']
+            if url != command.url:
+                return {
+                    'cmd': '',
+                    'cwd': self.path,
+                    'output': 'Path already exists and contains a different repository',
+                    'returncode': 1
+                }
+            # pull updates for existing repo
+            cmd_pull = [GitClient._executable, 'pull']
+            result_pull = self._run_command(cmd_pull)
+            if result_pull['returncode']:
+                return result_pull
+            cmd = result_pull['cmd']
+            output = result_pull['output']
+
+        else:
+            cmd_clone = [GitClient._executable, 'clone', command.url, '.']
+            result_clone = self._run_command(cmd_clone)
+            if result_clone['returncode']:
+                result_clone['output'] = "Could not clone repository '%s': %s" % (command.url, result_clone['output'])
+                return result_clone
+            cmd = result_clone['cmd']
+            output = result_clone['output']
+
+        cmd_checkout = [GitClient._executable, 'checkout', command.version]
+        result_checkout = self._run_command(cmd_checkout)
+        if result_checkout['returncode']:
+            result_checkout['output'] = "Could not checkout ref '%s': %s" % (command.version, result_clone['output'])
+            return result_checkout
+        cmd += ' && ' + ' '.join(cmd_checkout)
+        output = '\n'.join([output, result_checkout['output']])
+
+        return {
+            'cmd': cmd,
+            'cwd': self.path,
+            'output': output,
+            'returncode': 0
+        }
 
     def log(self, command):
         cmd = [GitClient._executable, 'log', '-%d' % command.limit]

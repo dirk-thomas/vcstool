@@ -9,8 +9,29 @@ class VcsClientBase(object):
     def __init__(self, path):
         self.path = path
 
+    def __getattribute__(self, name):
+        if name == 'import':
+            try:
+                return self.import_
+            except AttributeError:
+                pass
+        return super(VcsClientBase, self).__getattribute__(name)
+
     def _run_command(self, cmd):
         return run_command(cmd, os.path.abspath(self.path))
+
+    def _create_path(self):
+        if not os.path.exists(self.path):
+            try:
+                os.makedirs(self.path)
+            except os.error as e:
+                return {
+                    'cmd': 'os.makedirs(%s)' % self.path,
+                    'cwd': self.path,
+                    'output': "Could not create directory '%s': %s" % (self.path, e),
+                    'returncode': 1
+                }
+        return None
 
 
 def find_executable(file_name):

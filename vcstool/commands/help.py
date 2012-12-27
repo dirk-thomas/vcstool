@@ -64,7 +64,7 @@ def get_parser_with_command_only():
 
 
 def _get_description():
-    return 'The commands take directory arguments, recursively searching for repositories\n\
+    return 'Most commands take directory arguments, recursively searching for repositories\n\
 in these directories.  If no arguments are supplied to a command, it recurses\n\
 on the current directory (inclusive) by default.'
 

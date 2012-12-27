@@ -39,7 +39,7 @@ def simple_main(parser, command_class, args=None):
     if command.output_repos:
         output_repositories(clients)
     jobs = generate_jobs(clients, command)
-    results = execute_jobs(jobs, show_commands=command.debug, show_progress=True)
+    results = execute_jobs(jobs, show_progress=True)
 
     output_results(results)
     return 0

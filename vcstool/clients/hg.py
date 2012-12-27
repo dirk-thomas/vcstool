@@ -130,7 +130,7 @@ class HgClient(VcsClientBase):
 
     def push(self, _command):
         cmd = [HgClient._executable, 'push']
-        return cmd
+        return self._run_command(cmd)
 
     def remotes(self, _command):
         cmd = [HgClient._executable, 'paths']

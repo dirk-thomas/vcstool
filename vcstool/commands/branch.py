@@ -1,9 +1,7 @@
 import argparse
 import sys
 
-from vcstool.executor import execute
-
-from .command import add_common_arguments, Command
+from .command import Command, simple_main
 
 
 class BranchCommand(Command):
@@ -14,9 +12,6 @@ class BranchCommand(Command):
     def __init__(self, args):
         super(BranchCommand, self).__init__(args)
 
-    def get_command_line(self, client):
-        return client.branch(self)
-
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Show the branches', prog='vcs branch')
@@ -26,11 +21,7 @@ def get_parser():
 
 def main(args=None):
     parser = get_parser()
-    add_common_arguments(parser)
-    args = parser.parse_args(args)
-    cmd = BranchCommand(args)
-    execute(cmd)
-    return 0
+    return simple_main(parser, BranchCommand, args)
 
 
 if __name__ == '__main__':

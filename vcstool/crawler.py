@@ -33,7 +33,7 @@ def _find_repositories(path, repos, visited):
 
 
 def get_vcs_client(path):
-    for vcs_type in vcstool_clients:
-        if vcs_type.is_repository(path):
-            return vcs_type(path)
+    for client_class in vcstool_clients:
+        if client_class.is_repository(path):
+            return client_class(path)
     return None

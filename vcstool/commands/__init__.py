@@ -14,3 +14,7 @@ vcstool_commands.append(PullCommand)
 vcstool_commands.append(PushCommand)
 vcstool_commands.append(RemotesCommand)
 vcstool_commands.append(StatusCommand)
+
+_commands = [c.command for c in vcstool_commands]
+if len(_commands) != len(set(_commands)):
+    raise RuntimeError('Multiple commands share the same command name: %s' % ', '.join(sorted(_commands)))

@@ -38,7 +38,7 @@ Did you mean one of these?\n\
     if ns.clients:
         print('The available VCS clients are:')
         for client in vcstool_clients:
-            print('  %s' % client('.').type)
+            print('  %s' % client.__class__.type)
         return 0
 
     # output detailed command list

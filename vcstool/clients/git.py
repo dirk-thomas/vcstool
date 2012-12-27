@@ -1,11 +1,11 @@
 import os
-import subprocess
 
 from .vcs_base import find_executable, VcsClientBase
 
 
 class GitClient(VcsClientBase):
 
+    type = 'git'
     _executable = None
     _config_color_is_auto = None
 
@@ -14,11 +14,11 @@ class GitClient(VcsClientBase):
         return os.path.isdir(os.path.join(path, '.git'))
 
     def __init__(self, path):
-        super(GitClient, self).__init__('git', path)
+        super(GitClient, self).__init__(path)
 
     def branch(self, _command):
         cmd = [GitClient._executable, 'branch']
-        return cmd
+        return self._run_command(cmd)
 
     def diff(self, command):
         cmd = [GitClient._executable, 'diff']
@@ -27,23 +27,23 @@ class GitClient(VcsClientBase):
             cmd = [cmd[0]] + ['-c', 'color.ui=always'] + cmd[1:]
         if command.context:
             cmd += ['--unified=%d' % command.context]
-        return cmd
+        return self._run_command(cmd)
 
     def log(self, command):
         cmd = [GitClient._executable, 'log', '-%d' % command.limit]
-        return cmd
+        return self._run_command(cmd)
 
     def pull(self, _command):
         cmd = [GitClient._executable, 'pull']
-        return cmd
+        return self._run_command(cmd)
 
     def push(self, _command):
         cmd = [GitClient._executable, 'push']
-        return cmd
+        return self._run_command(cmd)
 
     def remotes(self, _command):
         cmd = [GitClient._executable, 'remote', '-v']
-        return cmd
+        return self._run_command(cmd)
 
     def status(self, command):
         cmd = [GitClient._executable, 'status']
@@ -52,13 +52,14 @@ class GitClient(VcsClientBase):
             cmd = [cmd[0]] + ['-c', 'color.ui=always'] + cmd[1:]
         if command.quiet:
             cmd += ['--untracked-files=no']
-        return cmd
+        return self._run_command(cmd)
 
     def _check_auto_color(self):
         # check if user uses colorization
         if GitClient._config_color_is_auto is None:
-            output = subprocess.check_output([GitClient._executable, 'config', '--get', 'color.ui'], shell=False)
-            GitClient._config_color_is_auto = output.strip() == 'auto'
+            cmd = [GitClient._executable, 'config', '--get', 'color.ui']
+            result = self._run_command(cmd)
+            GitClient._config_color_is_auto = result['output'] == 'auto'
 
 
 if not GitClient._executable:

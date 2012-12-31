@@ -33,10 +33,26 @@ def get_parser():
 
 
 def get_repositories(yaml_file):
+    try:
+        root = yaml.load(yaml_file)
+    except yaml.YAMLError as e:
+        raise RuntimeError('Input data is not valid yaml format: %s' % e)
+
+    try:
+        repositories = root['repositories']
+        return get_repos_in_vcstool_format(repositories)
+    except AttributeError as e:
+        raise RuntimeError('Input data is not valid format: %s' % e)
+    except TypeError as e:
+        # try rosinstall file format
+        try:
+            return get_repos_in_rosinstall_format(root)
+        except:
+            raise RuntimeError('Input data is not valid format: %s' % e)
+
+
+def get_repos_in_vcstool_format(repositories):
     repos = {}
-    data = yaml_file.read()
-    root = yaml.load(data)
-    repositories = root['repositories']
     for path in repositories:
         repo = {}
         attributes = repositories[path]
@@ -45,8 +61,32 @@ def get_repositories(yaml_file):
             repo['url'] = attributes['url']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
-        except Exception as e:
-            print(ansi('redf') + ("Repository '%s' does not provide the necessary information: %s" % (path, e)) + ansi('reset'), file=sys.stderr)
+        except AttributeError as e:
+            print(ansi('yellowf') + ("Repository '%s' does not provide the necessary information: %s" % (path, e)) + ansi('reset'), file=sys.stderr)
+            continue
+        repos[path] = repo
+    return repos
+
+
+def get_repos_in_rosinstall_format(root):
+    repos = {}
+    for i, item in enumerate(root):
+        if len(item.keys()) != 1:
+            raise RuntimeError('Input data is not valid format')
+        repo = {'type': item.keys()[0]}
+        attributes = item.values()[0]
+        try:
+            path = attributes['local-name']
+        except AttributeError as e:
+            print(ansi('yellowf') + ('Repository #%d does not provide the necessary information: %s' % (i, e)) + ansi('reset'), file=sys.stderr)
+            continue
+        try:
+            repo['url'] = attributes['uri']
+            if 'version' in attributes:
+                repo['version'] = attributes['version']
+        except AttributeError as e:
+            print(ansi('yellowf') + ("Repository '%s' does not provide the necessary information: %s" % (path, e)) + ansi('reset'), file=sys.stderr)
+            continue
         repos[path] = repo
     return repos
 
@@ -77,7 +117,11 @@ def main(args=None):
     parser = get_parser()
     args = parser.parse_args(args)
     args.paths = [args.path]
-    repos = get_repositories(args.input)
+    try:
+        repos = get_repositories(args.input)
+    except RuntimeError as e:
+        print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
+        return 1
     jobs = generate_jobs(repos, args)
     results = execute_jobs(jobs, show_progress=True)
     output_results(results)

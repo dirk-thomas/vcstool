@@ -30,18 +30,28 @@ class GitClient(VcsClientBase):
             cmd += ['--unified=%d' % command.context]
         return self._run_command(cmd)
 
-    def export(self, _command):
+    def export(self, command):
         result_url = self._get_url()
         if result_url['returncode']:
             return result_url
         url = result_url['output']
 
-        cmd_ref = [GitClient._executable, 'rev-parse', '--abbrev-ref', 'HEAD']
+        cmd_ref = [GitClient._executable, 'rev-parse', 'HEAD']
         result_ref = self._run_command(cmd_ref)
         if result_ref['returncode']:
             result_ref['output'] = 'Could not determine ref: %s' % result_ref['output']
             return result_ref
         ref = result_ref['output']
+
+        if not command.exact:
+            cmd_abbrev_ref = [GitClient._executable, 'rev-parse', '--abbrev-ref', 'HEAD']
+            result_abbrev_ref = self._run_command(cmd_abbrev_ref)
+            if result_abbrev_ref['returncode']:
+                result_abbrev_ref['output'] = 'Could not determine abbrev-ref: %s' % result_abbrev_ref['output']
+                return result_abbrev_ref
+            if result_abbrev_ref['output'] != 'HEAD':
+                ref = result_abbrev_ref['output']
+                cmd_ref = cmd_abbrev_ref
 
         return {
             'cmd': '%s && %s' % (result_url['cmd'], ' '.join(cmd_ref)),

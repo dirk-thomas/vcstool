@@ -25,26 +25,42 @@ class HgClient(VcsClientBase):
             cmd += ['--unified %d' % command.context]
         return self._run_command(cmd)
 
-    def export(self, _command):
+    def export(self, command):
         result_url = self._get_url()
         if result_url['returncode']:
             return result_url
         url = result_url['output']
 
-        cmd_branch = [HgClient._executable, 'branch']
-        result_branch = self._run_command(cmd_branch)
-        if result_branch['returncode']:
-            result_branch['output'] = 'Could not determine branch: %s' % result_branch['output']
-            return result_branch
-        branch = result_branch['output']
+        cmd_id = [HgClient._executable, 'identify', '--id']
+        result_id = self._run_command(cmd_id)
+        if result_id['returncode']:
+            result_id['output'] = 'Could not determine id: %s' % result_id['output']
+            return result_id
+        id_ = result_id['output']
 
-        cmd = cmd_url + ['&&'] + cmd_branch
+        if not command.exact:
+            cmd_branch = [HgClient._executable, 'identify', '--branch']
+            result_branch = self._run_command(cmd_branch)
+            if result_branch['returncode']:
+                result_branch['output'] = 'Could not determine branch: %s' % result_branch['output']
+                return result_branch
+            branch = result_branch['output']
+
+            cmd_branch_id = [HgClient._executable, 'identify', '-r', branch, '--id']
+            result_branch_id = self._run_command(cmd_branch_id)
+            if result_branch_id['returncode']:
+                result_branch_id['output'] = 'Could not determine branch id: %s' % result_branch_id['output']
+                return result_branch_id
+            if result_branch_id['output'] == id_:
+                id_ = branch
+                cmd_branch = cmd_branch_id
+
         return {
-            'cmd': ' '.join(cmd),
+            'cmd': '%s && %s' % (result_url['cmd'], ' '.join(cmd_id)),
             'cwd': self.path,
             'output': '\n'.join([url, branch]),
             'returncode': 0,
-            'export_data': {'url': url, 'version': branch}
+            'export_data': {'url': url, 'version': id_}
         }
 
     def _get_url(self):

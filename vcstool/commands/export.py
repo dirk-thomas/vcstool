@@ -17,12 +17,14 @@ class ExportCommand(Command):
 
     def __init__(self, args):
         super(ExportCommand, self).__init__(args)
+        self.exact = args.exact
 
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Export the list of repositories', prog='vcs export')
     group = parser.add_argument_group('"export" command parameters')
     group.add_argument('path', nargs='?', type=existing_dir, default=os.curdir, help='Base path to look for repositories')
+    group.add_argument('--exact', action='store_true', default=False, help='Export exact commit hash instead of branch names')
     return parser
 
 

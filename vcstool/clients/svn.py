@@ -59,7 +59,7 @@ class SvnClient(VcsClientBase):
             cmd += ['--unified=%d' % command.context]
         return self._run_command(cmd)
 
-    def export(self, _command):
+    def export(self, command):
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:
@@ -71,6 +71,7 @@ class SvnClient(VcsClientBase):
             root = fromstring(info)
             entry = root.find('entry')
             url = entry.findtext('url')
+            revision = entry.get('revision')
         except Exception as e:
             return {
                 'cmd': '',
@@ -79,12 +80,15 @@ class SvnClient(VcsClientBase):
                 'returncode': 1
             }
 
+        export_data = {'url': url}
+        if command.exact:
+            export_data['version'] = revision
         return {
             'cmd': ' '.join(cmd_info),
             'cwd': self.path,
             'output': url,
             'returncode': 0,
-            'export_data': {'url': url}
+            'export_data': export_data
         }
 
     def import_(self, command):
@@ -100,7 +104,11 @@ class SvnClient(VcsClientBase):
         if not_exist:
             return not_exist
 
-        cmd_checkout = [SvnClient._executable, '--non-interactive', 'checkout', command.url, '.']
+        url = command.url
+        if command.version:
+            url += '@%d' % command.version
+
+        cmd_checkout = [SvnClient._executable, '--non-interactive', 'checkout', url, '.']
         result_checkout = self._run_command(cmd_checkout)
         if result_checkout['returncode']:
             result_checkout['output'] = "Could not checkout repository '%s': %s" % (command.url, result_checkout['output'])

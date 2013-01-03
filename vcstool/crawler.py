@@ -25,7 +25,7 @@ def _find_repositories(path, repos, visited):
             listdir = os.listdir(path)
         except OSError:
             listdir = []
-        for name in listdir:
+        for name in sorted(listdir):
             subpath = os.path.join(path, name)
             if not os.path.isdir(subpath):
                 continue

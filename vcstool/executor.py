@@ -1,3 +1,4 @@
+import os
 try:
     import queue
 except ImportError:
@@ -15,10 +16,38 @@ def output_repositories(clients):
 
 def generate_jobs(clients, command):
     jobs = []
+    realpaths = {}
     for client in clients:
+        # check if client is a duplicate of another path
+        realpath = os.path.realpath(client.path)
+        if realpath not in realpaths:
+            realpaths[realpath] = [client.path]
+        else:
+            # override command on client to ignore multiple invocation on same repository
+            duplicate_path = realpaths[realpath][0]
+            realpaths[realpath].append(client.path)
+            method_name = command.__class__.command
+            method = getattr(client, method_name, None)
+            if method is not None:
+                setattr(client, method_name, DuplicateCommandHandler(client, duplicate_path))
+
         job = {'client': client, 'command': command}
         jobs.append(job)
     return jobs
+
+
+class DuplicateCommandHandler(object):
+    def __init__(self, client, duplicate_path):
+        self.client = client
+        self.duplicate_path = duplicate_path
+
+    def __call__(self, _command):
+        return {
+            'cmd': '',
+            'cwd': self.client.path,
+            'output': "Same repository as '%s'" % self.duplicate_path,
+            'returncode': NotImplemented
+        }
 
 
 def execute_jobs(jobs, show_progress=False):

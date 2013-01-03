@@ -84,14 +84,14 @@ class Worker(threading.Thread):
     def process_job(self, job):
         method_name = job['command'].__class__.command
         try:
-            method = getattr(job['client'], method_name)
+            method = getattr(job['client'], method_name, None)
+            if method is None:
+                return {
+                    'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
+                    'output': "Command '%s' not implemented for client '%s'" % (job['command'].__class__.command, job['client'].__class__.type),
+                    'returncode': NotImplemented
+                }
             return method(job['command'])
-        except AttributeError:
-            return {
-                'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
-                'output': "Command '%s' not implemented for client '%s'" % (job['command'].__class__.command, job['client'].__class__.type),
-                'returncode': NotImplemented
-            }
         except Exception as e:
             return {
                 'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),

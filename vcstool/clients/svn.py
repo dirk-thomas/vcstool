@@ -122,7 +122,16 @@ class SvnClient(VcsClientBase):
         }
 
     def log(self, command):
-        cmd = [SvnClient._executable, 'log', '--limit', '%d' % command.limit]
+        if command.limit_untagged:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': 'SvnClient can not determine latest tag',
+                'returncode': NotImplemented
+            }
+        cmd = [SvnClient._executable, 'log']
+        if command.limit != 0:
+            cmd += ['--limit', '%d' % command.limit]
         return self._run_command(cmd)
 
     def pull(self, _command):

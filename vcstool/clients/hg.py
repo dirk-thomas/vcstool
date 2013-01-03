@@ -137,7 +137,18 @@ class HgClient(VcsClientBase):
         }
 
     def log(self, command):
-        cmd = [HgClient._executable, 'log', '--limit', '%d' % command.limit]
+        if not command.limit_untagged:
+            cmd = [HgClient._executable, 'log']
+            if command.limit != 0:
+                cmd += ['--limit', '%d' % command.limit]
+        else:
+            # determine distance to nearest tag
+            cmd_tag = [HgClient._executable, 'log', '--rev', '.', '--template', '{latesttagdistance}']
+            result_tag = self._run_command(cmd_tag)
+            if result_tag['returncode']:
+                return result_tag
+            # output log since nearest tag
+            cmd = [HgClient._executable, 'log', '--limit', result_tag['output']]
         return self._run_command(cmd)
 
     def pull(self, _command):

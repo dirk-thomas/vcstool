@@ -152,7 +152,18 @@ class GitClient(VcsClientBase):
         }
 
     def log(self, command):
-        cmd = [GitClient._executable, 'log', '-%d' % command.limit]
+        if not command.limit_untagged:
+            cmd = [GitClient._executable, 'log']
+            if command.limit != 0:
+                cmd += ['-%d' % command.limit]
+        else:
+            # determine nearest tag
+            cmd_tag = [GitClient._executable, 'describe', '--abbrev=0', '--tags']
+            result_tag = self._run_command(cmd_tag)
+            if result_tag['returncode']:
+                return result_tag
+            # output log since nearest tag
+            cmd = [GitClient._executable, 'log', '%s..' % result_tag['output']]
         return self._run_command(cmd)
 
     def pull(self, _command):

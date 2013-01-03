@@ -37,6 +37,6 @@ class BzrClient(VcsClientBase):
 
 
 if not BzrClient._executable:
-    BzrClient._executable = find_executable('bbzr')
+    BzrClient._executable = find_executable('bzr')
     if not BzrClient._executable:
         raise ImportError('Could not find executable "bzr" for vcstool.clients.BzrClient')

@@ -1,0 +1,31 @@
+[all-building]
+method                  = scp
+login                   = rosbuild
+fqdn                    = 50.28.27.175
+incoming                = /var/www/repos/building/queue/all
+run_dinstall            = 0
+post_upload_command     = ssh rosbuild@50.28.27.175 -- /usr/bin/reprepro -b /var/www/repos/building --ignore=emptyfilenamepart -V processincoming all
+
+[all-shadow]
+method                  = scp
+login                   = rosbuild
+fqdn                    = pub8.willowgarage.com
+incoming                = /var/packages/ros-shadow/ubuntu/queue/all
+run_dinstall            = 0
+post_upload_command     = ssh rosbuild@pub8.willowgarage.com -- /usr/bin/reprepro -b /var/packages/ros-shadow/ubuntu --ignore=emptyfilenamepart -V processincoming all
+
+[all-shadow-fixed]
+method                  = scp
+login                   = rosbuild
+fqdn                    = pub8.willowgarage.com
+incoming                = /var/packages/ros-shadow-fixed/ubuntu/queue/all
+run_dinstall            = 0
+post_upload_command     = ssh rosbuild@pub8.willowgarage.com -- /usr/bin/reprepro -b /var/packages/ros-shadow-fixed/ubuntu --ignore=emptyfilenamepart -V processincoming all
+
+[all-ros]
+method                  = scp
+login                   = rosbuild
+fqdn                    = pub8.willowgarage.com
+incoming                = /var/packages/ros/ubuntu/queue/all
+run_dinstall            = 0
+post_upload_command     = ssh rosbuild@pub8.willowgarage.com -- /usr/bin/reprepro -b /var/packages/ros/ubuntu --ignore=emptyfilenamepart -V processincoming all

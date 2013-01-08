@@ -13,23 +13,13 @@ def main(args=None):
     parser = get_parser(add_help=False)
     ns, _ = parser.parse_known_args(args)
 
-    if ns.command and ns.command != 'help':
-        # accept command with same prefix if unique
-        commands = [cmd.command for cmd in vcstool_commands]
-        commands = [cmd for cmd in commands if cmd.startswith(ns.command)]
-        if len(commands) != 1:
-            print("vcs: '%s' is not a vcs command. See 'vcs help'." % ns.command)
-            if commands:
-                print('\n\
-Did you mean one of these?\n\
-   %s' % '\n   '.join(commands), file=sys.stderr)
+    # help for a specific command
+    if ns.command:
+        # relay help request foe specific command
+        entrypoint = get_entrypoint(ns.command)
+        if not entrypoint:
             return 1
-
-        entrypoint = load_entry_point('vcstool', 'console_scripts', 'vcs-%s' % commands[0])
-        if args is None:
-            args = sys.argv[1:]
-        args.remove(ns.command)
-        return entrypoint(args)
+        return entrypoint(['--help'])
 
     # regular parsing validating options and arguments
     parser = get_parser()
@@ -55,6 +45,21 @@ def get_parser(add_help=True):
     from vcstool import __version__
     group.add_argument('--version', action='version', version='%(prog)s ' + __version__, help='Show the vcstool version')
     return parser
+
+
+def get_entrypoint(command):
+    # accept command with same prefix if unique
+    commands = [cmd.command for cmd in vcstool_commands]
+    commands = [cmd for cmd in commands if cmd.startswith(command)]
+    if len(commands) != 1:
+        print("vcs: '%s' is not a vcs command. See 'vcs help'." % command, file=sys.stderr)
+        if commands:
+            print('\n\
+Did you mean one of these?\n\
+   %s' % '\n   '.join(commands), file=sys.stderr)
+        return None
+
+    return load_entry_point('vcstool', 'console_scripts', 'vcs-%s' % commands[0])
 
 
 def get_parser_with_command_only():

@@ -31,6 +31,10 @@ def main(args=None):
             print('  %s' % client.type)
         return 0
 
+    if ns.commands:
+        print(' '.join([cmd.command for cmd in vcstool_commands]))
+        return 0
+
     # output detailed command list
     parser = get_parser_with_command_only()
     parser.print_help()
@@ -42,6 +46,7 @@ def get_parser(add_help=True):
     group = parser.add_mutually_exclusive_group()
     group.add_argument('command', metavar='<command>', nargs='?', help='The available commands: %s' % ', '.join([cmd.command for cmd in vcstool_commands]))
     group.add_argument('--clients', action='store_true', default=False, help='Show the available VCS clients')
+    group.add_argument('--commands', action='store_true', default=False, help='Output the available commands for auto-completion')
     from vcstool import __version__
     group.add_argument('--version', action='version', version='%(prog)s ' + __version__, help='Show the vcstool version')
     return parser

@@ -16,9 +16,53 @@ class BzrClient(VcsClientBase):
     def __init__(self, path):
         super(BzrClient, self).__init__(path)
 
+    def branch(self, _command):
+        return self._get_parent_branch()
+
     def diff(self, _command):
         cmd = [BzrClient._executable, 'diff']
         return self._run_command(cmd)
+
+    def import_(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        not_exist = self._create_path()
+        if not_exist:
+            return not_exist
+
+        if BzrClient.is_repository(self.path):
+            # verify that existing repository is the same
+            result_parent_branch = self._get_parent_branch()
+            if result_parent_branch['returncode']:
+                return result_parent_branch
+            parent_branch = result_parent_branch['output']
+            if parent_branch != command.url:
+                return {
+                    'cmd': '',
+                    'cwd': self.path,
+                    'output': 'Path already exists and contains a different repository',
+                    'returncode': 1
+                }
+            # pull updates for existing repo
+            cmd_pull = [BzrClient._executable, 'pull']
+            return self._run_command(cmd_pull)
+
+        else:
+            cmd_branch = [BzrClient._executable, 'branch']
+            if command.version:
+                cmd_branch += ['-r', command.version]
+            cmd_branch += [command.url, '.']
+            result_branch = self._run_command(cmd_branch)
+            if result_branch['returncode']:
+                result_branch['output'] = "Could not branch repository '%s': %s" % (command.url, result_branch['output'])
+                return result_branch
+            return result_branch
 
     def log(self, command):
         if command.limit_untagged:
@@ -80,9 +124,33 @@ class BzrClient(VcsClientBase):
         cmd = [BzrClient._executable, 'push']
         return self._run_command(cmd)
 
+    def remotes(self, _command):
+        return self._get_parent_branch()
+
     def status(self, _command):
         cmd = [BzrClient._executable, 'status']
         return self._run_command(cmd)
+
+    def _get_parent_branch(self):
+        cmd = [BzrClient._executable, 'info']
+        # parsing the text output requires enforcing language
+        env = copy.copy(os.environ)
+        env['LANG'] = 'en_US.UTF-8'
+        result = self._run_command(cmd, env)
+        if result['returncode']:
+            return result
+        branch = None
+        prefix = '  parent branch: '
+        for line in result['output'].split('\n'):
+            if line.startswith(prefix):
+                branch = line[len(prefix):]
+                break
+        if not branch:
+            result['output'] = 'Could not determine parent branch',
+            result['returncode'] = 1
+            return result
+        result['output'] = branch
+        return result
 
 
 if not BzrClient._executable:

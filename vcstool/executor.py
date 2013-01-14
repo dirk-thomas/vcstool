@@ -94,6 +94,7 @@ class Worker(threading.Thread):
 
     def __init__(self, job_queue, result_queue):
         super(Worker, self).__init__()
+        self.daemon = True
         self.job_queue = job_queue
         self.result_queue = result_queue
 

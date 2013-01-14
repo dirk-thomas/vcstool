@@ -1,2 +1,4 @@
 *.pyc
+deb_dist
+dist
 vcstool.egg-info

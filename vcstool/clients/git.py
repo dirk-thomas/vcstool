@@ -139,7 +139,7 @@ class GitClient(VcsClientBase):
         cmd_checkout = [GitClient._executable, 'checkout', command.version]
         result_checkout = self._run_command(cmd_checkout)
         if result_checkout['returncode']:
-            result_checkout['output'] = "Could not checkout ref '%s': %s" % (command.version, result_clone['output'])
+            result_checkout['output'] = "Could not checkout ref '%s': %s" % (command.version, result_checkout['output'])
             return result_checkout
         cmd += ' && ' + ' '.join(cmd_checkout)
         output = '\n'.join([output, result_checkout['output']])

@@ -1,3 +1,4 @@
+import copy
 import os
 
 from .vcs_base import find_executable, VcsClientBase
@@ -26,8 +27,11 @@ class BzrClient(VcsClientBase):
             result_tag = self._run_command(cmd_tag)
             if result_tag['returncode']:
                 return result_tag
-            line = result_tag['output'].split('\n')[0]
-            tag = line.split(' ')[0]
+            tag = None
+            for line in result_tag['output'].split('\n'):
+                parts = line.split(' ', 2)
+                if parts[1] != '?':
+                    tag = parts[0]
             if not tag:
                 result_tag['output'] = 'Could not determine latest tag',
                 result_tag['returncode'] = 1
@@ -37,15 +41,23 @@ class BzrClient(VcsClientBase):
             result_tag_rev = self._run_command(cmd_tag_rev)
             if result_tag_rev['returncode']:
                 return result_tag_rev
-            tag_rev = int(result_tag_rev['output'])
+            try:
+                tag_rev = int(result_tag_rev['output'])
+                tag_next_rev = tag_rev + 1
+            except ValueError:
+                tag_rev = result_tag_rev['output']
+                tag_next_rev = tag_rev
             # determine revision number of HEAD
             cmd_head_rev = [BzrClient._executable, 'revno']
             result_head_rev = self._run_command(cmd_head_rev)
             if result_head_rev['returncode']:
                 return result_head_rev
-            head_rev = int(result_head_rev['output'])
+            try:
+                head_rev = int(result_head_rev['output'])
+            except ValueError:
+                head_rev = result_head_rev['output']
             # output log since nearest tag
-            cmd_log = [BzrClient._executable, 'log', '--rev', 'revno:%d..' % (tag_rev + 1)]
+            cmd_log = [BzrClient._executable, 'log', '--rev', 'revno:%s..' % str(tag_next_rev)]
             if tag_rev == head_rev:
                 return {
                     'cmd': ' '.join(cmd_log),

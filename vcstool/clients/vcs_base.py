@@ -17,6 +17,13 @@ class VcsClientBase(object):
                 pass
         return super(VcsClientBase, self).__getattribute__(name)
 
+    def _not_applicable(self, command):
+        return {
+            'cmd': '%s.%s(%s)' % (self.__class__.type, 'push', command.__class__.command),
+            'output': "Command '%s' not applicable for client '%s'" % (command.__class__.command, self.__class__.type),
+            'returncode': NotImplemented
+        }
+
     def _run_command(self, cmd):
         return run_command(cmd, os.path.abspath(self.path))
 

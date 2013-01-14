@@ -138,6 +138,9 @@ class SvnClient(VcsClientBase):
         cmd = [SvnClient._executable, '--non-interactive', 'update']
         return self._run_command(cmd)
 
+    def push(self, command):
+        return self._not_applicable(command)
+
     def remotes(self, _command):
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)

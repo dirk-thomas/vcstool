@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
+from vcstool import __version__
 
 setup(
     name='vcstool',
-    version='0.0.1',
+    version=__version__,
     packages=find_packages(),
     author='Dirk Thomas',
     author_email='dthomas@willowgarage.com',

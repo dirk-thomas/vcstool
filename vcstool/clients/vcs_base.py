@@ -24,8 +24,8 @@ class VcsClientBase(object):
             'returncode': NotImplemented
         }
 
-    def _run_command(self, cmd):
-        return run_command(cmd, os.path.abspath(self.path))
+    def _run_command(self, cmd, env=None):
+        return run_command(cmd, os.path.abspath(self.path), env=env)
 
     def _create_path(self):
         if not os.path.exists(self.path):
@@ -49,10 +49,11 @@ def find_executable(file_name):
     return None
 
 
-def run_command(cmd, cwd):
+def run_command(cmd, cwd, env=None):
     result = {'cmd': ' '.join(cmd), 'cwd': cwd}
     try:
-        result['output'] = subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT).rstrip()
+        proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
+        result['output'], _ = proc.communicate()
         result['returncode'] = 0
     except subprocess.CalledProcessError as e:
         result['output'] = e.output

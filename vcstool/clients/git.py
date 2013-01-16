@@ -192,7 +192,7 @@ class GitClient(VcsClientBase):
         if GitClient._config_color_is_auto is None:
             cmd = [GitClient._executable, 'config', '--get', 'color.ui']
             result = self._run_command(cmd)
-            GitClient._config_color_is_auto = (result['output'].strip() == 'auto')
+            GitClient._config_color_is_auto = (result['output'] == 'auto')
 
 
 if not GitClient._executable:

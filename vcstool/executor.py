@@ -133,7 +133,7 @@ class Worker(threading.Thread):
 def output_result(result):
     client = result['client']
     print(ansi('bluef') + '=== ' + ansi('boldon') + client.path + ansi('boldoff') + ' (' + client.__class__.type + ') ===' + ansi('reset'))
-    output = result['output'].rstrip()
+    output = result['output']
     if result['returncode'] == NotImplemented:
         output = ansi('yellowf') + output + ansi('reset')
     elif result['returncode']:

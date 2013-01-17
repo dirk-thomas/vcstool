@@ -1,4 +1,3 @@
-from mako.exceptions import RuntimeException
 vcstool_clients = []
 
 try:

@@ -14,8 +14,9 @@ setup:
 
 clean_dist:
 	-rm -f MANIFEST
-	-rm -rf dist
 	-rm -rf deb_dist
+	-rm -rf dist
+	-rm -rf vcstool.egg-info
 
 distro: setup clean_dist
 	python setup.py sdist
@@ -31,7 +32,6 @@ install: distro
 	sudo checkinstall python setup.py install
 
 deb_dist:
-	# need to convert unstable to each distro and repeat
 	python setup.py --command-packages=stdeb.command sdist_dsc --workaround-548392=False bdist_deb
 
 upload-packages: deb_dist

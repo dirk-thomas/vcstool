@@ -23,9 +23,7 @@ class GitClient(VcsClientBase):
 
     def diff(self, command):
         cmd = [GitClient._executable, 'diff']
-        self._check_auto_color()
-        if GitClient._config_color_is_auto:
-            cmd = [cmd[0]] + ['-c', 'color.ui=always'] + cmd[1:]
+        self._check_color(cmd)
         if command.context:
             cmd += ['--unified=%d' % command.context]
         return self._run_command(cmd)
@@ -164,10 +162,12 @@ class GitClient(VcsClientBase):
                 return result_tag
             # output log since nearest tag
             cmd = [GitClient._executable, 'log', '%s..' % result_tag['output']]
+        self._check_color(cmd)
         return self._run_command(cmd)
 
     def pull(self, _command):
         cmd = [GitClient._executable, 'pull']
+        self._check_color(cmd)
         return self._run_command(cmd)
 
     def push(self, _command):
@@ -180,19 +180,21 @@ class GitClient(VcsClientBase):
 
     def status(self, command):
         cmd = [GitClient._executable, 'status']
-        self._check_auto_color()
-        if GitClient._config_color_is_auto:
-            cmd = [cmd[0]] + ['-c', 'color.ui=always'] + cmd[1:]
+        self._check_color(cmd)
         if command.quiet:
             cmd += ['--untracked-files=no']
         return self._run_command(cmd)
 
-    def _check_auto_color(self):
+    def _check_color(self, cmd):
         # check if user uses colorization
         if GitClient._config_color_is_auto is None:
-            cmd = [GitClient._executable, 'config', '--get', 'color.ui']
-            result = self._run_command(cmd)
+            _cmd = [GitClient._executable, 'config', '--get', 'color.ui']
+            result = self._run_command(_cmd)
             GitClient._config_color_is_auto = (result['output'] == 'auto')
+
+        # inject arguments to force colorization
+        if GitClient._config_color_is_auto:
+            cmd[1:1] = '-c', 'color.ui=always'
 
 
 if not GitClient._executable:

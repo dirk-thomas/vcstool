@@ -7,6 +7,7 @@ class HgClient(VcsClientBase):
 
     type = 'hg'
     _executable = None
+    _config_color = None
 
     @staticmethod
     def is_repository(path):
@@ -21,6 +22,7 @@ class HgClient(VcsClientBase):
 
     def diff(self, command):
         cmd = [HgClient._executable, 'diff']
+        self._check_color(cmd)
         if command.context:
             cmd += ['--unified %d' % command.context]
         return self._run_command(cmd)
@@ -149,10 +151,12 @@ class HgClient(VcsClientBase):
                 return result_tag
             # output log since nearest tag
             cmd = [HgClient._executable, 'log', '--limit', result_tag['output']]
+        self._check_color(cmd)
         return self._run_command(cmd)
 
     def pull(self, _command):
         cmd = [HgClient._executable, 'pull', '--update']
+        self._check_color(cmd)
         return self._run_command(cmd)
 
     def push(self, _command):
@@ -165,9 +169,35 @@ class HgClient(VcsClientBase):
 
     def status(self, command):
         cmd = [HgClient._executable, 'status']
+        self._check_color(cmd)
         if command.quiet:
             cmd += ['--untracked-files=no']
         return self._run_command(cmd)
+
+    def _check_color(self, cmd):
+        # check if user uses colorization
+        if HgClient._config_color is None:
+            HgClient._config_color = False
+            # check if config extension is available
+            _cmd = [HgClient._executable, 'config', '--help']
+            result = self._run_command(_cmd)
+            if result['returncode'] != 0:
+                return
+            # check if color extension is available and not disabled
+            _cmd = [HgClient._executable, 'config', 'extensions.color']
+            result = self._run_command(_cmd)
+            if result['returncode'] != 0 or result['output'].startswith('!'):
+                return
+            # check if color mode is not off
+            _cmd = [HgClient._executable, 'config', 'color.mode']
+            result = self._run_command(_cmd)
+            if result['returncode'] != 0 or result['output'] == 'off':
+                return
+            HgClient._config_color = True
+
+        # inject arguments to force colorization
+        if HgClient._config_color:
+            cmd[1:1] = '--color', 'always'
 
 
 if not HgClient._executable:

@@ -55,7 +55,7 @@ def run_command(cmd, cwd, env=None):
         proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
         output, _ = proc.communicate()
         result['output'] = output.rstrip()
-        result['returncode'] = 0
+        result['returncode'] = proc.returncode
     except subprocess.CalledProcessError as e:
         result['output'] = e.output
         result['returncode'] = e.returncode

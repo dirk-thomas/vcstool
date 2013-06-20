@@ -32,7 +32,7 @@ class GitClient(VcsClientBase):
         result_url = self._get_url()
         if result_url['returncode']:
             return result_url
-        url = result_url['output']
+        url = result_url['output'][0]
 
         cmd_ref = [GitClient._executable, 'rev-parse', 'HEAD']
         result_ref = self._run_command(cmd_ref)
@@ -81,7 +81,7 @@ class GitClient(VcsClientBase):
         return {
             'cmd': ' '.join(cmd),
             'cwd': self.path,
-            'output': url,
+            'output': [url, remote],
             'returncode': 0
         }
 
@@ -109,7 +109,8 @@ class GitClient(VcsClientBase):
             result_url = self._get_url()
             if result_url['returncode']:
                 return result_url
-            url = result_url['output']
+            url = result_url['output'][0]
+            remote = result_url['output'][1]
             if url != command.url:
                 return {
                     'cmd': '',
@@ -118,7 +119,7 @@ class GitClient(VcsClientBase):
                     'returncode': 1
                 }
             # pull updates for existing repo
-            cmd_pull = [GitClient._executable, 'pull']
+            cmd_pull = [GitClient._executable, 'pull', remote, command.version]
             result_pull = self._run_command(cmd_pull)
             if result_pull['returncode']:
                 return result_pull

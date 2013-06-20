@@ -12,7 +12,7 @@ On these repositories vcstool invokes the native VCS client with the requested c
 Which VCS types are supported?
 ------------------------------
 
-Vcstool suports `Git <http://git-scm.com>`_, `Mercurial <http://git-scm.comhttp://mercurial.selenic.com>`_, `Subversion <http://subversion.apache.org>`_, `Bazaar <http://bazaar.canonical.com/en/>`_.
+Vcstool supports `Git <http://git-scm.com>`_, `Mercurial <http://git-scm.comhttp://mercurial.selenic.com>`_, `Subversion <http://subversion.apache.org>`_, `Bazaar <http://bazaar.canonical.com/en/>`_.
 
 How to use vcstool?
 -------------------
@@ -54,6 +54,9 @@ The ``vcs import`` command clones all repositories which are passed in via stdin
 Usually the data of a previously exported file is piped in::
 
   vcs import < my.repos
+
+The ``import`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
+Only for this command vcstool supports a pseudo client ``tar`` which fetches a tarball from an URL and unpacks its content.
 
 How to install vcstool?
 =======================

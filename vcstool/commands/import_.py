@@ -96,11 +96,12 @@ def generate_jobs(repos, args):
     for path, repo in repos.iteritems():
         clients = [c for c in vcstool_clients if c.type == repo['type']]
         if not clients:
-            print(ansi('redf') + ("Repository type '%s' is not supported" % repo['repo']) + ansi('reset'), file=sys.stderr)
+            from vcstool.clients.none import NoneClient
             job = {
-                'cmd': '',
+                'client': NoneClient(path),
+                'command': None,
                 'cwd': path,
-                'output': "Repository type '%s' is not supported" % repo['repo'],
+                'output': "Repository type '%s' is not supported" % repo['type'],
                 'returncode': NotImplemented
             }
             jobs.append(job)

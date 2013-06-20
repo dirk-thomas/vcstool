@@ -112,7 +112,14 @@ class Worker(threading.Thread):
                 break
 
     def process_job(self, job):
-        method_name = job['command'].__class__.command
+        command = job['command']
+        if not command:
+            return {
+                'cmd': '',
+                'output': job['output'],
+                'returncode': 1
+            }
+        method_name = command.__class__.command
         try:
             method = getattr(job['client'], method_name, None)
             if method is None:

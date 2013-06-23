@@ -34,6 +34,7 @@ Currently it supports git, hg, svn and bzr.''',
         'console_scripts': [
             'vcs = vcstool.commands.vcs:main',
             'vcs-branch = vcstool.commands.branch:main',
+            'vcs-custom = vcstool.commands.custom:main',
             'vcs-diff = vcstool.commands.diff:main',
             'vcs-export = vcstool.commands.export:main',
             'vcs-help = vcstool.commands.help:main',

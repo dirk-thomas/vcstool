@@ -19,6 +19,10 @@ class BzrClient(VcsClientBase):
     def branch(self, _command):
         return self._get_parent_branch()
 
+    def custom(self, command):
+        cmd = [BzrClient._executable] + command.args
+        return self._run_command(cmd)
+
     def diff(self, _command):
         cmd = [BzrClient._executable, 'diff']
         return self._run_command(cmd)

@@ -53,6 +53,10 @@ class SvnClient(VcsClientBase):
             'returncode': 0,
         }
 
+    def custom(self, command):
+        cmd = [SvnClient._executable] + command.args
+        return self._run_command(cmd)
+
     def diff(self, command):
         cmd = [SvnClient._executable, 'diff']
         if command.context:

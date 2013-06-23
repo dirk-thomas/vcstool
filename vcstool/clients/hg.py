@@ -20,6 +20,10 @@ class HgClient(VcsClientBase):
         cmd = [HgClient._executable, 'branch']
         return self._run_command(cmd)
 
+    def custom(self, command):
+        cmd = [HgClient._executable] + command.args
+        return self._run_command(cmd)
+
     def diff(self, command):
         cmd = [HgClient._executable, 'diff']
         self._check_color(cmd)

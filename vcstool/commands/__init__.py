@@ -1,4 +1,5 @@
 from .branch import BranchCommand
+from .custom import CustomCommand
 from .diff import DiffCommand
 from .export import ExportCommand
 from .import_ import ImportCommand
@@ -10,6 +11,7 @@ from .status import StatusCommand
 
 vcstool_commands = []
 vcstool_commands.append(BranchCommand)
+vcstool_commands.append(CustomCommand)
 vcstool_commands.append(DiffCommand)
 vcstool_commands.append(ExportCommand)
 vcstool_commands.append(ImportCommand)

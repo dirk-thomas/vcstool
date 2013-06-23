@@ -21,6 +21,10 @@ class GitClient(VcsClientBase):
         cmd = [GitClient._executable, 'branch']
         return self._run_command(cmd)
 
+    def custom(self, command):
+        cmd = [GitClient._executable] + command.args
+        return self._run_command(cmd)
+
     def diff(self, command):
         cmd = [GitClient._executable, 'diff']
         self._check_color(cmd)

@@ -58,6 +58,16 @@ Usually the data of a previously exported file is piped in::
 The ``import`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
 Only for this command vcstool supports a pseudo client ``tar`` which fetches a tarball from an URL and unpacks its content.
 
+Run arbitrary comands
+~~~~~~~~~~~~~~~~~~~~~
+
+The ``vcs custom`` command enables to pass arbitrary user-specified arguments to the vcs invocation.
+The set of repositories to operate on can optionally be restricted by the type:
+
+  vcs custom --git --args log --oneline -n 10
+
+If your command should work on multiple repositories make sure to pass only generic arguments which work for all of these repository types.
+
 How to install vcstool?
 =======================
 

@@ -1,0 +1,1 @@
+include vcstool-completion/vcs.bash vcstool-completion/vcs.tcsh vcstool-completion/vcs.zsh

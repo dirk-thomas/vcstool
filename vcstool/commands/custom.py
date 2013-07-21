@@ -69,7 +69,7 @@ def main(args=None):
     jobs = generate_jobs(clients, command)
     results = execute_jobs(jobs, show_progress=True)
 
-    output_results(results)
+    output_results(results, hide_empty=args.hide_empty)
     return 0
 
 

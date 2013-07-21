@@ -137,9 +137,7 @@ class Worker(threading.Thread):
             }
 
 
-def output_result(result):
-    client = result['client']
-    print(ansi('bluef') + '=== ' + ansi('boldon') + client.path + ansi('boldoff') + ' (' + client.__class__.type + ') ===' + ansi('reset'))
+def output_result(result, hide_empty=False):
     output = result['output']
     if result['returncode'] == NotImplemented:
         output = ansi('yellowf') + output + ansi('reset')
@@ -149,16 +147,19 @@ def output_result(result):
         output = ansi('redf') + output + ansi('reset')
     elif not result['cmd']:
         output = ansi('yellowf') + output + ansi('reset')
+    if output or not hide_empty:
+        client = result['client']
+        print(ansi('bluef') + '=== ' + ansi('boldon') + client.path + ansi('boldoff') + ' (' + client.__class__.type + ') ===' + ansi('reset'))
     if output:
         print(output)
 
 
-def output_results(results, output_handler=output_result):
+def output_results(results, output_handler=output_result, hide_empty=False):
     # output results in alphabetic order
     path_to_idx = {result['client'].path: i for i, result in enumerate(results)}
     idxs_in_order = [path_to_idx[path] for path in sorted(path_to_idx.keys())]
     for i in idxs_in_order:
-        output_handler(results[i])
+        output_handler(results[i], hide_empty=hide_empty)
 
 
 def ansi(keyword):

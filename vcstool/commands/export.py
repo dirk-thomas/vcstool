@@ -28,7 +28,7 @@ def get_parser():
     return parser
 
 
-def output_export_data(result):
+def output_export_data(result, hide_empty=False):
     client = result['client']
     path = os.path.relpath(client.path, result['command'].paths[0])
     if path == '.':
@@ -54,7 +54,7 @@ def output_export_data(result):
 
 def main(args=None):
     parser = get_parser()
-    add_common_arguments(parser)
+    add_common_arguments(parser, skip_hide_empty=True)
     args = parser.parse_args(args)
     args.paths = [args.path]
 
@@ -66,7 +66,7 @@ def main(args=None):
     results = execute_jobs(jobs)
 
     print('repositories:')
-    output_results(results, output_export_data)
+    output_results(results, output_handler=output_export_data)
     return 0
 
 

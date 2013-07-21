@@ -15,9 +15,11 @@ class Command(object):
         self.paths = args.paths
 
 
-def add_common_arguments(parser):
+def add_common_arguments(parser, skip_hide_empty=False):
     group = parser.add_argument_group('Common parameters')
     group.add_argument('--debug', action='store_true', default=False, help='Show debug messages')
+    if not skip_hide_empty:
+        group.add_argument('--hide-empty', action='store_true', default=False, help='Hide repositories with empty output')
     group.add_argument('--repos', action='store_true', default=False, help='List repositories which the command operates on')
     group.add_argument('paths', nargs='*', type=existing_dir, default=[os.curdir], help='Base paths to look for repositories')
 
@@ -41,5 +43,5 @@ def simple_main(parser, command_class, args=None):
     jobs = generate_jobs(clients, command)
     results = execute_jobs(jobs, show_progress=True)
 
-    output_results(results)
+    output_results(results, hide_empty=args.hide_empty)
     return 0

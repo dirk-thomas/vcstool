@@ -184,6 +184,13 @@ class GitClient(VcsClientBase):
         return self._run_command(cmd)
 
     def status(self, command):
+        if command.hide_empty:
+            cmd = [GitClient._executable, 'status', '-s']
+            if command.quiet:
+                cmd += ['--untracked-files=no']
+            result = self._run_command(cmd)
+            if result['returncode'] or not result['output']:
+                return result
         cmd = [GitClient._executable, 'status']
         self._check_color(cmd)
         if command.quiet:

@@ -11,6 +11,7 @@ class Command(object):
 
     def __init__(self, args):
         self.debug = args.debug if 'debug' in args else False
+        self.hide_empty = args.hide_empty if 'hide_empty' in args else False
         self.output_repos = args.repos if 'repos' in args else False
         self.paths = args.paths
 

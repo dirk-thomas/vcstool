@@ -76,7 +76,7 @@ class BzrClient(VcsClientBase):
             if result_tag['returncode']:
                 return result_tag
             tag = None
-            for line in result_tag['output'].split('\n'):
+            for line in result_tag['output'].splitlines():
                 parts = line.split(' ', 2)
                 if parts[1] != '?':
                     tag = parts[0]
@@ -145,7 +145,7 @@ class BzrClient(VcsClientBase):
             return result
         branch = None
         prefix = '  parent branch: '
-        for line in result['output'].split('\n'):
+        for line in result['output'].splitlines():
             if line.startswith(prefix):
                 branch = line[len(prefix):]
                 break

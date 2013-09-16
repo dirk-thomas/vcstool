@@ -22,7 +22,7 @@ distro: setup clean_dist
 
 push: distro
 	python setup.py sdist register upload
-	scp dist/${NAME}-${VERSION}.tar.gz root@ipr.willowgarage.com:/var/www/pr.willowgarage.com/html/downloads/${NAME}
+	scp dist/${NAME}-${VERSION}.tar.gz ros@ftp-osl.osuosl.org:/home/ros/data/download.ros.org/downloads/${NAME}
 
 clean: clean_dist
 	echo "clean"

@@ -1,3 +1,3 @@
 from .clients import vcstool_clients
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'

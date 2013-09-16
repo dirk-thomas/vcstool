@@ -6,9 +6,9 @@ import sys
 import yaml
 
 from vcstool.clients import vcstool_clients
-from vcstool.executor import ansi, execute_jobs, output_results
+from vcstool.executor import ansi, execute_jobs, output_repositories, output_results
 
-from .command import Command, existing_dir
+from .command import add_common_arguments, Command, existing_dir
 
 
 class ImportCommand(Command):
@@ -24,10 +24,7 @@ class ImportCommand(Command):
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Import the list of repositories', prog='vcs import')
-    group = parser.add_argument_group('Common parameters')
-    group.add_argument('--debug', action='store_true', default=False, help='Show debug messages')
     group = parser.add_argument_group('"import" command parameters')
-    group.add_argument('path', nargs='?', type=existing_dir, default=os.curdir, help='Base path to clone repositories to')
     group.add_argument('--input', type=argparse.FileType('r'), default=sys.stdin)
     return parser
 
@@ -94,6 +91,7 @@ def get_repos_in_rosinstall_format(root):
 def generate_jobs(repos, args):
     jobs = []
     for path, repo in repos.iteritems():
+        path = os.path.join(args.path, path)
         clients = [c for c in vcstool_clients if c.type == repo['type']]
         if not clients:
             from vcstool.clients.none import NoneClient
@@ -116,14 +114,18 @@ def generate_jobs(repos, args):
 
 def main(args=None):
     parser = get_parser()
+    add_common_arguments(parser, skip_hide_empty=True, single_path=True, path_help='Base path to clone repositories to')
     args = parser.parse_args(args)
-    args.paths = [args.path]
     try:
         repos = get_repositories(args.input)
     except RuntimeError as e:
         print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
         return 1
     jobs = generate_jobs(repos, args)
+
+    if args.repos:
+        output_repositories([job['client'] for job in jobs])
+
     results = execute_jobs(jobs, show_progress=True)
     output_results(results)
     return 0

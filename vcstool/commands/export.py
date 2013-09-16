@@ -23,7 +23,6 @@ class ExportCommand(Command):
 def get_parser():
     parser = argparse.ArgumentParser(description='Export the list of repositories', prog='vcs export')
     group = parser.add_argument_group('"export" command parameters')
-    group.add_argument('path', nargs='?', type=existing_dir, default=os.curdir, help='Base path to look for repositories')
     group.add_argument('--exact', action='store_true', default=False, help='Export exact commit hash instead of branch names')
     return parser
 
@@ -54,9 +53,8 @@ def output_export_data(result, hide_empty=False):
 
 def main(args=None):
     parser = get_parser()
-    add_common_arguments(parser, skip_hide_empty=True)
+    add_common_arguments(parser, skip_hide_empty=True, single_path=True)
     args = parser.parse_args(args)
-    args.paths = [args.path]
 
     command = ExportCommand(args)
     clients = find_repositories(command.paths)

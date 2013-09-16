@@ -13,16 +13,23 @@ class Command(object):
         self.debug = args.debug if 'debug' in args else False
         self.hide_empty = args.hide_empty if 'hide_empty' in args else False
         self.output_repos = args.repos if 'repos' in args else False
-        self.paths = args.paths
+        if 'paths' in args:
+            self.paths = args.paths
+        else:
+            self.paths = [args.path]
 
 
-def add_common_arguments(parser, skip_hide_empty=False):
+def add_common_arguments(parser, skip_hide_empty=False, single_path=False, path_help=None):
     group = parser.add_argument_group('Common parameters')
     group.add_argument('--debug', action='store_true', default=False, help='Show debug messages')
     if not skip_hide_empty:
         group.add_argument('--hide-empty', action='store_true', default=False, help='Hide repositories with empty output')
     group.add_argument('--repos', action='store_true', default=False, help='List repositories which the command operates on')
-    group.add_argument('paths', nargs='*', type=existing_dir, default=[os.curdir], help='Base paths to look for repositories')
+    if single_path:
+        path_help = path_help or 'Base path to look for repositories'
+        group.add_argument('path', nargs='?', type=existing_dir, default=os.curdir, help=path_help)
+    else:
+        group.add_argument('paths', nargs='*', type=existing_dir, default=[os.curdir], help='Base paths to look for repositories')
 
 
 def existing_dir(path):

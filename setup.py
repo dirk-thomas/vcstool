@@ -6,6 +6,7 @@ from vcstool import __version__
 setup(
     name='vcstool',
     version=__version__,
+    install_requires=['argparse', 'PyYAML'],
     packages=find_packages(),
     author='Dirk Thomas',
     author_email='dthomas@osrfoundation.org',

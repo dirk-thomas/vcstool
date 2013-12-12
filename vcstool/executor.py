@@ -1,8 +1,8 @@
 import os
 try:
-    import queue
+    from queue import Empty, Queue
 except ImportError:
-    import Queue as queue
+    from Queue import Empty, Queue
 import sys
 import threading
 
@@ -53,8 +53,8 @@ class DuplicateCommandHandler(object):
 def execute_jobs(jobs, show_progress=False):
     results = []
 
-    job_queue = queue.Queue()
-    result_queue = queue.Queue()
+    job_queue = Queue()
+    result_queue = Queue()
 
     # create worker threads
     workers = []
@@ -108,7 +108,7 @@ class Worker(threading.Thread):
                 result = self.process_job(job)
                 # send result
                 self.result_queue.put((job, result))
-            except queue.Empty:
+            except Empty:
                 break
 
     def process_job(self, job):

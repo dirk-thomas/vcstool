@@ -70,8 +70,8 @@ def get_repos_in_rosinstall_format(root):
     for i, item in enumerate(root):
         if len(item.keys()) != 1:
             raise RuntimeError('Input data is not valid format')
-        repo = {'type': item.keys()[0]}
-        attributes = item.values()[0]
+        repo = {'type': list(item.keys())[0]}
+        attributes = list(item.values())[0]
         try:
             path = attributes['local-name']
         except AttributeError as e:
@@ -90,7 +90,7 @@ def get_repos_in_rosinstall_format(root):
 
 def generate_jobs(repos, args):
     jobs = []
-    for path, repo in repos.iteritems():
+    for path, repo in repos.items():
         path = os.path.join(args.path, path)
         clients = [c for c in vcstool_clients if c.type == repo['type']]
         if not clients:

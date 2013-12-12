@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 
+import sys
+
 from setuptools import setup, find_packages
 from vcstool import __version__
+
+install_requires = ['PyYAML']
+if sys.version_info[0] == 2:
+    install_requires.append('argparse')
 
 setup(
     name='vcstool',
     version=__version__,
-    install_requires=['argparse', 'PyYAML'],
+    install_requires=install_requires,
     packages=find_packages(),
     author='Dirk Thomas',
     author_email='dthomas@osrfoundation.org',

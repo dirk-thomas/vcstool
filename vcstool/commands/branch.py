@@ -15,7 +15,7 @@ class BranchCommand(Command):
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Show the branches', prog='vcs branch')
-    group = parser.add_argument_group('"branch" command parameters')
+    parser.add_argument_group('"branch" command parameters')
     return parser
 
 

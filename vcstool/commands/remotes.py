@@ -15,7 +15,7 @@ class RemotesCommand(Command):
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Show the URL of the repository', prog='vcs remotes')
-    group = parser.add_argument_group('"remotes" command parameters')
+    parser.add_argument_group('"remotes" command parameters')
     return parser
 
 

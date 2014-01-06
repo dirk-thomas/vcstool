@@ -8,7 +8,7 @@ import yaml
 from vcstool.clients import vcstool_clients
 from vcstool.executor import ansi, execute_jobs, output_repositories, output_results
 
-from .command import add_common_arguments, Command, existing_dir
+from .command import add_common_arguments, Command
 
 
 class ImportCommand(Command):

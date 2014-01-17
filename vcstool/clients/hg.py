@@ -64,7 +64,7 @@ class HgClient(VcsClientBase):
         return {
             'cmd': '%s && %s' % (result_url['cmd'], ' '.join(cmd_id)),
             'cwd': self.path,
-            'output': '\n'.join([url, branch]),
+            'output': '\n'.join([url, id_]),
             'returncode': 0,
             'export_data': {'url': url, 'version': id_}
         }

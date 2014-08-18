@@ -154,7 +154,7 @@ class HgClient(VcsClientBase):
             if result_tag['returncode']:
                 return result_tag
             # output log since nearest tag
-            cmd = [HgClient._executable, 'log', '--limit', result_tag['output']]
+            cmd = [HgClient._executable, 'log', '--limit', result_tag['output'], '-b', '.']
         self._check_color(cmd)
         return self._run_command(cmd)
 

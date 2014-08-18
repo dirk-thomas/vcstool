@@ -143,18 +143,31 @@ class HgClient(VcsClientBase):
         }
 
     def log(self, command):
-        if not command.limit_untagged:
+        if command.limit_tag:
+            # check if specific tag exists
+            cmd_log = [HgClient._executable, 'log', '--rev', 'tag(%s)' % command.limit_tag]
+            result_log = self._run_command(cmd_log)
+            if result_log['returncode']:
+                return {
+                    'cmd': '',
+                    'cwd': self.path,
+                    'output': "Repository lacks the tag '%s'" % command.limit_tag,
+                    'returncode': 1
+                }
+            # output log since specific tag
+            cmd = [HgClient._executable, 'log', '--rev', 'sort(tag(%s)::, -rev) and not tag (%s)' % (command.limit_tag, command.limit_tag)]
+        elif command.limit_untagged:
+            # determine distance to nearest tag
+            cmd_log = [HgClient._executable, 'log', '--rev', '.', '--template', '{latesttagdistance}']
+            result_log = self._run_command(cmd_log)
+            if result_log['returncode']:
+                return result_log
+            # output log since nearest tag
+            cmd = [HgClient._executable, 'log', '--limit', result_log['output'], '-b', '.']
+        else:
             cmd = [HgClient._executable, 'log']
             if command.limit != 0:
                 cmd += ['--limit', '%d' % command.limit]
-        else:
-            # determine distance to nearest tag
-            cmd_tag = [HgClient._executable, 'log', '--rev', '.', '--template', '{latesttagdistance}']
-            result_tag = self._run_command(cmd_tag)
-            if result_tag['returncode']:
-                return result_tag
-            # output log since nearest tag
-            cmd = [HgClient._executable, 'log', '--limit', result_tag['output'], '-b', '.']
         self._check_color(cmd)
         return self._run_command(cmd)
 

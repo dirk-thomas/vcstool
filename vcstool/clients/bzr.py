@@ -69,25 +69,30 @@ class BzrClient(VcsClientBase):
             return result_branch
 
     def log(self, command):
-        if command.limit_untagged:
-            # determine nearest tag
-            cmd_tag = [BzrClient._executable, 'tags', '--sort=time']
-            result_tag = self._run_command(cmd_tag)
-            if result_tag['returncode']:
-                return result_tag
+        if command.limit_tag or command.limit_untagged:
             tag = None
-            for line in result_tag['output'].splitlines():
-                parts = line.split(' ', 2)
-                if parts[1] != '?':
-                    tag = parts[0]
-            if not tag:
-                result_tag['output'] = 'Could not determine latest tag',
-                result_tag['returncode'] = 1
-                return result_tag
+            if command.limit_tag:
+                tag = command.limit_tag
+            else:
+                # determine nearest tag
+                cmd_tag = [BzrClient._executable, 'tags', '--sort=time']
+                result_tag = self._run_command(cmd_tag)
+                if result_tag['returncode']:
+                    return result_tag
+                for line in result_tag['output'].splitlines():
+                    parts = line.split(' ', 2)
+                    if parts[1] != '?':
+                        tag = parts[0]
+                if not tag:
+                    result_tag['output'] = 'Could not determine latest tag',
+                    result_tag['returncode'] = 1
+                    return result_tag
             # determine revision number of tag
             cmd_tag_rev = [BzrClient._executable, 'revno', '--rev', 'tag:%s' % tag]
             result_tag_rev = self._run_command(cmd_tag_rev)
             if result_tag_rev['returncode']:
+                if command.limit_tag:
+                    result_tag_rev['output'] = "Repository lacks the tag '%s'" % tag
                 return result_tag_rev
             try:
                 tag_rev = int(result_tag_rev['output'])

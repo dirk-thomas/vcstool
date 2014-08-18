@@ -155,11 +155,22 @@ class GitClient(VcsClientBase):
         }
 
     def log(self, command):
-        if not command.limit_untagged:
-            cmd = [GitClient._executable, 'log']
-            if command.limit != 0:
-                cmd += ['-%d' % command.limit]
-        else:
+        if command.limit_tag:
+            # check if specific tag exists
+            cmd_tag = [GitClient._executable, 'tag', '-l', command.limit_tag]
+            result_tag = self._run_command(cmd_tag)
+            if result_tag['returncode']:
+                return result_tag
+            if not result_tag['output']:
+                return {
+                    'cmd': '',
+                    'cwd': self.path,
+                    'output': "Repository lacks the tag '%s'" % command.limit_tag,
+                    'returncode': 1
+                }
+            # output log since specific tag
+            cmd = [GitClient._executable, 'log', '%s..' % command.limit_tag]
+        elif command.limit_untagged:
             # determine nearest tag
             cmd_tag = [GitClient._executable, 'describe', '--abbrev=0', '--tags']
             result_tag = self._run_command(cmd_tag)
@@ -167,6 +178,10 @@ class GitClient(VcsClientBase):
                 return result_tag
             # output log since nearest tag
             cmd = [GitClient._executable, 'log', '%s..' % result_tag['output']]
+        else:
+            cmd = [GitClient._executable, 'log']
+            if command.limit != 0:
+                cmd += ['-%d' % command.limit]
         self._check_color(cmd)
         return self._run_command(cmd)
 

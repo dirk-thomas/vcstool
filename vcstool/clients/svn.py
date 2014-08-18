@@ -126,6 +126,13 @@ class SvnClient(VcsClientBase):
         }
 
     def log(self, command):
+        if command.limit_tag:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': 'SvnClient can not determine log since tag',
+                'returncode': NotImplemented
+            }
         if command.limit_untagged:
             return {
                 'cmd': '',

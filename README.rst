@@ -27,13 +27,28 @@ Optionally one path (or multiple paths) can be passed to search for repositories
 
   vcs status /path/to/several/repos /path/to/other/repos /path/to/single/repo
 
-Advanced features
------------------
+Exporting and importing sets of repositories
+--------------------------------------------
 
-Show log since last tag
-~~~~~~~~~~~~~~~~~~~~~~~
+Vcstool can export and import all the information required to reproduce the versions of a set of repositories.
+Vcstool uses a simple `YAML <http://www.yaml.org/>`_ format to encode this information.
+This format includes a root key ``repositories`` under which each local repository is described by a dictionary keyed by its relative path.
+Each of these dictionaries contains keys ``type``, ``url``, and ``version``.
 
-The ``vcs log`` command supports the argument ``--limit-untagged`` which will output the log for all commits since the last tag.
+This results in something similar to the following for a set of two repositories (`vcstool <https://github.com/dirk-thomas/vcstool>`_ cloned via Git and `rosinstall <http://github.com/vcstools/rosinstall>`_ checked out via Subversion):
+
+.. code-block:: yaml
+   
+  repositories:
+    vcstool:
+      type: git
+      url: git@github.com:dirk-thomas/vcstool.git
+      version: master
+    old_tools/rosinstall:
+      type: svn
+      url: https://github.com/vcstools/rosinstall/trunk
+      version: 748
+
 
 Export set of repositories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,6 +72,14 @@ Usually the data of a previously exported file is piped in::
 
 The ``import`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
 Only for this command vcstool supports a pseudo client ``tar`` which fetches a tarball from an URL and unpacks its content.
+
+Advanced features
+-----------------
+
+Show log since last tag
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``vcs log`` command supports the argument ``--limit-untagged`` which will output the log for all commits since the last tag.
 
 Run arbitrary comands
 ~~~~~~~~~~~~~~~~~~~~~

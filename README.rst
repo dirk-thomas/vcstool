@@ -27,7 +27,7 @@ Optionally one path (or multiple paths) can be passed to search for repositories
 
   vcs status /path/to/several/repos /path/to/other/repos /path/to/single/repo
 
-Importing and exporting sets of repositories
+Exporting and importing sets of repositories
 --------------------------------------------
 
 Vcstool can export and import all the information required to reproduce the versions of a set of repositories. Vcstool uses a simple `YAML <http://www.yaml.org/>`_ format to encode this information. This format includes a root key ``repositories`` under which each local repository is described by a dictionary keyed by its relative path. Each of these dictionaries contains keys ``type``, ``url``, and ``version``.

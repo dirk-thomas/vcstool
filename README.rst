@@ -27,13 +27,17 @@ Optionally one path (or multiple paths) can be passed to search for repositories
 
   vcs status /path/to/several/repos /path/to/other/repos /path/to/single/repo
 
-Advanced features
------------------
+Importing and exporting sets of repositories
+--------------------------------------------
 
-Show log since last tag
-~~~~~~~~~~~~~~~~~~~~~~~
+Vcstool can export and import all the information required to reproduce the versions of a set of repositories. Vcstool uses a simple `YAML <http://www.yaml.org/>`_ format to encode this information:
 
-The ``vcs log`` command supports the argument ``--limit-untagged`` which will output the log for all commits since the last tag.
+.. code-block:: yaml
+   repositories:
+     LOCAL-NAME:
+       type: VCS-TYPE
+       url: REMOTE-URL
+       version: VCS-VERSION
 
 Export set of repositories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,6 +61,14 @@ Usually the data of a previously exported file is piped in::
 
 The ``import`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
 Only for this command vcstool supports a pseudo client ``tar`` which fetches a tarball from an URL and unpacks its content.
+
+Advanced features
+-----------------
+
+Show log since last tag
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``vcs log`` command supports the argument ``--limit-untagged`` which will output the log for all commits since the last tag.
 
 Run arbitrary comands
 ~~~~~~~~~~~~~~~~~~~~~

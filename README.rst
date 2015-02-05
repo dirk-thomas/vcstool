@@ -49,14 +49,6 @@ This results in something similar to the following for a set of two repositories
       url: https://github.com/vcstools/rosinstall/trunk
       version: 748
 
-Or alternatively:
-
-.. code-block:: yaml
-
-  repositories:
-    vcstool: {type: git, url: "git@github.com:dirk-thomas/vcstool.git", version: master}
-    old_tools/rosinstall: {type: svn, url: "https://github.com/vcstools/rosinstall/trunk", version: 748}
-
 
 Export set of repositories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

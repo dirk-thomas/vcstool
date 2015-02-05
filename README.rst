@@ -30,7 +30,10 @@ Optionally one path (or multiple paths) can be passed to search for repositories
 Exporting and importing sets of repositories
 --------------------------------------------
 
-Vcstool can export and import all the information required to reproduce the versions of a set of repositories. Vcstool uses a simple `YAML <http://www.yaml.org/>`_ format to encode this information. This format includes a root key ``repositories`` under which each local repository is described by a dictionary keyed by its relative path. Each of these dictionaries contains keys ``type``, ``url``, and ``version``.
+Vcstool can export and import all the information required to reproduce the versions of a set of repositories.
+Vcstool uses a simple `YAML <http://www.yaml.org/>`_ format to encode this information.
+This format includes a root key ``repositories`` under which each local repository is described by a dictionary keyed by its relative path.
+Each of these dictionaries contains keys ``type``, ``url``, and ``version``.
 
 This results in something similar to the following for a set of two repositories (`vcstool <https://github.com/dirk-thomas/vcstool>`_ cloned via Git and `rosinstall <http://github.com/vcstools/rosinstall>`_ checked out via Subversion):
 

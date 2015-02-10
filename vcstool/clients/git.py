@@ -1,5 +1,6 @@
 import copy
 import os
+import re
 
 from .vcs_base import find_executable, VcsClientBase
 
@@ -64,12 +65,23 @@ class GitClient(VcsClientBase):
         }
 
     def _get_url(self):
-        cmd_remote = [GitClient._executable, 'remote', 'show']
+        cmd_remote = [GitClient._executable, 'branch', '-vv', '--color=never']
         result_remote = self._run_command(cmd_remote)
         if result_remote['returncode']:
             result_remote['output'] = 'Could not determine remote: %s' % result_remote['output']
             return result_remote
-        remote = result_remote['output']
+        branches = result_remote['output']
+
+        for line in branches.splitlines():
+            tokens = line.split()
+            if len(tokens) > 3 and tokens[0] == '*':
+                ref = re.findall('\[(.+)\]',tokens[3])
+                if len(ref) == 1:
+                    remote, remote_branch = ref[0].split('/',1)
+                else:
+                    result_remote['output'] = 'Could not determine remote: %s' % result_remote['output']
+                    return result_remote
+                break
 
         cmd_url_tpl = [GitClient._executable, 'config', '--get', 'remote.%s.url']
         cmd_url = copy.copy(cmd_url_tpl)

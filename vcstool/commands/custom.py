@@ -72,6 +72,25 @@ def main(args=None):
     output_results(results, hide_empty=args.hide_empty)
     return 0
 
+def bzr_main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    return main(['--bzr', '--args'] + args)
+
+def git_main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    return main(['--git', '--args'] + args)
+
+def hg_main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    return main(['--hg', '--args'] + args)
+
+def svn_main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    return main(['--svn', '--args'] + args)
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -1,9 +1,14 @@
+
+from __future__ import print_function
+
 import copy
 import os
 import re
+import sys
+
+from vcstool.executor import ansi
 
 from .vcs_base import find_executable, VcsClientBase
-
 
 class GitClient(VcsClientBase):
 
@@ -42,6 +47,13 @@ class GitClient(VcsClientBase):
 
         remote = result_remote['output'][0]
         ref = result_remote['output'][1]
+        n_ahead = result_remote['output'][2]
+
+        # Check if this local branch is ahead of the remote
+        if n_ahead > 0:
+            print((ansi('yellowf') + "WARNING: %s: Current branch is ahead of remote tracking branch by %d commit(s)." + ansi('reset'))
+                  % (os.path.normpath(self.path), n_ahead),
+                  file=sys.stderr)
 
         # Get the url for this remote
         result_url = self._get_url(remote)
@@ -72,22 +84,44 @@ class GitClient(VcsClientBase):
         branches = result_branch_vv['output']
 
         # regex patterns for branches and detached snapshots
-        branch_pattern = '^\*\s+(.+?)\s+([0-9a-fA-F]+)\s\[(.+?)/(.+)\]'
+        branch_pattern = '^\*\s+(.+?)\s+([0-9a-fA-F]+)\s\[(.+?)/([^\]^\:]+)\:{0,1}\s*(?:ahead\s+([0-9]+)){0,1}.*?(?:behind\s+([0-9])){0,1}\]'
+        #                  |    |       |                 |     |           |        |          |                |           |
+        #                  |    |       |                 |     |           |        |          |                |           ^ capture #rev behind
+        #                  |    |       |                 |     |           |        |          |                ^ non-capturing 'bheind' group
+        #                  |    |       |                 |     |           |        |          ^ capture #rev ahead
+        #                  |    |       |                 |     |           |        ^ non-capturing 'ahead' group
+        #                  |    |       |                 |     |           ^ match colon delimiting ahead/behind details
+        #                  |    |       |                 |     ^ catpure remote branch name (branches with '/' are ok)
+        #                  |    |       |                 ^ catpure remote name (assumes remote does not contain '/' character)
+        #                  |    |       ^ capture snapshot SHA
+        #                  |    ^ capture local branch name
+        #                  ^ match asterisk
+
         detached_pattern = '^\*\s+\(detached from (.+)\)\s+([0-9a-fA-F]+)'
+        #                    |                    |        ^ catpure SHA
+        #                    |                    ^ capture branch that this branch is detached from
+        #                    ^ match asterisk
+
         remote_tags_pattern = '^([0-9a-fA-F]+)\s+refs\/tags\/(.+)'
+        #                       |                            |
+        #                       |                            ^ capture tag name
+        #                       ^ capture SHA
 
-        sed_cmd = lambda p,r: "sed -re 's@%s@%s@p;d'" % (p, r)
-
+        # Compole expressions
+        # TODO: do this in initialization?
         branch_re = re.compile(branch_pattern, re.MULTILINE)
         detached_re = re.compile(detached_pattern, re.MULTILINE)
         remote_tags_re = re.compile(remote_tags_pattern, re.MULTILINE)
 
+        # Define sed command string to apply the same thing that we're doing in python from the cli
+        sed_cmd = lambda p,r: "sed -re 's@%s@%s@p;d'" % (p, r)
+
         # Check for branch checkout
-        for (local_branch_, snapshot_, remote_, remote_branch_) in branch_re.findall(branches):
+        for (local_branch_, snapshot_, remote_, remote_branch_, n_ahead_, n_behind_) in branch_re.findall(branches):
             ref = snapshot_ if exact else remote_branch_
             return {
-                'cmd': ' '.join([result_branch_vv['cmd'], '|', sed_cmd(branch_pattern,'\\3 \\4')]),
-                'output': [remote_, ref],
+                'cmd': ' '.join([result_branch_vv['cmd'], '|', sed_cmd(branch_pattern,'\\3 \\4 \\5')]),
+                'output': [remote_, ref, int(n_ahead_ or 0)],
                 'returncode': 0
             }
 
@@ -117,7 +151,7 @@ class GitClient(VcsClientBase):
                         ref = remote_snapshot_ if exact else remote_tag_
                         return {
                             'cmd': result_remote_tags['cmd'],
-                            'output': [remote_, ref],
+                            'output': [remote_, ref, 0],
                             'returncode': 0
                         }
 
@@ -135,7 +169,7 @@ class GitClient(VcsClientBase):
                     if rev == snapshot_:
                         return {
                             'cmd': ' '.join([cmd_rev_list['cmd'],'|','grep',snapshot_]),
-                            'output': [remote_, snapshot_],
+                            'output': [remote_, snapshot_, 0],
                             'returncode': 0
                         }
 

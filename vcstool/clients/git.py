@@ -1,8 +1,14 @@
+
+from __future__ import print_function
+
 import copy
 import os
+import re
+import sys
+
+from vcstool.executor import ansi
 
 from .vcs_base import find_executable, VcsClientBase
-
 
 class GitClient(VcsClientBase):
 
@@ -33,57 +39,166 @@ class GitClient(VcsClientBase):
         return self._run_command(cmd)
 
     def export(self, command):
-        result_url = self._get_url()
+
+        # Get the remote and remote reference
+        result_remote = self._get_remote_ref(command.exact)
+        if result_remote['returncode']:
+            return result_remote
+
+        remote = result_remote['output'][0]
+        ref = result_remote['output'][1]
+        n_ahead = result_remote['output'][2]
+
+        # Check if this local branch is ahead of the remote
+        if n_ahead > 0:
+            print((ansi('yellowf') + "WARNING: %s: Current branch is ahead of remote tracking branch by %d commit(s)." + ansi('reset'))
+                  % (os.path.normpath(self.path), n_ahead),
+                  file=sys.stderr)
+
+        # Get the url for this remote
+        result_url = self._get_url(remote)
         if result_url['returncode']:
             return result_url
+
         url = result_url['output'][0]
 
-        cmd_ref = [GitClient._executable, 'rev-parse', 'HEAD']
-        result_ref = self._run_command(cmd_ref)
-        if result_ref['returncode']:
-            result_ref['output'] = 'Could not determine ref: %s' % result_ref['output']
-            return result_ref
-        ref = result_ref['output']
-
-        if not command.exact:
-            cmd_abbrev_ref = [GitClient._executable, 'rev-parse', '--abbrev-ref', 'HEAD']
-            result_abbrev_ref = self._run_command(cmd_abbrev_ref)
-            if result_abbrev_ref['returncode']:
-                result_abbrev_ref['output'] = 'Could not determine abbrev-ref: %s' % result_abbrev_ref['output']
-                return result_abbrev_ref
-            if result_abbrev_ref['output'] != 'HEAD':
-                ref = result_abbrev_ref['output']
-                cmd_ref = cmd_abbrev_ref
-
         return {
-            'cmd': '%s && %s' % (result_url['cmd'], ' '.join(cmd_ref)),
+            'cmd': '%s && %s' % (result_remote['cmd'], result_url['cmd']),
             'cwd': self.path,
             'output': '\n'.join([url, ref]),
             'returncode': 0,
             'export_data': {'url': url, 'version': ref}
         }
 
-    def _get_url(self):
-        cmd_remote = [GitClient._executable, 'remote', 'show']
-        result_remote = self._run_command(cmd_remote)
-        if result_remote['returncode']:
-            result_remote['output'] = 'Could not determine remote: %s' % result_remote['output']
-            return result_remote
-        remote = result_remote['output']
+    def _get_remote_ref(self, exact=False):
+        """Get the remote name and remote reference for the current checkout.
 
-        cmd_url_tpl = [GitClient._executable, 'config', '--get', 'remote.%s.url']
-        cmd_url = copy.copy(cmd_url_tpl)
-        cmd_url[-1] = cmd_url[-1] % remote
+        param: exact: Get the SHA1 even if there is a remote branch or tag name
+        """
+
+        cmd_branch_vv = [GitClient._executable, 'branch', '-vv', '--abbrev=0', '--color=never']
+        result_branch_vv = self._run_command(cmd_branch_vv)
+        if result_branch_vv['returncode']:
+            result_branch_vv['output'] = 'Could not determine local branches: %s' % result_branch_vv['output']
+            return result_branch_vv
+        branches = result_branch_vv['output']
+
+        # regex patterns for branches and detached snapshots
+        branch_pattern = '^\*\s+(.+?)\s+([0-9a-fA-F]+)\s\[(.+?)/([^\]^\:]+)\:{0,1}\s*(?:ahead\s+([0-9]+)){0,1}.*?(?:behind\s+([0-9])){0,1}\]'
+        #                  |    |       |                 |     |           |        |          |                |           |
+        #                  |    |       |                 |     |           |        |          |                |           ^ capture #rev behind
+        #                  |    |       |                 |     |           |        |          |                ^ non-capturing 'bheind' group
+        #                  |    |       |                 |     |           |        |          ^ capture #rev ahead
+        #                  |    |       |                 |     |           |        ^ non-capturing 'ahead' group
+        #                  |    |       |                 |     |           ^ match colon delimiting ahead/behind details
+        #                  |    |       |                 |     ^ catpure remote branch name (branches with '/' are ok)
+        #                  |    |       |                 ^ catpure remote name (assumes remote does not contain '/' character)
+        #                  |    |       ^ capture snapshot SHA
+        #                  |    ^ capture local branch name
+        #                  ^ match asterisk
+
+        detached_pattern = '^\*\s+\(detached from (.+)\)\s+([0-9a-fA-F]+)'
+        #                    |                    |        ^ catpure SHA
+        #                    |                    ^ capture branch that this branch is detached from
+        #                    ^ match asterisk
+
+        remote_tags_pattern = '^([0-9a-fA-F]+)\s+refs\/tags\/(.+)'
+        #                       |                            |
+        #                       |                            ^ capture tag name
+        #                       ^ capture SHA
+
+        # Compole expressions
+        # TODO: do this in initialization?
+        branch_re = re.compile(branch_pattern, re.MULTILINE)
+        detached_re = re.compile(detached_pattern, re.MULTILINE)
+        remote_tags_re = re.compile(remote_tags_pattern, re.MULTILINE)
+
+        # Define sed command string to apply the same thing that we're doing in python from the cli
+        sed_cmd = lambda p,r: "sed -re 's@%s@%s@p;d'" % (p, r)
+
+        # Check for branch checkout
+        for (local_branch_, snapshot_, remote_, remote_branch_, n_ahead_, n_behind_) in branch_re.findall(branches):
+            ref = snapshot_ if exact else remote_branch_
+            return {
+                'cmd': ' '.join([result_branch_vv['cmd'], '|', sed_cmd(branch_pattern,'\\3 \\4 \\5')]),
+                'output': [remote_, ref, int(n_ahead_ or 0)],
+                'returncode': 0
+            }
+
+        # Check for detached checkout
+        for (detached_name_, snapshot_) in detached_re.findall(branches):
+
+            # Get the list of remotes
+            cmd_remote = [GitClient._executable, 'remote', 'show']
+            result_remote = self._run_command(cmd_remote)
+            if result_remote['returncode']:
+                result_remote['output'] = 'Could not determine remotes when looking for remote snapshot: %s' % result_remote['output']
+                return result_remote
+            remotes = result_remote['output']
+
+            # Find ANY remote with a tag referencing this snapshot
+            for remote_ in remotes.splitlines():
+                cmd_remote_tags = [GitClient._executable, 'ls-remote', '--tags', remote_]
+                result_remote_tags = self._run_command(cmd_remote_tags)
+                if result_remote_tags['returncode']:
+                    result_remote_tags['output'] = 'Could not determine remote tags when looking for remote snapshot: %s' % result_remote_tags['output']
+                    return result_remote_tags
+
+                remote_tags = result_remote_tags['output']
+
+                for (remote_snapshot_, remote_tag_) in remote_tags_re.findall(remote_tags):
+                    if remote_snapshot_ == snapshot_:
+                        ref = remote_snapshot_ if exact else remote_tag_
+                        return {
+                            'cmd': result_remote_tags['cmd'],
+                            'output': [remote_, ref, 0],
+                            'returncode': 0
+                        }
+
+            # Find ANY remote with this snapshot
+            for remote_ in remotes.splitlines():
+                cmd_rev_list = [GitClient._executable, 'rev-list', '--remotes=%s' % (remote_)]
+                result_rev_list = self._run_command(cmd_rev_list)
+                if result_rev_list['returncode']:
+                    result_rev_list['output'] = 'Could not determine remote tags when looking for remote snapshot: %s' % result_rev_list['output']
+                    return result_rev_list
+
+                rev_list = result_rev_list['output']
+
+                for rev in rev_list.splitlines():
+                    if rev == snapshot_:
+                        return {
+                            'cmd': ' '.join([cmd_rev_list['cmd'],'|','grep',snapshot_]),
+                            'output': [remote_, snapshot_, 0],
+                            'returncode': 0
+                        }
+
+        return {
+            'cmd': result_branch_vv['cmd'],
+            'output': 'Could not determine remote for current checkout: \n\n'+result_branch_vv['output'],
+            'returncode': -1,
+        }
+
+    def _get_url(self, remote=None):
+
+        # get the remote and remote reference
+        if remote is None:
+            result_get_remote = self._get_remote_ref()
+            if result_get_remote['returncode'] != 0:
+                result_get_remote['output'] = 'Could not determine remote: %s' % result_get_remote['output']
+                return result_get_remote
+
+            remote = result_get_remote['output'][0]
+
+        cmd_url = [GitClient._executable, 'config', '--get', 'remote.%s.url' % remote]
         result_url = self._run_command(cmd_url)
         if result_url['returncode']:
             result_url['output'] = 'Could not determine remote url: %s' % result_url['output']
             return result_url
         url = result_url['output']
 
-        cmd = copy.copy(cmd_url_tpl)
-        cmd[-1] = cmd[-1] % ('`%s`' % ' '.join(cmd_remote))
         return {
-            'cmd': ' '.join(cmd),
+            'cmd': result_url['cmd'],
             'cwd': self.path,
             'output': [url, remote],
             'returncode': 0

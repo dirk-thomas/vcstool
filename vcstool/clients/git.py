@@ -33,61 +33,139 @@ class GitClient(VcsClientBase):
         return self._run_command(cmd)
 
     def export(self, command):
-        result_url = self._get_url()
-        if result_url['returncode']:
-            return result_url
-        url = result_url['output'][0]
+        exact = command.exact
+        if not exact:
+            # determine if a specific branch is checked out or ec is detached
+            cmd_branch = [
+                GitClient._executable, 'rev-parse', '--abbrev-ref', 'HEAD']
+            result_branch = self._run_command(cmd_branch)
+            if result_branch['returncode']:
+                result_branch['output'] = 'Could not determine ref: ' + \
+                    result_branch['output']
+                return result_branch
+            branch_name = result_branch['output']
+            exact = branch_name == 'HEAD'  # is detached
 
-        cmd_ref = [GitClient._executable, 'rev-parse', 'HEAD']
-        result_ref = self._run_command(cmd_ref)
-        if result_ref['returncode']:
-            result_ref['output'] = 'Could not determine ref: %s' % result_ref['output']
-            return result_ref
-        ref = result_ref['output']
+        if not exact:
+            # determine the remote of the current branch
+            cmd_remote = [
+                GitClient._executable, 'rev-parse', '--abbrev-ref',
+                '@{upstream}']
+            result_remote = self._run_command(cmd_remote)
+            if result_remote['returncode']:
+                result_remote['output'] = 'Could not determine ref: ' + \
+                    result_remote['output']
+                return result_remote
+            branch_with_remote = result_remote['output']
 
-        if not command.exact:
-            cmd_abbrev_ref = [GitClient._executable, 'rev-parse', '--abbrev-ref', 'HEAD']
-            result_abbrev_ref = self._run_command(cmd_abbrev_ref)
-            if result_abbrev_ref['returncode']:
-                result_abbrev_ref['output'] = 'Could not determine abbrev-ref: %s' % result_abbrev_ref['output']
-                return result_abbrev_ref
-            if result_abbrev_ref['output'] != 'HEAD':
-                ref = result_abbrev_ref['output']
-                cmd_ref = cmd_abbrev_ref
+            # determine remote
+            suffix = '/' + branch_name
+            assert branch_with_remote.endswith(branch_name), \
+                "'%s' does not end with '%s'" % \
+                (branch_with_remote, branch_name)
+            remote = branch_with_remote[:-len(suffix)]
 
-        return {
-            'cmd': '%s && %s' % (result_url['cmd'], ' '.join(cmd_ref)),
-            'cwd': self.path,
-            'output': '\n'.join([url, ref]),
-            'returncode': 0,
-            'export_data': {'url': url, 'version': ref}
-        }
+            # determine url of remote
+            result_url = self._get_remote_url(remote)
+            if result_url['returncode']:
+                return result_url
+            url = result_url['output']
+
+            # the result is the remote url and the branch name
+            return {
+                'cmd': ' && '.join([
+                    result_branch['cmd'], result_remote['cmd'],
+                    result_url['cmd']]),
+                'cwd': self.path,
+                'output': '\n'.join([url, branch_name]),
+                'returncode': 0,
+                'export_data': {'url': url, 'version': branch_name}
+            }
+
+        else:
+            # determine the hash
+            cmd_ref = [GitClient._executable, 'rev-parse', 'HEAD']
+            result_ref = self._run_command(cmd_ref)
+            if result_ref['returncode']:
+                result_ref['output'] = 'Could not determine ref: ' + \
+                    result_ref['output']
+                return result_ref
+            ref = result_ref['output']
+
+            # get all remote names
+            cmd_remotes = [GitClient._executable, 'remote']
+            result_remotes = self._run_command(cmd_remotes)
+            if result_remotes['returncode']:
+                result_remotes['output'] = 'Could not determine remotes: ' + \
+                    result_remotes['output']
+                return result_remotes
+            remotes = result_remotes['output'].splitlines()
+
+            # TODO prefer original / upstream remote
+
+            # for each remote name check if the hash is part of the remote
+            for remote in remotes:
+                # get all remote names
+                cmd_refs = [
+                    GitClient._executable, 'rev-list', '--remotes=' + remote]
+                result_refs = self._run_command(cmd_refs)
+                if result_refs['returncode']:
+                    result_refs['output'] = \
+                        "Could not determine refs of remote '%s': " % \
+                        remote + result_refs['output']
+                    return result_refs
+                refs = result_refs['output'].splitlines()
+                if ref not in refs:
+                    continue
+
+                # determine url of remote
+                result_url = self._get_remote_url(remote)
+                if result_url['returncode']:
+                    return result_url
+                url = result_url['output']
+                # the result is the remote url and the hash
+                return {
+                    'cmd': ' && '.join([result_ref['cmd'], result_url['cmd']]),
+                    'cwd': self.path,
+                    'output': '\n'.join([url, ref]),
+                    'returncode': 0,
+                    'export_data': {'url': url, 'version': ref}
+                }
+
+            return {
+                'cmd': ' && '.join([result_ref['cmd'], result_remotes['cmd']]),
+                'cwd': self.path,
+                'output': "Could not determine remote containing '%s'" % ref,
+                'returncode': 1,
+            }
 
     def _get_url(self):
         cmd_remote = [GitClient._executable, 'remote', 'show']
         result_remote = self._run_command(cmd_remote)
         if result_remote['returncode']:
-            result_remote['output'] = 'Could not determine remote: %s' % result_remote['output']
+            result_remote['output'] = 'Could not determine remote: %s' % \
+                result_remote['output']
             return result_remote
         remote = result_remote['output']
-
-        cmd_url_tpl = [GitClient._executable, 'config', '--get', 'remote.%s.url']
-        cmd_url = copy.copy(cmd_url_tpl)
-        cmd_url[-1] = cmd_url[-1] % remote
-        result_url = self._run_command(cmd_url)
+        result_url = self._get_remote_url(remote)
         if result_url['returncode']:
-            result_url['output'] = 'Could not determine remote url: %s' % result_url['output']
             return result_url
         url = result_url['output']
-
-        cmd = copy.copy(cmd_url_tpl)
-        cmd[-1] = cmd[-1] % ('`%s`' % ' '.join(cmd_remote))
         return {
-            'cmd': ' '.join(cmd),
+            'cmd': ' && '.join([cmd_remote, result_url['cmd']]),
             'cwd': self.path,
             'output': [url, remote],
             'returncode': 0
         }
+
+    def _get_remote_url(self, remote):
+        cmd_url = [
+            GitClient._executable, 'config', '--get', 'remote.%s.url' % remote]
+        result_url = self._run_command(cmd_url)
+        if result_url['returncode']:
+            result_url['output'] = 'Could not determine remote url: %s' % \
+                result_url['output']
+        return result_url
 
     def import_(self, command):
         if not command.url or not command.version:

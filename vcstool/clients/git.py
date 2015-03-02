@@ -101,7 +101,13 @@ class GitClient(VcsClientBase):
                 return result_remotes
             remotes = result_remotes['output'].splitlines()
 
-            # TODO prefer original / upstream remote
+            # prefer origin and upstream remotes
+            if 'upstream' in remotes:
+                remotes.remove('upstream')
+                remotes.insert(0, 'upstream')
+            if 'origin' in remotes:
+                remotes.remove('origin')
+                remotes.insert(0, 'origin')
 
             # for each remote name check if the hash is part of the remote
             for remote in remotes:

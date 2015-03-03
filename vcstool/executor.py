@@ -5,6 +5,7 @@ except ImportError:
     from Queue import Empty, Queue
 import sys
 import threading
+import traceback
 
 
 def output_repositories(clients):
@@ -130,9 +131,11 @@ class Worker(threading.Thread):
                 }
             return method(job['command'])
         except Exception as e:
+            exc_tb = sys.exc_info()[2]
+            filename, lineno, _, _ = traceback.extract_tb(exc_tb)[-1]
             return {
                 'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
-                'output': "Invocation of command '%s' on client '%s' failed: %s" % (job['command'].__class__.command, job['client'].__class__.type, e),
+                'output': "Invocation of command '%s' on client '%s' failed: %s: %s (%s:%s)" % (job['command'].__class__.command, job['client'].__class__.type, type(e).__name__, e, filename, lineno),
                 'returncode': 1
             }
 

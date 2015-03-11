@@ -166,6 +166,8 @@ def output_results(results, output_handler=output_result, hide_empty=False):
 
 
 def ansi(keyword):
+    if os.name == 'nt':
+        return ''
     codes = {
         'bluef': '\033[34m',
         'boldon': '\033[1m',

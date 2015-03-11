@@ -41,11 +41,26 @@ class VcsClientBase(object):
         return None
 
 
-def find_executable(file_name):
+def is_executable_file(file_path):
+    return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
+
+
+def find_executable(file_name, check_for_exe=None):
+    # If not explicitly set, True for Windows, otherwise False
+    if check_for_exe is None:
+        check_for_exe = os.name == 'nt'
+    # Set to False if it already ends with .exe
+    if check_for_exe:
+        if file_name.endswith('.exe'):
+            check_for_exe = False
     for path in os.getenv('PATH').split(os.path.pathsep):
         file_path = os.path.join(path, file_name)
-        if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
+        if is_executable_file(file_path):
             return file_path
+        if check_for_exe:
+            file_path += '.exe'
+            if is_executable_file(file_path):
+                return file_path
     return None
 
 

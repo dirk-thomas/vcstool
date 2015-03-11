@@ -164,8 +164,17 @@ def output_results(results, output_handler=output_result, hide_empty=False):
     for i in idxs_in_order:
         output_handler(results[i], hide_empty=hide_empty)
 
+HAS_COLOR = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+IS_WINDOWS = os.name == 'nt'
+if HAS_COLOR and IS_WINDOWS:
+    HAS_COLOR = False
+    if os.environ.get('ConEmuANSI', None) == 'ON':
+        HAS_COLOR = True
+
 
 def ansi(keyword):
+    if not HAS_COLOR:
+        return ''
     codes = {
         'bluef': '\033[34m',
         'boldon': '\033[1m',

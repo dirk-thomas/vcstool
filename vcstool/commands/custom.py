@@ -70,7 +70,9 @@ def main(args=None):
     results = execute_jobs(jobs, show_progress=True)
 
     output_results(results, hide_empty=args.hide_empty)
-    return 0
+
+    any_error = any([r['returncode'] != 0 for r in results])
+    return 1 if any_error else 0
 
 def bzr_main(args=None):
     if args is None:

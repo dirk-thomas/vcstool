@@ -128,7 +128,9 @@ def main(args=None):
 
     results = execute_jobs(jobs, show_progress=True)
     output_results(results)
-    return 0
+
+    any_error = any([r['returncode'] != 0 for r in results])
+    return 1 if any_error else 0
 
 
 if __name__ == '__main__':

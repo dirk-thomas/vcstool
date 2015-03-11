@@ -145,25 +145,6 @@ class GitClient(VcsClientBase):
                 'returncode': 1,
             }
 
-    def _get_url(self):
-        cmd_remote = [GitClient._executable, 'remote', 'show']
-        result_remote = self._run_command(cmd_remote)
-        if result_remote['returncode']:
-            result_remote['output'] = 'Could not determine remote: %s' % \
-                result_remote['output']
-            return result_remote
-        remote = result_remote['output']
-        result_url = self._get_remote_url(remote)
-        if result_url['returncode']:
-            return result_url
-        url = result_url['output']
-        return {
-            'cmd': ' && '.join([cmd_remote, result_url['cmd']]),
-            'cwd': self.path,
-            'output': [url, remote],
-            'returncode': 0
-        }
-
     def _get_remote_url(self, remote):
         cmd_url = [
             GitClient._executable, 'config', '--get', 'remote.%s.url' % remote]
@@ -235,6 +216,25 @@ class GitClient(VcsClientBase):
             'cmd': cmd,
             'cwd': self.path,
             'output': output,
+            'returncode': 0
+        }
+
+    def _get_url(self):
+        cmd_remote = [GitClient._executable, 'remote', 'show']
+        result_remote = self._run_command(cmd_remote)
+        if result_remote['returncode']:
+            result_remote['output'] = 'Could not determine remote: %s' % \
+                result_remote['output']
+            return result_remote
+        remote = result_remote['output']
+        result_url = self._get_remote_url(remote)
+        if result_url['returncode']:
+            return result_url
+        url = result_url['output']
+        return {
+            'cmd': ' && '.join([result_remote['cmd'], result_url['cmd']]),
+            'cwd': self.path,
+            'output': [url, remote],
             'returncode': 0
         }
 

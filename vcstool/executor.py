@@ -165,7 +165,15 @@ def output_results(results, output_handler=output_result, hide_empty=False):
         output_handler(results[i], hide_empty=hide_empty)
 
 
+USE_COLOR = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+# disable color on Windows except if ConEmuANSI is explicitly enabled
+if os.name == 'nt' and os.environ.get('ConEmuANSI', None) != 'ON':
+    USE_COLOR = False
+
+
 def ansi(keyword):
+    if not USE_COLOR:
+        return ''
     codes = {
         'bluef': '\033[34m',
         'boldon': '\033[1m',

@@ -2,6 +2,40 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.10 (2015-03-12)
+-------------------
+* change license from BSD to Apache License, Version 2.0
+* return code 1 if the command fails for any repository
+* fix colored output to be disabled if not isatty and on Windows without ConEmuANSI
+
+0.1.9 (2015-03-11)
+------------------
+* fix 'import' command for git (regression introduced in 0.1.8)
+
+0.1.8 (2015-03-03)
+------------------
+* improve error message if command raises an exception
+* fix 'export' command for git repositories with multiple remotes(`#11 <https://github.com/dirk-thomas/vcstool/pulls/11>`_)
+
+0.1.7 (2014-10-15)
+------------------
+* add '--limit-tag TAGNAME' option to 'log' command
+* fix '--limit-untagged' option of 'log' command for mercurial
+
+0.1.6 (2014-01-17)
+------------------
+* Python 3 compatibility
+* fix '--exact' option of 'export' command for mercurial (`#6 <https://github.com/dirk-thomas/vcstool/issues/6>`_)
+
+0.1.5 (2013-11-03)
+------------------
+* fix missing dependencies (`#5 <https://github.com/dirk-thomas/vcstool/issues/5>`_)
+
+0.1.4 (2013-09-16)
+------------------
+* add '--hide-empty' option (`#3 <https://github.com/dirk-thomas/vcstool/issues/3>`_)
+* fix 'import' command cloning to wrong path (`#4 <https://github.com/dirk-thomas/vcstool/issues/4>`_)
+
 0.1.3 (2013-06-23)
 ------------------
 * add 'custom' command to run arbitrary vcs commands with user-specified arguments

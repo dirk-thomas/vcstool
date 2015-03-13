@@ -1,7 +1,7 @@
 import os
 from xml.etree.ElementTree import fromstring
 
-from .vcs_base import find_executable, VcsClientBase
+from .vcs_base import VcsClientBase, which
 
 
 class SvnClient(VcsClientBase):
@@ -187,4 +187,4 @@ class SvnClient(VcsClientBase):
 
 
 if not SvnClient._executable:
-    SvnClient._executable = find_executable('svn')
+    SvnClient._executable = which('svn')

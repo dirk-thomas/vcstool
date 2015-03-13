@@ -1,7 +1,7 @@
 import copy
 import os
 
-from .vcs_base import find_executable, VcsClientBase
+from .vcs_base import VcsClientBase, which
 
 
 class BzrClient(VcsClientBase):
@@ -163,6 +163,6 @@ class BzrClient(VcsClientBase):
 
 
 if not BzrClient._executable:
-    BzrClient._executable = find_executable('bzr')
+    BzrClient._executable = which('bzr')
     if not BzrClient._executable:
         raise ImportError('Could not find executable "bzr" for vcstool.clients.BzrClient')

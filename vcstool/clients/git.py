@@ -1,7 +1,7 @@
 import copy
 import os
 
-from .vcs_base import find_executable, VcsClientBase
+from .vcs_base import VcsClientBase, which
 
 
 class GitClient(VcsClientBase):
@@ -309,4 +309,4 @@ class GitClient(VcsClientBase):
 
 
 if not GitClient._executable:
-    GitClient._executable = find_executable('git')
+    GitClient._executable = which('git')

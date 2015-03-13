@@ -1,6 +1,11 @@
 import os
 import subprocess
 
+try:
+    from shutil import which
+except ImportError:
+    from vcstool.compat.shutil import which
+
 
 class VcsClientBase(object):
 
@@ -39,14 +44,6 @@ class VcsClientBase(object):
                     'returncode': 1
                 }
         return None
-
-
-def find_executable(file_name):
-    for path in os.getenv('PATH').split(os.path.pathsep):
-        file_path = os.path.join(path, file_name)
-        if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
-            return file_path
-    return None
 
 
 def run_command(cmd, cwd, env=None):

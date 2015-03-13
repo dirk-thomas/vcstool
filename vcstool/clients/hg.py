@@ -1,6 +1,6 @@
 import os
 
-from .vcs_base import find_executable, VcsClientBase
+from .vcs_base import VcsClientBase, which
 
 
 class HgClient(VcsClientBase):
@@ -218,4 +218,4 @@ class HgClient(VcsClientBase):
 
 
 if not HgClient._executable:
-    HgClient._executable = find_executable('hg')
+    HgClient._executable = which('hg')

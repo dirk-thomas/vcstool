@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.11 (2015-03-13)
+-------------------
+* fix Python 2 (regression introduced in 0.1.10)
+
 0.1.10 (2015-03-12)
 -------------------
 * change license from BSD to Apache License, Version 2.0

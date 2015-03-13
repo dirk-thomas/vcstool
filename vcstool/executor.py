@@ -68,7 +68,7 @@ def execute_jobs(jobs, show_progress=False):
         job_queue.put(job)
 
     # start all workers
-    _ = [w.start() for w in workers]
+    [w.start() for w in workers]
 
     # collect results
     while len(results) < len(jobs):
@@ -87,7 +87,7 @@ def execute_jobs(jobs, show_progress=False):
         print('')  # finish progress line
 
     # join all workers
-    _ = [w.join() for w in workers]
+    [w.join() for w in workers]
     return results
 
 

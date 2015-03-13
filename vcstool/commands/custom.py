@@ -24,7 +24,8 @@ def get_parser():
     for client_type in [c.type for c in vcstool_clients if c.type not in ['tar']]:
         group.add_argument('--%s' % client_type, action='store_true', default=False, help="Run command on '%s' repositories" % client_type)
     group = parser.add_argument_group('"custom" command parameters')
-    group.add_argument('--args', required=True, nargs='*', help='Arbitrary arguments passed to each vcs invocation. '
+    group.add_argument(
+        '--args', required=True, nargs='*', help='Arbitrary arguments passed to each vcs invocation. '
         'It must be passed after other arguments since it collects all following options.')
     return parser
 
@@ -74,20 +75,24 @@ def main(args=None):
     any_error = any([r['returncode'] != 0 for r in results])
     return 1 if any_error else 0
 
+
 def bzr_main(args=None):
     if args is None:
         args = sys.argv[1:]
     return main(['--bzr', '--args'] + args)
+
 
 def git_main(args=None):
     if args is None:
         args = sys.argv[1:]
     return main(['--git', '--args'] + args)
 
+
 def hg_main(args=None):
     if args is None:
         args = sys.argv[1:]
     return main(['--hg', '--args'] + args)
+
 
 def svn_main(args=None):
     if args is None:

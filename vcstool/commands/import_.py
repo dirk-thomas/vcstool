@@ -44,7 +44,7 @@ def get_repositories(yaml_file):
         # try rosinstall file format
         try:
             return get_repos_in_rosinstall_format(root)
-        except:
+        except Exception:
             raise RuntimeError('Input data is not valid format: %s' % e)
 
 

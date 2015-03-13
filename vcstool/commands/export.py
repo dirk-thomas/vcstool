@@ -28,27 +28,46 @@ def get_parser():
 
 
 def output_export_data(result, hide_empty=False):
+    # errors are handled by a separate function
+    if result['returncode']:
+        return
+
+    path = get_path_of_result(result)
+
+    try:
+        lines = []
+        lines.append('  %s:' % path)
+        lines.append('    type: %s' % result['client'].__class__.type)
+        export_data = result['export_data']
+        lines.append('    url: %s' % export_data['url'])
+        if 'version' in export_data and export_data['version']:
+            lines.append('    version: %s' % export_data['version'])
+        print('\n'.join(lines))
+    except KeyError as e:
+        print(ansi('redf') + ("Command '%s' failed for path '%s': %s: %s" % (result['command'].__class__.command, result['client'].path, e.__class__.__name__, e)) + ansi('reset'), file=sys.stderr)
+
+
+def output_error_information(result, hide_empty=False):
+    # successful results are handled by a separate function
+    if not result['returncode']:
+        return
+
+    if result['returncode'] == NotImplemented:
+        color = 'yellow'
+    else:
+        color = 'red'
+
+    path = get_path_of_result(result)
+    line = '%s: %s' % (path, result['output'])
+    print(ansi('%sf' % color) + line + ansi('reset'), file=sys.stderr)
+
+
+def get_path_of_result(result):
     client = result['client']
     path = os.path.relpath(client.path, result['command'].paths[0])
     if path == '.':
         path = os.path.basename(os.path.abspath(client.path))
-
-    try:
-        if result['returncode'] == NotImplemented:
-            print(ansi('yellowf') + result['output'] + ansi('reset'), file=sys.stderr)
-        elif result['returncode']:
-            print(ansi('redf') + result['output'] + ansi('reset'), file=sys.stderr)
-        else:
-            lines = []
-            lines.append('  %s:' % path)
-            lines.append('    type: %s' % client.__class__.type)
-            export_data = result['export_data']
-            lines.append('    url: %s' % export_data['url'])
-            if 'version' in export_data and export_data['version']:
-                lines.append('    version: %s' % export_data['version'])
-            print('\n'.join(lines))
-    except KeyError as e:
-        print(ansi('redf') + ("Command '%s' failed for path '%s': %s" % (result['command'].__class__.command, client.path, e)) + ansi('reset'), file=sys.stderr)
+    return path
 
 
 def main(args=None):
@@ -65,6 +84,7 @@ def main(args=None):
 
     print('repositories:')
     output_results(results, output_handler=output_export_data)
+    output_results(results, output_handler=output_error_information)
 
     any_error = any([r['returncode'] != 0 for r in results])
     return 1 if any_error else 0

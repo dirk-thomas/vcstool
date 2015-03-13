@@ -18,7 +18,7 @@ setup(
     author_email='dthomas@osrfoundation.org',
     maintainer='Dirk Thomas',
     maintainer_email='dthomas@osrfoundation.org',
-    url='http://wiki.ros.org/vcstool',
+    url='https://github.com/dirk-thomas/vcstool',
     download_url='http://download.ros.org/downloads/vcstool/',
     classifiers=['Intended Audience :: Developers',
                  'License :: OSI Approved :: BSD License',

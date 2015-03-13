@@ -21,7 +21,7 @@ setup(
     url='https://github.com/dirk-thomas/vcstool',
     download_url='http://download.ros.org/downloads/vcstool/',
     classifiers=['Intended Audience :: Developers',
-                 'License :: OSI Approved :: BSD License',
+                 'License :: OSI Approved :: Apache Software License',
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Version Control',
                  'Topic :: Utilities'],
@@ -29,7 +29,7 @@ setup(
     long_description='''\
 vcstool enables batch commands on multiple different vcs repositories. \
 Currently it supports git, hg, svn and bzr.''',
-    license='BSD',
+    license='Apache License, Version 2.0',
     data_files=[
         ('share/vcstool-completion', [
             'vcstool-completion/vcs.bash',

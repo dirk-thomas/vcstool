@@ -188,7 +188,7 @@ class GitClient(VcsClientBase):
                     'returncode': 1
                 }
             # pull updates for existing repo
-            cmd_pull = [GitClient._executable, 'pull', remote, command.version]
+            cmd_pull = [GitClient._executable, 'pull', '--rebase', remote, command.version]
             result_pull = self._run_command(cmd_pull)
             if result_pull['returncode']:
                 return result_pull

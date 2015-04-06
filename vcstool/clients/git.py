@@ -1,4 +1,3 @@
-import copy
 import os
 
 from .vcs_base import VcsClientBase, which

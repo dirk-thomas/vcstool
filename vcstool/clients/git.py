@@ -16,9 +16,17 @@ class GitClient(VcsClientBase):
     def __init__(self, path):
         super(GitClient, self).__init__(path)
 
-    def branch(self, _command):
+    def branch(self, command):
         cmd = [GitClient._executable, 'branch']
-        return self._run_command(cmd)
+        result = self._run_command(cmd)
+
+        if not command.all and not result['returncode']:
+            # only show current branch
+            lines = result['output'].splitlines()
+            lines = [l[2:] for l in lines if l.startswith('* ')]
+            result['output'] = '\n'.join(lines)
+
+        return result
 
     def custom(self, command):
         cmd = [GitClient._executable] + command.args

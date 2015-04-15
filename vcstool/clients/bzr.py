@@ -16,7 +16,10 @@ class BzrClient(VcsClientBase):
     def __init__(self, path):
         super(BzrClient, self).__init__(path)
 
-    def branch(self, _command):
+    def branch(self, command):
+        if command.all:
+            return self._not_applicable(command, message='at least with the option to list all branches')
+
         return self._get_parent_branch()
 
     def custom(self, command):

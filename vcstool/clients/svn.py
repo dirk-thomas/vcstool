@@ -16,7 +16,10 @@ class SvnClient(VcsClientBase):
     def __init__(self, path):
         super(SvnClient, self).__init__(path)
 
-    def branch(self, _command):
+    def branch(self, command):
+        if command.all:
+            return self._not_applicable(command, message='at least with the option to list all branches')
+
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:

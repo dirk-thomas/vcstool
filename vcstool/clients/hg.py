@@ -16,8 +16,9 @@ class HgClient(VcsClientBase):
     def __init__(self, path):
         super(HgClient, self).__init__(path)
 
-    def branch(self, _command):
-        cmd = [HgClient._executable, 'branch']
+    def branch(self, command):
+        cmd = [HgClient._executable, 'branches' if command.all else 'branch']
+        self._check_color(cmd)
         return self._run_command(cmd)
 
     def custom(self, command):

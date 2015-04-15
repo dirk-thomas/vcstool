@@ -22,10 +22,11 @@ class VcsClientBase(object):
                 pass
         return super(VcsClientBase, self).__getattribute__(name)
 
-    def _not_applicable(self, command):
+    def _not_applicable(self, command, message=None):
         return {
             'cmd': '%s.%s(%s)' % (self.__class__.type, 'push', command.__class__.command),
-            'output': "Command '%s' not applicable for client '%s'" % (command.__class__.command, self.__class__.type),
+            'output': "Command '%s' not applicable for client '%s'%s" %
+            (command.__class__.command, self.__class__.type, ': %s' % message if message else ''),
             'returncode': NotImplemented
         }
 

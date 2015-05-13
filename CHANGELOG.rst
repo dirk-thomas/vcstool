@@ -2,6 +2,15 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.13 (2015-04-18)
+-------------------
+* use --rebase when invoking pull on import
+* unify branch command behavior showing the current branch, add option --all to list all branches (`#15 <https://github.com/dirk-thomas/vcstool/issues/15>`_)
+
+0.1.12 (2015-03-22)
+-------------------
+* improve output of export command in case of errors (`#13 <https://github.com/dirk-thomas/vcstool/pull/13>`_)
+
 0.1.11 (2015-03-13)
 -------------------
 * fix Python 2 (regression introduced in 0.1.10)
@@ -19,7 +28,7 @@ Changelog for package vcstool
 0.1.8 (2015-03-03)
 ------------------
 * improve error message if command raises an exception
-* fix 'export' command for git repositories with multiple remotes(`#11 <https://github.com/dirk-thomas/vcstool/pulls/11>`_)
+* fix 'export' command for git repositories with multiple remotes (`#11 <https://github.com/dirk-thomas/vcstool/pull/11>`_)
 
 0.1.7 (2014-10-15)
 ------------------

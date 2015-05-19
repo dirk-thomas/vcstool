@@ -20,13 +20,16 @@ class BzrClient(VcsClientBase):
         if command.all:
             return self._not_applicable(command, message='at least with the option to list all branches')
 
+        self._check_executable()
         return self._get_parent_branch()
 
     def custom(self, command):
+        self._check_executable()
         cmd = [BzrClient._executable] + command.args
         return self._run_command(cmd)
 
     def diff(self, _command):
+        self._check_executable()
         cmd = [BzrClient._executable, 'diff']
         return self._run_command(cmd)
 
@@ -43,6 +46,7 @@ class BzrClient(VcsClientBase):
         if not_exist:
             return not_exist
 
+        self._check_executable()
         if BzrClient.is_repository(self.path):
             # verify that existing repository is the same
             result_parent_branch = self._get_parent_branch()
@@ -72,6 +76,7 @@ class BzrClient(VcsClientBase):
             return result_branch
 
     def log(self, command):
+        self._check_executable()
         if command.limit_tag or command.limit_untagged:
             tag = None
             if command.limit_tag:
@@ -129,17 +134,21 @@ class BzrClient(VcsClientBase):
         return self._run_command(cmd)
 
     def pull(self, _command):
+        self._check_executable()
         cmd = [BzrClient._executable, 'pull']
         return self._run_command(cmd)
 
     def push(self, _command):
+        self._check_executable()
         cmd = [BzrClient._executable, 'push']
         return self._run_command(cmd)
 
     def remotes(self, _command):
+        self._check_executable()
         return self._get_parent_branch()
 
     def status(self, _command):
+        self._check_executable()
         cmd = [BzrClient._executable, 'status']
         return self._run_command(cmd)
 
@@ -164,8 +173,9 @@ class BzrClient(VcsClientBase):
         result['output'] = branch
         return result
 
+    def _check_executable(self):
+        assert BzrClient._executable is not None, "Could not find 'bzr' executable"
+
 
 if not BzrClient._executable:
     BzrClient._executable = which('bzr')
-    if not BzrClient._executable:
-        raise ImportError('Could not find executable "bzr" for vcstool.clients.BzrClient')

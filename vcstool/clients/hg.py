@@ -17,15 +17,18 @@ class HgClient(VcsClientBase):
         super(HgClient, self).__init__(path)
 
     def branch(self, command):
+        self._check_executable()
         cmd = [HgClient._executable, 'branches' if command.all else 'branch']
         self._check_color(cmd)
         return self._run_command(cmd)
 
     def custom(self, command):
+        self._check_executable()
         cmd = [HgClient._executable] + command.args
         return self._run_command(cmd)
 
     def diff(self, command):
+        self._check_executable()
         cmd = [HgClient._executable, 'diff']
         self._check_color(cmd)
         if command.context:
@@ -33,6 +36,7 @@ class HgClient(VcsClientBase):
         return self._run_command(cmd)
 
     def export(self, command):
+        self._check_executable()
         result_url = self._get_url()
         if result_url['returncode']:
             return result_url
@@ -97,6 +101,7 @@ class HgClient(VcsClientBase):
         if not_exist:
             return not_exist
 
+        self._check_executable()
         if HgClient.is_repository(self.path):
             # verify that existing repository is the same
             result_url = self._get_url()
@@ -144,6 +149,7 @@ class HgClient(VcsClientBase):
         }
 
     def log(self, command):
+        self._check_executable()
         if command.limit_tag:
             # check if specific tag exists
             cmd_log = [HgClient._executable, 'log', '--rev', 'tag(%s)' % command.limit_tag]
@@ -173,19 +179,23 @@ class HgClient(VcsClientBase):
         return self._run_command(cmd)
 
     def pull(self, _command):
+        self._check_executable()
         cmd = [HgClient._executable, 'pull', '--update']
         self._check_color(cmd)
         return self._run_command(cmd)
 
     def push(self, _command):
+        self._check_executable()
         cmd = [HgClient._executable, 'push']
         return self._run_command(cmd)
 
     def remotes(self, _command):
+        self._check_executable()
         cmd = [HgClient._executable, 'paths']
         return self._run_command(cmd)
 
     def status(self, command):
+        self._check_executable()
         cmd = [HgClient._executable, 'status']
         self._check_color(cmd)
         if command.quiet:
@@ -216,6 +226,9 @@ class HgClient(VcsClientBase):
         # inject arguments to force colorization
         if HgClient._config_color:
             cmd[1:1] = '--color', 'always'
+
+    def _check_executable(self):
+        assert HgClient._executable is not None, "Could not find 'hg' executable"
 
 
 if not HgClient._executable:

@@ -20,6 +20,7 @@ class SvnClient(VcsClientBase):
         if command.all:
             return self._not_applicable(command, message='at least with the option to list all branches')
 
+        self._check_executable()
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:
@@ -57,16 +58,19 @@ class SvnClient(VcsClientBase):
         }
 
     def custom(self, command):
+        self._check_executable()
         cmd = [SvnClient._executable] + command.args
         return self._run_command(cmd)
 
     def diff(self, command):
+        self._check_executable()
         cmd = [SvnClient._executable, 'diff']
         if command.context:
             cmd += ['--unified=%d' % command.context]
         return self._run_command(cmd)
 
     def export(self, command):
+        self._check_executable()
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:
@@ -111,6 +115,8 @@ class SvnClient(VcsClientBase):
         if not_exist:
             return not_exist
 
+        self._check_executable()
+
         url = command.url
         if command.version:
             url += '@%d' % command.version
@@ -143,19 +149,23 @@ class SvnClient(VcsClientBase):
                 'output': 'SvnClient can not determine latest tag',
                 'returncode': NotImplemented
             }
+        self._check_executable()
         cmd = [SvnClient._executable, 'log']
         if command.limit != 0:
             cmd += ['--limit', '%d' % command.limit]
         return self._run_command(cmd)
 
     def pull(self, _command):
+        self._check_executable()
         cmd = [SvnClient._executable, '--non-interactive', 'update']
         return self._run_command(cmd)
 
     def push(self, command):
+        self._check_executable()
         return self._not_applicable(command)
 
     def remotes(self, _command):
+        self._check_executable()
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:
@@ -183,10 +193,14 @@ class SvnClient(VcsClientBase):
         }
 
     def status(self, command):
+        self._check_executable()
         cmd = [SvnClient._executable, 'status']
         if command.quiet:
             cmd += ['--quiet']
         return self._run_command(cmd)
+
+    def _check_executable(self):
+        assert SvnClient._executable is not None, "Could not find 'svn' executable"
 
 
 if not SvnClient._executable:

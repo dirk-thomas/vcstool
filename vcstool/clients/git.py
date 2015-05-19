@@ -17,6 +17,7 @@ class GitClient(VcsClientBase):
         super(GitClient, self).__init__(path)
 
     def branch(self, command):
+        self._check_executable()
         cmd = [GitClient._executable, 'branch']
         result = self._run_command(cmd)
 
@@ -29,10 +30,12 @@ class GitClient(VcsClientBase):
         return result
 
     def custom(self, command):
+        self._check_executable()
         cmd = [GitClient._executable] + command.args
         return self._run_command(cmd)
 
     def diff(self, command):
+        self._check_executable()
         cmd = [GitClient._executable, 'diff']
         self._check_color(cmd)
         if command.context:
@@ -40,6 +43,7 @@ class GitClient(VcsClientBase):
         return self._run_command(cmd)
 
     def export(self, command):
+        self._check_executable()
         exact = command.exact
         if not exact:
             # determine if a specific branch is checked out or ec is detached
@@ -180,6 +184,7 @@ class GitClient(VcsClientBase):
         if not_exist:
             return not_exist
 
+        self._check_executable()
         if GitClient.is_repository(self.path):
             # verify that existing repository is the same
             result_url = self._get_url()
@@ -246,6 +251,7 @@ class GitClient(VcsClientBase):
         }
 
     def log(self, command):
+        self._check_executable()
         if command.limit_tag:
             # check if specific tag exists
             cmd_tag = [GitClient._executable, 'tag', '-l', command.limit_tag]
@@ -277,19 +283,23 @@ class GitClient(VcsClientBase):
         return self._run_command(cmd)
 
     def pull(self, _command):
+        self._check_executable()
         cmd = [GitClient._executable, 'pull']
         self._check_color(cmd)
         return self._run_command(cmd)
 
     def push(self, _command):
+        self._check_executable()
         cmd = [GitClient._executable, 'push']
         return self._run_command(cmd)
 
     def remotes(self, _command):
+        self._check_executable()
         cmd = [GitClient._executable, 'remote', '-v']
         return self._run_command(cmd)
 
     def status(self, command):
+        self._check_executable()
         if command.hide_empty:
             cmd = [GitClient._executable, 'status', '-s']
             if command.quiet:
@@ -313,6 +323,9 @@ class GitClient(VcsClientBase):
         # inject arguments to force colorization
         if GitClient._config_color_is_auto:
             cmd[1:1] = '-c', 'color.ui=always'
+
+    def _check_executable(self):
+        assert GitClient._executable is not None, "Could not find 'git' executable"
 
 
 if not GitClient._executable:

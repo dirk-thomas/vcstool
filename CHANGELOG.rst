@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.14 (2015-05-19)
+-------------------
+* improve error message when executable is not available (`#16 <https://github.com/dirk-thomas/vcstool/issues/16>`_)
+
 0.1.13 (2015-04-18)
 -------------------
 * use --rebase when invoking pull on import

@@ -166,17 +166,11 @@ class GitClient(VcsClientBase):
         return result_url
 
     def import_(self, command):
-        if not command.url or not command.version:
-            if not command.url and not command.version:
-                value_missing = "'url' and 'version'"
-            elif not command.url:
-                value_missing = "'url'"
-            else:
-                value_missing = "'version'"
+        if not command.url:
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': 'Repository data lacks the %s value' % value_missing,
+                'output': "Repository data lacks the 'url' value",
                 'returncode': 1
             }
 
@@ -199,8 +193,31 @@ class GitClient(VcsClientBase):
                     'output': 'Path already exists and contains a different repository',
                     'returncode': 1
                 }
+
+            if command.version:
+                checkout_version = command.version
+            else:
+                # determine remote HEAD branch
+                cmd_remote = [GitClient._executable, 'remote', 'show', remote]
+                # override locale in order to parse output
+                env = os.environ.copy()
+                env['LC_ALL'] = 'C'
+                result_remote = self._run_command(cmd_remote, env=env)
+                if result_remote['returncode']:
+                    result_remote['output'] = "Could not get remote information of repository '%s': %s" % (url, result_remote['output'])
+                    return result_remote
+                prefix = '  HEAD branch: '
+                for line in result_remote['output'].splitlines():
+                    if line.startswith(prefix):
+                        checkout_version = line[len(prefix):]
+                        break
+                else:
+                    result_remote['returncode'] = 1
+                    result_remote['output'] = "Could not determine remote HEAD branch of repository '%s': %s" % (url, result_remote['output'])
+                    return result_remote
+
             # pull updates for existing repo
-            cmd_pull = [GitClient._executable, 'pull', '--rebase', remote, command.version]
+            cmd_pull = [GitClient._executable, 'pull', '--rebase', remote, checkout_version]
             result_pull = self._run_command(cmd_pull)
             if result_pull['returncode']:
                 return result_pull
@@ -216,13 +233,16 @@ class GitClient(VcsClientBase):
             cmd = result_clone['cmd']
             output = result_clone['output']
 
-        cmd_checkout = [GitClient._executable, 'checkout', command.version]
-        result_checkout = self._run_command(cmd_checkout)
-        if result_checkout['returncode']:
-            result_checkout['output'] = "Could not checkout ref '%s': %s" % (command.version, result_checkout['output'])
-            return result_checkout
-        cmd += ' && ' + ' '.join(cmd_checkout)
-        output = '\n'.join([output, result_checkout['output']])
+            checkout_version = command.version
+
+        if checkout_version:
+            cmd_checkout = [GitClient._executable, 'checkout', checkout_version]
+            result_checkout = self._run_command(cmd_checkout)
+            if result_checkout['returncode']:
+                result_checkout['output'] = "Could not checkout ref '%s': %s" % (checkout_version, result_checkout['output'])
+                return result_checkout
+            cmd += ' && ' + ' '.join(cmd_checkout)
+            output = '\n'.join([output, result_checkout['output']])
 
         return {
             'cmd': cmd,

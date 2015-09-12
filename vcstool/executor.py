@@ -154,7 +154,10 @@ def output_result(result, hide_empty=False):
         client = result['client']
         print(ansi('bluef') + '=== ' + ansi('boldon') + client.path + ansi('boldoff') + ' (' + client.__class__.type + ') ===' + ansi('reset'))
     if output:
-        print(output)
+        try:
+            print(output)
+        except UnicodeEncodeError:
+            print(output.encode(sys.getdefaultencoding(), 'replace'))
 
 
 def output_results(results, output_handler=output_result, hide_empty=False):

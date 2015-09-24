@@ -2,6 +2,12 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.15 (2015-09-24)
+-------------------
+* make version attribute in imported yaml file optional for git repos (`#19 <https://github.com/dirk-thomas/vcstool/issues/19>`_)
+* if printing output fails due to encoding problems try again replacing the problematic characters
+* add short option for --hide-empty, use -s and --skip-empty as synonyms (`#17 <https://github.com/dirk-thomas/vcstool/pull/17>`_)
+
 0.1.14 (2015-05-19)
 -------------------
 * improve error message when executable is not available (`#16 <https://github.com/dirk-thomas/vcstool/issues/16>`_)

@@ -338,7 +338,7 @@ class GitClient(VcsClientBase):
         if GitClient._config_color_is_auto is None:
             _cmd = [GitClient._executable, 'config', '--get', 'color.ui']
             result = self._run_command(_cmd)
-            GitClient._config_color_is_auto = (result['output'] == 'auto')
+            GitClient._config_color_is_auto = (result['output'] in ['', 'auto'])
 
         # inject arguments to force colorization
         if GitClient._config_color_is_auto:

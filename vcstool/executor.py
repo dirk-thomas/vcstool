@@ -51,7 +51,7 @@ class DuplicateCommandHandler(object):
         }
 
 
-def execute_jobs(jobs, show_progress=False):
+def execute_jobs(jobs, show_progress=False, number_of_workers=10):
     results = []
 
     job_queue = Queue()
@@ -59,7 +59,7 @@ def execute_jobs(jobs, show_progress=False):
 
     # create worker threads
     workers = []
-    for _ in range(min(10, len(jobs))):
+    for _ in range(min(number_of_workers, len(jobs))):
         worker = Worker(job_queue, result_queue)
         workers.append(worker)
 

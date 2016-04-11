@@ -20,10 +20,12 @@ class Command(object):
 
 
 def add_common_arguments(parser, skip_hide_empty=False, single_path=False, path_help=None):
+    parser.formatter_class = argparse.ArgumentDefaultsHelpFormatter
     group = parser.add_argument_group('Common parameters')
     group.add_argument('--debug', action='store_true', default=False, help='Show debug messages')
     if not skip_hide_empty:
         group.add_argument('-s', '--hide-empty', '--skip-empty', action='store_true', default=False, help='Hide repositories with empty output')
+    group.add_argument('-w', '--workers', type=int, metavar='N', default=10, help='Number of parallel worker threads')
     group.add_argument('--repos', action='store_true', default=False, help='List repositories which the command operates on')
     if single_path:
         path_help = path_help or 'Base path to look for repositories'
@@ -49,7 +51,7 @@ def simple_main(parser, command_class, args=None):
     if command.output_repos:
         output_repositories(clients)
     jobs = generate_jobs(clients, command)
-    results = execute_jobs(jobs, show_progress=True)
+    results = execute_jobs(jobs, show_progress=True, number_of_workers=args.workers)
 
     output_results(results, hide_empty=args.hide_empty)
 

@@ -80,7 +80,7 @@ def main(args=None):
     if command.output_repos:
         output_repositories(clients)
     jobs = generate_jobs(clients, command)
-    results = execute_jobs(jobs)
+    results = execute_jobs(jobs, number_of_workers=args.workers)
 
     print('repositories:')
     output_results(results, output_handler=output_export_data)

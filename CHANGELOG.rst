@@ -2,6 +2,12 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.16 (2016-06-01)
+-------------------
+* fix import tar with Python 3 (`#25 <https://github.com/dirk-thomas/vcstool/issues/25>`_)
+* add command line option to specify number of worker threads
+* do not require explicit color.ui option but consider default value
+
 0.1.15 (2015-09-24)
 -------------------
 * make version attribute in imported yaml file optional for git repos (`#19 <https://github.com/dirk-thomas/vcstool/issues/19>`_)

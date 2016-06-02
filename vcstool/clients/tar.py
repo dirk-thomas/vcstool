@@ -2,9 +2,9 @@ import os
 import shutil
 import socket
 try:
-    from cStringIO import StringIO
+    from cStringIO import StringIO as BytesIO
 except ImportError:
-    from io import StringIO
+    from io import BytesIO
 import tarfile
 import time
 try:
@@ -69,7 +69,7 @@ class TarClient(VcsClientBase):
         # unpack tarball into destination
         try:
             # raise all fatal errors
-            tar = tarfile.open(mode='r', fileobj=StringIO(data), errorlevel=1)
+            tar = tarfile.open(mode='r', fileobj=BytesIO(data), errorlevel=1)
         except (tarfile.ReadError, IOError, OSError) as e:
             return {
                 'cmd': '',

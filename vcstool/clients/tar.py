@@ -84,7 +84,7 @@ class TarClient(VcsClientBase):
                 if tar_info.name.startswith(prefix):
                     tar_info.name = tar_info.name[len(prefix):]
                     yield tar_info
-        prefix = command.version + os.sep
+        prefix = command.version + '/'
         tar.extractall(self.path, get_members(tar, prefix))
 
         return {

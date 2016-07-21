@@ -216,10 +216,10 @@ class HgClient(VcsClientBase):
             result = self._run_command(_cmd)
             if result['returncode'] != 0 or result['output'].startswith('!'):
                 return
-            # check if color mode is not off
+            # check if color mode is not off or not set
             _cmd = [HgClient._executable, 'config', 'color.mode']
             result = self._run_command(_cmd)
-            if result['returncode'] != 0 or result['output'] == 'off':
+            if result['returncode'] == 0 and result['output'] == 'off':
                 return
             HgClient._config_color = True
 

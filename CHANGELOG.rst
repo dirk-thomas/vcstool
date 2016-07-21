@@ -2,6 +2,14 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.18 (2016-07-21)
+-------------------
+* do not require explicit color.mode option for hg but consider default value
+
+0.1.17 (2016-06-17)
+-------------------
+* fix tar extraction on Windows (`#27 <https://github.com/dirk-thomas/vcstool/issues/27>`_)
+
 0.1.16 (2016-06-01)
 -------------------
 * fix import tar with Python 3 (`#25 <https://github.com/dirk-thomas/vcstool/issues/25>`_)

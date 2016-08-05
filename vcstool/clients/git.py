@@ -71,10 +71,16 @@ class GitClient(VcsClientBase):
 
             # determine remote
             suffix = '/' + branch_name
+            prefix = 'remotes/'
             assert branch_with_remote.endswith(branch_name), \
                 "'%s' does not end with '%s'" % \
                 (branch_with_remote, branch_name)
-            remote = branch_with_remote[:-len(suffix)]
+            # check if `git rev-parse --abbrev-ref @{upstream}`
+            # returned a ref with the "remotes/" prefix
+            # e.g. remotes/<remote>/<branch>"
+            if not branch_with_remote.startswith(prefix):
+                prefix = ''
+            remote = branch_with_remote[len(prefix):-len(suffix)]
 
             # determine url of remote
             result_url = self._get_remote_url(remote)

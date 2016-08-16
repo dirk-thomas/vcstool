@@ -76,6 +76,12 @@ class GitClient(VcsClientBase):
                 (branch_with_remote, branch_name)
             remote = branch_with_remote[:-len(suffix)]
 
+            # if a local ref exists with the same name as the remote branch
+            # the result will be prefixed to make it unambiguous
+            prefix = 'remotes/'
+            if remote.startswith(prefix):
+                remote = remote[len(prefix):]
+
             # determine url of remote
             result_url = self._get_remote_url(remote)
             if result_url['returncode']:

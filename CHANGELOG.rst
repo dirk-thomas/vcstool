@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.19 (2016-08-15)
+-------------------
+* fix export if local branch has same name as ref (`#29 <https://github.com/dirk-thomas/vcstool/pull/29>`_)
+
 0.1.18 (2016-07-21)
 -------------------
 * do not require explicit color.mode option for hg but consider default value

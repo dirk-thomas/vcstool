@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.20 (2016-08-22)
+-------------------
+* fix hg colorization which only worked for some repos due to a race condition
+
 0.1.19 (2016-08-15)
 -------------------
 * fix export if local branch has same name as ref (`#29 <https://github.com/dirk-thomas/vcstool/pull/29>`_)

@@ -1,4 +1,5 @@
 import os
+from threading import Lock
 
 from .vcs_base import VcsClientBase, which
 
@@ -8,6 +9,7 @@ class HgClient(VcsClientBase):
     type = 'hg'
     _executable = None
     _config_color = None
+    _config_color_lock = Lock()
 
     @staticmethod
     def is_repository(path):
@@ -203,25 +205,26 @@ class HgClient(VcsClientBase):
         return self._run_command(cmd)
 
     def _check_color(self, cmd):
-        # check if user uses colorization
-        if HgClient._config_color is None:
-            HgClient._config_color = False
-            # check if config extension is available
-            _cmd = [HgClient._executable, 'config', '--help']
-            result = self._run_command(_cmd)
-            if result['returncode'] != 0:
-                return
-            # check if color extension is available and not disabled
-            _cmd = [HgClient._executable, 'config', 'extensions.color']
-            result = self._run_command(_cmd)
-            if result['returncode'] != 0 or result['output'].startswith('!'):
-                return
-            # check if color mode is not off or not set
-            _cmd = [HgClient._executable, 'config', 'color.mode']
-            result = self._run_command(_cmd)
-            if result['returncode'] == 0 and result['output'] == 'off':
-                return
-            HgClient._config_color = True
+        with HgClient._config_color_lock:
+            # check if user uses colorization
+            if HgClient._config_color is None:
+                HgClient._config_color = False
+                # check if config extension is available
+                _cmd = [HgClient._executable, 'config', '--help']
+                result = self._run_command(_cmd)
+                if result['returncode'] != 0:
+                    return
+                # check if color extension is available and not disabled
+                _cmd = [HgClient._executable, 'config', 'extensions.color']
+                result = self._run_command(_cmd)
+                if result['returncode'] != 0 or result['output'].startswith('!'):
+                    return
+                # check if color mode is not off or not set
+                _cmd = [HgClient._executable, 'config', 'color.mode']
+                result = self._run_command(_cmd)
+                if result['returncode'] == 0 and result['output'] == 'off':
+                    return
+                HgClient._config_color = True
 
         # inject arguments to force colorization
         if HgClient._config_color:

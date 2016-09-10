@@ -1,3 +1,4 @@
+import logging
 import os
 try:
     from queue import Empty, Queue
@@ -6,6 +7,9 @@ except ImportError:
 import sys
 import threading
 import traceback
+
+logger = logging.getLogger(__name__)
+logging.basicConfig()
 
 
 def output_repositories(clients):
@@ -51,7 +55,10 @@ class DuplicateCommandHandler(object):
         }
 
 
-def execute_jobs(jobs, show_progress=False, number_of_workers=10):
+def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=False):
+    if debug_jobs:
+        logger.setLevel(logging.DEBUG)
+
     results = []
 
     job_queue = Queue()
@@ -63,9 +70,15 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10):
         worker = Worker(job_queue, result_queue)
         workers.append(worker)
 
-    # fill job_queue
-    for job in jobs:
+    # fill job_queue with jobs for each worker
+    pending_jobs = list(jobs)
+    running_job_paths = []
+    while job_queue.qsize() < len(workers):
+        job = pending_jobs.pop(0)
+        running_job_paths.append(job['client'].path)
+        logger.debug("started '%s'" % job['client'].path)
         job_queue.put(job)
+    logger.debug('ongoing %s' % running_job_paths)
 
     # start all workers
     [w.start() for w in workers]
@@ -73,6 +86,8 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10):
     # collect results
     while len(results) < len(jobs):
         (job, result) = result_queue.get()
+        logger.debug("finished '%s'" % job['client'].path)
+        running_job_paths.remove(result['job']['client'].path)
         if show_progress and len(jobs) > 1:
             if result['returncode'] == NotImplemented:
                 sys.stdout.write('s')
@@ -80,13 +95,24 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10):
                 sys.stdout.write('E')
             else:
                 sys.stdout.write('.')
+            if debug_jobs:
+                sys.stdout.write('\n')
             sys.stdout.flush()
         result.update(job)
         results.append(result)
-    if show_progress and len(jobs) > 1:
+        if pending_jobs:
+            job = pending_jobs.pop(0)
+            running_job_paths.append(job['client'].path)
+            logger.debug("started '%s'" % job['client'].path)
+            job_queue.put(job)
+        if running_job_paths:
+            logger.debug('ongoing %s' % running_job_paths)
+    if show_progress and len(jobs) > 1 and not debug_jobs:
         print('')  # finish progress line
 
     # join all workers
+    for w in workers:
+        w.done = True
     [w.join() for w in workers]
     return results
 
@@ -96,27 +122,29 @@ class Worker(threading.Thread):
     def __init__(self, job_queue, result_queue):
         super(Worker, self).__init__()
         self.daemon = True
+        self.done = False
         self.job_queue = job_queue
         self.result_queue = result_queue
 
     def run(self):
         # process all incoming jobs
-        while self.job_queue.qsize():
+        while not self.done:
             try:
                 # fetch next job
-                job = self.job_queue.get(block=False)
+                job = self.job_queue.get(timeout=0.1)
                 # process job
                 result = self.process_job(job)
                 # send result
                 self.result_queue.put((job, result))
             except Empty:
-                break
+                pass
 
     def process_job(self, job):
         command = job['command']
         if not command:
             return {
                 'cmd': '',
+                'job': job,
                 'output': job['output'],
                 'returncode': 1
             }
@@ -126,15 +154,19 @@ class Worker(threading.Thread):
             if method is None:
                 return {
                     'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
+                    'job': job,
                     'output': "Command '%s' not implemented for client '%s'" % (job['command'].__class__.command, job['client'].__class__.type),
                     'returncode': NotImplemented
                 }
-            return method(job['command'])
+            result = method(job['command'])
+            result['job'] = job
+            return result
         except Exception as e:
             exc_tb = sys.exc_info()[2]
             filename, lineno, _, _ = traceback.extract_tb(exc_tb)[-1]
             return {
                 'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
+                'job': job,
                 'output': "Invocation of command '%s' on client '%s' failed: %s: %s (%s:%s)" % (job['command'].__class__.command, job['client'].__class__.type, type(e).__name__, e, filename, lineno),
                 'returncode': 1
             }

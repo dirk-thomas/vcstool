@@ -126,7 +126,7 @@ def main(args=None):
     if args.repos:
         output_repositories([job['client'] for job in jobs])
 
-    results = execute_jobs(jobs, show_progress=True, number_of_workers=args.workers)
+    results = execute_jobs(jobs, show_progress=True, number_of_workers=args.workers, debug_jobs=args.debug)
     output_results(results)
 
     any_error = any([r['returncode'] != 0 for r in results])

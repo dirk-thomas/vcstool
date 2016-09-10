@@ -19,13 +19,23 @@ class Command(object):
             self.paths = [args.path]
 
 
+def check_greater_zero(value):
+    try:
+        value = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("invalid int value: '%s'" % value)
+    if value <= 0:
+         raise argparse.ArgumentTypeError("invalid positive int value: '%d'" % value)
+    return value
+
+
 def add_common_arguments(parser, skip_hide_empty=False, single_path=False, path_help=None):
     parser.formatter_class = argparse.ArgumentDefaultsHelpFormatter
     group = parser.add_argument_group('Common parameters')
     group.add_argument('--debug', action='store_true', default=False, help='Show debug messages')
     if not skip_hide_empty:
         group.add_argument('-s', '--hide-empty', '--skip-empty', action='store_true', default=False, help='Hide repositories with empty output')
-    group.add_argument('-w', '--workers', type=int, metavar='N', default=10, help='Number of parallel worker threads')
+    group.add_argument('-w', '--workers', type=check_greater_zero, metavar='N', default=10, help='Number of parallel worker threads')
     group.add_argument('--repos', action='store_true', default=False, help='List repositories which the command operates on')
     if single_path:
         path_help = path_help or 'Base path to look for repositories'

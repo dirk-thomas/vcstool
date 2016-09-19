@@ -222,13 +222,13 @@ class GitClient(VcsClientBase):
                     result_remote['output'] = "Could not determine remote HEAD branch of repository '%s': %s" % (url, result_remote['output'])
                     return result_remote
 
-            # pull updates for existing repo
-            cmd_pull = [GitClient._executable, 'pull', '--rebase', remote, checkout_version]
-            result_pull = self._run_command(cmd_pull)
-            if result_pull['returncode']:
-                return result_pull
-            cmd = result_pull['cmd']
-            output = result_pull['output']
+            # fetch updates for existing repo
+            cmd_fetch = [GitClient._executable, 'fetch', remote]
+            result_fetch = self._run_command(cmd_fetch)
+            if result_fetch['returncode']:
+                return result_fetch
+            cmd = result_fetch['cmd']
+            output = result_fetch['output']
 
         else:
             cmd_clone = [GitClient._executable, 'clone', command.url, '.']

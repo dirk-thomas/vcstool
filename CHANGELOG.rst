@@ -2,6 +2,11 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.21 (2016-09-19)
+-------------------
+* change git import behavior to handle detached HEADs better (`#31 <https://github.com/dirk-thomas/vcstool/pull/31>`_)
+* add messages to debug currently processed jobs when using --debug (`#30 <https://github.com/dirk-thomas/vcstool/issues/30>`_)
+
 0.1.20 (2016-08-22)
 -------------------
 * fix hg colorization which only worked for some repos due to a race condition

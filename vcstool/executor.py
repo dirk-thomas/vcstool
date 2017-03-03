@@ -51,7 +51,7 @@ class DuplicateCommandHandler(object):
             'cmd': '',
             'cwd': self.client.path,
             'output': "Same repository as '%s'" % self.duplicate_path,
-            'returncode': NotImplemented
+            'returncode': None
         }
 
 
@@ -174,14 +174,18 @@ class Worker(threading.Thread):
 
 def output_result(result, hide_empty=False):
     output = result['output']
+    if hide_empty and result['returncode'] is None:
+        output = ''
     if result['returncode'] == NotImplemented:
-        output = ansi('yellowf') + output + ansi('reset')
+        if output:
+            output = ansi('yellowf') + output + ansi('reset')
     elif result['returncode']:
         if not output:
             output = 'Failed with return code %d' % result['returncode']
         output = ansi('redf') + output + ansi('reset')
     elif not result['cmd']:
-        output = ansi('yellowf') + output + ansi('reset')
+        if output:
+            output = ansi('yellowf') + output + ansi('reset')
     if output or not hide_empty:
         client = result['client']
         print(ansi('bluef') + '=== ' + ansi('boldon') + client.path + ansi('boldoff') + ' (' + client.__class__.type + ') ===' + ansi('reset'))

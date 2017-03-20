@@ -2,6 +2,14 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.23 (2017-03-20)
+-------------------
+* do not hide git status when ahead or behind (`#36 <https://github.com/dirk-thomas/vcstool/pull/36>`_)
+
+0.1.22 (2017-03-02)
+-------------------
+* do not show 'same repo' when using --hide (`#34 <https://github.com/dirk-thomas/vcstool/pull/34>`_)
+
 0.1.21 (2016-09-19)
 -------------------
 * change git import behavior to handle detached HEADs better (`#31 <https://github.com/dirk-thomas/vcstool/pull/31>`_)

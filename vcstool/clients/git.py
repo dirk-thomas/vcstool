@@ -326,13 +326,26 @@ class GitClient(VcsClientBase):
 
     def status(self, command):
         self._check_executable()
-        if command.hide_empty:
+        while command.hide_empty:
+            # check if ahead
+            cmd = [GitClient._executable, 'log', '@{push}..']
+            result = self._run_command(cmd)
+            if not result['returncode'] and result['output']:
+                # ahead, do not hide
+                break
+            # check if behind
+            cmd = [GitClient._executable, 'log', '..@{upstream}']
+            result = self._run_command(cmd)
+            if not result['returncode'] and result['output']:
+                # behind, do not hide
+                break
             cmd = [GitClient._executable, 'status', '-s']
             if command.quiet:
                 cmd += ['--untracked-files=no']
             result = self._run_command(cmd)
             if result['returncode'] or not result['output']:
                 return result
+            break
         cmd = [GitClient._executable, 'status']
         self._check_color(cmd)
         if command.quiet:

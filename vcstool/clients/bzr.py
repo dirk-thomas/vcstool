@@ -1,5 +1,6 @@
 import copy
 import os
+import shutil
 
 from .vcs_base import VcsClientBase, which
 
@@ -42,10 +43,6 @@ class BzrClient(VcsClientBase):
                 'returncode': 1
             }
 
-        not_exist = self._create_path()
-        if not_exist:
-            return not_exist
-
         self._check_executable()
         if BzrClient.is_repository(self.path):
             # verify that existing repository is the same
@@ -54,12 +51,23 @@ class BzrClient(VcsClientBase):
                 return result_parent_branch
             parent_branch = result_parent_branch['output']
             if parent_branch != command.url:
-                return {
-                    'cmd': '',
-                    'cwd': self.path,
-                    'output': 'Path already exists and contains a different repository',
-                    'returncode': 1
-                }
+                if not command.force:
+                    return {
+                        'cmd': '',
+                        'cwd': self.path,
+                        'output': 'Path already exists and contains a different repository',
+                        'returncode': 1
+                    }
+                try:
+                    shutil.rmtree(self.path)
+                except OSError:
+                    os.remove(self.path)
+
+        not_exist = self._create_path()
+        if not_exist:
+            return not_exist
+
+        if BzrClient.is_repository(self.path):
             # pull updates for existing repo
             cmd_pull = [BzrClient._executable, 'pull']
             return self._run_command(cmd_pull)

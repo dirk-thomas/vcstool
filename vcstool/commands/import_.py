@@ -20,12 +20,14 @@ class ImportCommand(Command):
         super(ImportCommand, self).__init__(args)
         self.url = url
         self.version = version
+        self.force = args.force
 
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Import the list of repositories', prog='vcs import')
     group = parser.add_argument_group('"import" command parameters')
     group.add_argument('--input', type=argparse.FileType('r'), default=sys.stdin)
+    group.add_argument('--force', action='store_true', default=False, help='Potentially overwrite existing folders if they contain different repositories')
     return parser
 
 

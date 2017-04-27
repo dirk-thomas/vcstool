@@ -1,4 +1,5 @@
 import os
+import shutil
 from threading import Lock
 
 from .vcs_base import VcsClientBase, which
@@ -99,10 +100,6 @@ class HgClient(VcsClientBase):
                 'returncode': 1
             }
 
-        not_exist = self._create_path()
-        if not_exist:
-            return not_exist
-
         self._check_executable()
         if HgClient.is_repository(self.path):
             # verify that existing repository is the same
@@ -111,12 +108,23 @@ class HgClient(VcsClientBase):
                 return result_url
             url = result_url['output']
             if url != command.url:
-                return {
-                    'cmd': '',
-                    'cwd': self.path,
-                    'output': 'Path already exists and contains a different repository',
-                    'returncode': 1
-                }
+                if not command.force:
+                    return {
+                        'cmd': '',
+                        'cwd': self.path,
+                        'output': 'Path already exists and contains a different repository',
+                        'returncode': 1
+                    }
+                try:
+                    shutil.rmtree(self.path)
+                except OSError:
+                    os.remove(self.path)
+
+        not_exist = self._create_path()
+        if not_exist:
+            return not_exist
+
+        if HgClient.is_repository(self.path):
             # pull updates for existing repo
             cmd_pull = [HgClient._executable, 'pull', '--update']
             result_pull = self._run_command(cmd_pull)

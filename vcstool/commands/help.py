@@ -1,8 +1,9 @@
 from __future__ import print_function
 
 import argparse
-from pkg_resources import load_entry_point
 import sys
+
+from pkg_resources import load_entry_point
 
 from vcstool.clients import vcstool_clients
 from vcstool.commands import vcstool_commands

@@ -3,10 +3,10 @@ from __future__ import print_function
 import argparse
 import os
 import sys
-import yaml
 
 from vcstool.clients import vcstool_clients
 from vcstool.executor import ansi, execute_jobs, output_repositories, output_results
+import yaml
 
 from .command import add_common_arguments, Command
 

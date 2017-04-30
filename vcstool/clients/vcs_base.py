@@ -2,9 +2,9 @@ import os
 import subprocess
 
 try:
-    from shutil import which
+    from shutil import which  # noqa
 except ImportError:
-    from vcstool.compat.shutil import which
+    from vcstool.compat.shutil import which  # noqa
 
 
 class VcsClientBase(object):

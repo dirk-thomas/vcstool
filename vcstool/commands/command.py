@@ -25,7 +25,7 @@ def check_greater_zero(value):
     except ValueError:
         raise argparse.ArgumentTypeError("invalid int value: '%s'" % value)
     if value <= 0:
-         raise argparse.ArgumentTypeError("invalid positive int value: '%d'" % value)
+        raise argparse.ArgumentTypeError("invalid positive int value: '%d'" % value)
     return value
 
 

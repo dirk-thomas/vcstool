@@ -1,0 +1,13 @@
+language: python
+dist: trusty
+sudo: false
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+install:
+  - pip install coverage flake8 flake8-docstrings flake8-import-order nose
+script:
+  - python setup.py nosetests -s --tests test
+notifications:
+  email: false

@@ -99,5 +99,6 @@ def svn_main(args=None):
         args = sys.argv[1:]
     return main(['--svn', '--args'] + args)
 
+
 if __name__ == '__main__':
     sys.exit(main())

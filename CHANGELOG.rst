@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.25 (2017-05-27)
+-------------------
+* process subfolders sequentially (`#41 <https://github.com/dirk-thomas/vcstool/pull/41>`_)
+
 0.1.24 (2017-04-27)
 -------------------
 * add --force option to import verb (`#37 <https://github.com/dirk-thomas/vcstool/pull/37>`_)

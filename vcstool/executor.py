@@ -55,6 +55,14 @@ class DuplicateCommandHandler(object):
         }
 
 
+def get_ready_job(jobs):
+    for job in jobs:
+        if not job['depends']:
+            jobs.remove(job)
+            return job
+    return None
+
+
 def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=False):
     if debug_jobs:
         logger.setLevel(logging.DEBUG)
@@ -74,7 +82,9 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=Fal
     pending_jobs = list(jobs)
     running_job_paths = []
     while job_queue.qsize() < len(workers):
-        job = pending_jobs.pop(0)
+        job = get_ready_job(pending_jobs)
+        if not job:
+            break
         running_job_paths.append(job['client'].path)
         logger.debug("started '%s'" % job['client'].path)
         job_queue.put(job)
@@ -101,10 +111,16 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=Fal
         result.update(job)
         results.append(result)
         if pending_jobs:
-            job = pending_jobs.pop(0)
-            running_job_paths.append(job['client'].path)
-            logger.debug("started '%s'" % job['client'].path)
-            job_queue.put(job)
+            for pending_job in pending_jobs:
+                pending_job['depends'].discard(job['client'].path)
+            while job_queue.qsize() < len(workers):
+                job = get_ready_job(pending_jobs)
+                if not job:
+                    break
+                running_job_paths.append(job['client'].path)
+                logger.debug("started '%s'" % job['client'].path)
+                job_queue.put(job)
+            assert running_job_paths
         if running_job_paths:
             logger.debug('ongoing %s' % running_job_paths)
     if show_progress and len(jobs) > 1 and not debug_jobs:

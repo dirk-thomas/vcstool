@@ -114,6 +114,19 @@ def generate_jobs(repos, args):
     return jobs
 
 
+def add_dependencies(jobs):
+    paths = [job['client'].path for job in jobs]
+    for job in jobs:
+        job['depends'] = set([])
+        path = job['client'].path
+        while True:
+            path = os.path.dirname(path)
+            if not path:
+                break
+            if path in paths:
+                job['depends'].add(path)
+
+
 def main(args=None):
     parser = get_parser()
     add_common_arguments(parser, skip_hide_empty=True, single_path=True, path_help='Base path to clone repositories to')
@@ -124,6 +137,7 @@ def main(args=None):
         print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
         return 1
     jobs = generate_jobs(repos, args)
+    add_dependencies(jobs)
 
     if args.repos:
         output_repositories([job['client'] for job in jobs])

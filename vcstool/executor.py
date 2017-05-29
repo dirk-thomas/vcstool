@@ -57,7 +57,7 @@ class DuplicateCommandHandler(object):
 
 def get_ready_job(jobs):
     for job in jobs:
-        if not job['depends']:
+        if not job.get('depends', set([])):
             jobs.remove(job)
             return job
     return None
@@ -112,7 +112,7 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=Fal
         results.append(result)
         if pending_jobs:
             for pending_job in pending_jobs:
-                pending_job['depends'].discard(job['client'].path)
+                pending_job.get('depends', set([])).discard(job['client'].path)
             while job_queue.qsize() < len(workers):
                 job = get_ready_job(pending_jobs)
                 if not job:

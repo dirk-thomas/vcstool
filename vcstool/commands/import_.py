@@ -120,9 +120,10 @@ def add_dependencies(jobs):
         job['depends'] = set([])
         path = job['client'].path
         while True:
-            path = os.path.dirname(path)
-            if not path:
+            parent_path = os.path.dirname(path)
+            if parent_path == path:
                 break
+            path = parent_path
             if path in paths:
                 job['depends'].add(path)
 

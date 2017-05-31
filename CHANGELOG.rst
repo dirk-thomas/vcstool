@@ -2,6 +2,14 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.27 (2017-05-31)
+-------------------
+* fix exit condition in loop  (regression introduced in 0.1.25) (`#44 <https://github.com/dirk-thomas/vcstool/pull/44>`_)
+
+0.1.26 (2017-05-29)
+-------------------
+* fix regression of added dependencies  (regression introduced in 0.1.25) (`#42 <https://github.com/dirk-thomas/vcstool/pull/42>`_)
+
 0.1.25 (2017-05-27)
 -------------------
 * process subfolders sequentially (`#41 <https://github.com/dirk-thomas/vcstool/pull/41>`_)

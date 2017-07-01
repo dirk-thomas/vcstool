@@ -15,6 +15,7 @@ def test_flake8():
     base_path = os.path.join(os.path.dirname(__file__), '..')
     paths = [
         os.path.join(base_path, 'scripts'),
+        os.path.join(base_path, 'setup.py'),
         os.path.join(base_path, 'test'),
         os.path.join(base_path, 'vcstool'),
     ]

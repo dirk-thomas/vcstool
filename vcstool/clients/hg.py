@@ -2,6 +2,8 @@ import os
 import shutil
 from threading import Lock
 
+from vcstool.executor import USE_COLOR
+
 from .vcs_base import VcsClientBase, which
 
 
@@ -213,6 +215,8 @@ class HgClient(VcsClientBase):
         return self._run_command(cmd)
 
     def _check_color(self, cmd):
+        if not USE_COLOR:
+            return
         with HgClient._config_color_lock:
             # check if user uses colorization
             if HgClient._config_color is None:

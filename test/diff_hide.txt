@@ -1,0 +1,12 @@
+...
+=== ./immutable/hash (git) ===
+diff --git a/LICENSE b/LICENSE
+index e5093df..c4f56b2 100644
+--- a/LICENSE
++++ b/LICENSE
+@@ -200,3 +200,4 @@
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
++testing
+\ No newline at end of file

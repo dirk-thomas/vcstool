@@ -1,10 +1,17 @@
+import logging
 import os
 
+from flake8 import configure_logging
 from flake8.api.legacy import StyleGuide
 from flake8.main.application import Application
 
+from pydocstyle.config import log
+
+log.level = logging.INFO
+
 
 def test_flake8():
+    configure_logging(1)
     argv = [
         '--ignore=%s' % ','.join([
             'D100', 'D101', 'D102', 'D103', 'D104', 'D105',
@@ -15,6 +22,7 @@ def test_flake8():
     base_path = os.path.join(os.path.dirname(__file__), '..')
     paths = [
         os.path.join(base_path, 'scripts'),
+        os.path.join(base_path, 'setup.py'),
         os.path.join(base_path, 'test'),
         os.path.join(base_path, 'vcstool'),
     ]

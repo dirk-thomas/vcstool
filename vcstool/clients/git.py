@@ -1,6 +1,8 @@
 import os
 import shutil
 
+from vcstool.executor import USE_COLOR
+
 from .vcs_base import VcsClientBase, which
 
 
@@ -360,6 +362,8 @@ class GitClient(VcsClientBase):
         return self._run_command(cmd)
 
     def _check_color(self, cmd):
+        if not USE_COLOR:
+            return
         # check if user uses colorization
         if GitClient._config_color_is_auto is None:
             _cmd = [GitClient._executable, 'config', '--get', 'color.ui']

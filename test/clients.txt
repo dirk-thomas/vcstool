@@ -1,0 +1,6 @@
+The available VCS clients are:
+  bzr
+  git
+  hg
+  svn
+  tar

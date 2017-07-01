@@ -1,0 +1,9 @@
+repositories:
+  hash:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 377d5b3d03c212f015cc832fdb368f4534d0d583
+  tag:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: bf9ca56de693a02b93ed423bcef589259d75eb0f

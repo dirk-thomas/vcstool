@@ -1,0 +1,13 @@
+./immutable/hash (git)
+./immutable/tag (git)
+./vcstool (git)
+...
+=== ./immutable/hash (git) ===
+origin	https://github.com/dirk-thomas/vcstool.git (fetch)
+origin	https://github.com/dirk-thomas/vcstool.git (push)
+=== ./immutable/tag (git) ===
+origin	https://github.com/dirk-thomas/vcstool.git (fetch)
+origin	https://github.com/dirk-thomas/vcstool.git (push)
+=== ./vcstool (git) ===
+origin	https://github.com/dirk-thomas/vcstool.git (fetch)
+origin	https://github.com/dirk-thomas/vcstool.git (push)

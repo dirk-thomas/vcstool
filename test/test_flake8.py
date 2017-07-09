@@ -21,11 +21,15 @@ def test_flake8():
     style_guide = get_style_guide(argv)
     base_path = os.path.join(os.path.dirname(__file__), '..')
     paths = [
-        os.path.join(base_path, 'scripts'),
         os.path.join(base_path, 'setup.py'),
         os.path.join(base_path, 'test'),
         os.path.join(base_path, 'vcstool'),
     ]
+    scripts_path = os.path.join(base_path, 'scripts')
+    for script in os.listdir(scripts_path):
+        if script.startswith('.'):
+            continue
+        paths.append(os.path.join(scripts_path, script))
     report = style_guide.check_files(paths)
     assert report.total_errors == 0, \
         'Found %d code style warnings' % report.total_errors

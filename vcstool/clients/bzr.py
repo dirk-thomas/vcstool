@@ -134,6 +134,8 @@ class BzrClient(VcsClientBase):
                     'output': '',
                     'returncode': 0
                 }
+            if command.limit != 0:
+                cmd_log += ['--limit', '%d' % command.limit]
             result_log = self._run_command(cmd_log)
             return result_log
         cmd = [BzrClient._executable, 'log']

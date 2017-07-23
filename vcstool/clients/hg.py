@@ -185,8 +185,8 @@ class HgClient(VcsClientBase):
             cmd = [HgClient._executable, 'log', '--limit', result_log['output'], '-b', '.']
         else:
             cmd = [HgClient._executable, 'log']
-            if command.limit != 0:
-                cmd += ['--limit', '%d' % command.limit]
+        if command.limit != 0:
+            cmd += ['--limit', '%d' % command.limit]
         self._check_color(cmd)
         return self._run_command(cmd)
 

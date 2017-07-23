@@ -312,8 +312,8 @@ class GitClient(VcsClientBase):
             cmd = [GitClient._executable, 'log', '%s..' % result_tag['output']]
         else:
             cmd = [GitClient._executable, 'log']
-            if command.limit != 0:
-                cmd += ['-%d' % command.limit]
+        if command.limit != 0:
+            cmd += ['-%d' % command.limit]
         self._check_color(cmd)
         return self._run_command(cmd)
 

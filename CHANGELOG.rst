@@ -2,6 +2,11 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.28 (2017-07-23)
+-------------------
+* allow log --limit in combination with other --limit-* options (`#47 <https://github.com/dirk-thomas/vcstool/pull/47>`_)
+* honor isatty for colorizing output (`#45 <https://github.com/dirk-thomas/vcstool/pull/45>`_)
+
 0.1.27 (2017-05-31)
 -------------------
 * fix exit condition in loop  (regression introduced in 0.1.25) (`#44 <https://github.com/dirk-thomas/vcstool/pull/44>`_)

@@ -80,7 +80,9 @@ Usually the data of a previously exported file is piped in::
   vcs import < my.repos
 
 The ``import`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
-Only for this command vcstool supports a pseudo client ``tar`` which fetches a tarball from an URL and unpacks its content.
+
+Only for this command vcstool supports the pseudo clients ``tar`` and ``zip`` which fetch a tarball / zipfile from an URL and unpack its content.
+The version key should in this case be the folder name the archive unpacks all its content into.
 
 
 Advanced features

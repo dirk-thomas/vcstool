@@ -19,7 +19,7 @@ class TestCommands(unittest.TestCase):
 
         try:
             output = run_command(
-                'import', ['--input', '../test/list.repos', '.'])
+                'import', ['--input', REPOS_FILE, '.'])
             expected = get_expected_output('import')
             assert output == expected
         except Exception:

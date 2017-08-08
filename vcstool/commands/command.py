@@ -1,4 +1,5 @@
 import argparse
+from multiprocessing import cpu_count
 import os
 
 from vcstool.crawler import find_repositories
@@ -35,7 +36,11 @@ def add_common_arguments(parser, skip_hide_empty=False, single_path=False, path_
     group.add_argument('--debug', action='store_true', default=False, help='Show debug messages')
     if not skip_hide_empty:
         group.add_argument('-s', '--hide-empty', '--skip-empty', action='store_true', default=False, help='Hide repositories with empty output')
-    group.add_argument('-w', '--workers', type=check_greater_zero, metavar='N', default=10, help='Number of parallel worker threads')
+    try:
+        default_workers = cpu_count()
+    except NotImplementedError:
+        default_workers = 4
+    group.add_argument('-w', '--workers', type=check_greater_zero, metavar='N', default=default_workers, help='Number of parallel worker threads')
     group.add_argument('--repos', action='store_true', default=False, help='List repositories which the command operates on')
     if single_path:
         path_help = path_help or 'Base path to look for repositories'

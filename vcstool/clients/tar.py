@@ -1,18 +1,16 @@
 import os
 import shutil
-import socket
 try:
     from cStringIO import StringIO as BytesIO
 except ImportError:
     from io import BytesIO
 import tarfile
-import time
 try:
-    from urllib.request import urlopen
-    from urllib.error import HTTPError, URLError
+    from urllib.error import URLError
 except ImportError:
-    from urllib2 import HTTPError, URLError, urlopen
+    from urllib2 import URLError
 
+from .vcs_base import load_url
 from .vcs_base import VcsClientBase
 
 
@@ -57,7 +55,7 @@ class TarClient(VcsClientBase):
 
         # download tarball
         try:
-            data = _load_url(command.url)
+            data = load_url(command.url)
         except URLError as e:
             return {
                 'cmd': '',
@@ -93,20 +91,3 @@ class TarClient(VcsClientBase):
             'output': "Downloaded tarball from '%s' and unpacked it" % command.url,
             'returncode': 0
         }
-
-
-def _load_url(url, retry=2, retry_period=1, timeout=10):
-    try:
-        fh = urlopen(url, timeout=timeout)
-    except HTTPError as e:
-        if e.code == 503 and retry:
-            time.sleep(retry_period)
-            return _load_url(url, retry=retry - 1, retry_period=retry_period, timeout=timeout)
-        e.msg += ' (%s)' % url
-        raise
-    except URLError as e:
-        if isinstance(e.reason, socket.timeout) and retry:
-            time.sleep(retry_period)
-            return _load_url(url, retry=retry - 1, retry_period=retry_period, timeout=timeout)
-        raise URLError(str(e) + ' (%s)' % url)
-    return fh.read()

@@ -1,5 +1,12 @@
 import os
+import socket
 import subprocess
+import time
+try:
+    from urllib.request import urlopen
+    from urllib.error import HTTPError, URLError
+except ImportError:
+    from urllib2 import HTTPError, URLError, urlopen
 
 try:
     from shutil import which  # noqa
@@ -58,3 +65,20 @@ def run_command(cmd, cwd, env=None):
         result['output'] = e.output.decode('utf8')
         result['returncode'] = e.returncode
     return result
+
+
+def load_url(url, retry=2, retry_period=1, timeout=10):
+    try:
+        fh = urlopen(url, timeout=timeout)
+    except HTTPError as e:
+        if e.code == 503 and retry:
+            time.sleep(retry_period)
+            return load_url(url, retry=retry - 1, retry_period=retry_period, timeout=timeout)
+        e.msg += ' (%s)' % url
+        raise
+    except URLError as e:
+        if isinstance(e.reason, socket.timeout) and retry:
+            time.sleep(retry_period)
+            return load_url(url, retry=retry - 1, retry_period=retry_period, timeout=timeout)
+        raise URLError(str(e) + ' (%s)' % url)
+    return fh.read()

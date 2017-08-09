@@ -4,3 +4,4 @@ The available VCS clients are:
   hg
   svn
   tar
+  zip

@@ -3,6 +3,14 @@ repositories:
     type: git
     url: https://github.com/dirk-thomas/vcstool.git
     version: 377d5b3d03c212f015cc832fdb368f4534d0d583
+  immutable/hash_tar:
+    type: tar
+    url: https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.tar.gz
+    version: vcstool-377d5b3d03c212f015cc832fdb368f4534d0d583
+  immutable/hash_zip:
+    type: zip
+    url: https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.zip
+    version: vcstool-377d5b3d03c212f015cc832fdb368f4534d0d583
   immutable/tag:
     type: git
     url: https://github.com/dirk-thomas/vcstool.git

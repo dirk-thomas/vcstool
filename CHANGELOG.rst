@@ -2,6 +2,11 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.29 (2017-08-09)
+-------------------
+* add support for zip for import (`#51 <https://github.com/dirk-thomas/vcstool/pull/51>`_)
+* choose default parallel workers based on cpu count (`#50 <https://github.com/dirk-thomas/vcstool/pull/50>`_)
+
 0.1.28 (2017-07-23)
 -------------------
 * allow log --limit in combination with other --limit-* options (`#47 <https://github.com/dirk-thomas/vcstool/pull/47>`_)

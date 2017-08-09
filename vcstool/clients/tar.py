@@ -26,17 +26,11 @@ class TarClient(VcsClientBase):
         super(TarClient, self).__init__(path)
 
     def import_(self, command):
-        if not command.url or not command.version:
-            if not command.url and not command.version:
-                value_missing = "'url' and 'version'"
-            elif not command.url:
-                value_missing = "'url'"
-            else:
-                value_missing = "'version'"
+        if not command.url:
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': 'Repository data lacks the %s value' % value_missing,
+                'output': "Repository data lacks the 'url' value",
                 'returncode': 1
             }
 
@@ -76,14 +70,18 @@ class TarClient(VcsClientBase):
                 'returncode': 1
             }
 
-        # remap all members from version subfolder into destination
-        def get_members(tar, prefix):
-            for tar_info in tar.getmembers():
-                if tar_info.name.startswith(prefix):
-                    tar_info.name = tar_info.name[len(prefix):]
-                    yield tar_info
-        prefix = command.version + '/'
-        tar.extractall(self.path, get_members(tar, prefix))
+        if not command.version:
+            members = None
+        else:
+            # remap all members from version subfolder into destination
+            def get_members(tar, prefix):
+                for tar_info in tar.getmembers():
+                    if tar_info.name.startswith(prefix):
+                        tar_info.name = tar_info.name[len(prefix):]
+                        yield tar_info
+            prefix = str(command.version) + '/'
+            members = get_members(tar, prefix)
+        tar.extractall(self.path, members)
 
         return {
             'cmd': '',

@@ -26,17 +26,11 @@ class ZipClient(VcsClientBase):
         super(ZipClient, self).__init__(path)
 
     def import_(self, command):
-        if not command.url or not command.version:
-            if not command.url and not command.version:
-                value_missing = "'url' and 'version'"
-            elif not command.url:
-                value_missing = "'url'"
-            else:
-                value_missing = "'version'"
+        if not command.url:
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': 'Repository data lacks the %s value' % value_missing,
+                'output': "Repository data lacks the 'url' value",
                 'returncode': 1
             }
 
@@ -88,22 +82,25 @@ class ZipClient(VcsClientBase):
                 'returncode': 1
             }
         try:
-            prefix = command.version + '/'
-            for name in zip_file.namelist():
-                if name.startswith(prefix):
-                    if not name[len(prefix):]:
-                        continue
-                    # remap all members from version subfolder into destination
-                    dst = os.path.join(self.path, name[len(prefix):])
-                    if dst.endswith('/'):
-                        # create directories
-                        not_exist = create_path(dst)
-                        if not_exist:
-                            return not_exist
-                    else:
-                        with zip_file.open(name, mode='r') as src_handle:
-                            with open(dst, 'wb') as dst_handle:
-                                dst_handle.write(src_handle.read())
+            if not command.version:
+                zip_file.extractall(self.path)
+            else:
+                prefix = str(command.version) + '/'
+                for name in zip_file.namelist():
+                    if name.startswith(prefix):
+                        if not name[len(prefix):]:
+                            continue
+                        # remap all members from version subfolder into destination
+                        dst = os.path.join(self.path, name[len(prefix):])
+                        if dst.endswith('/'):
+                            # create directories
+                            not_exist = create_path(dst)
+                            if not_exist:
+                                return not_exist
+                        else:
+                            with zip_file.open(name, mode='r') as src_handle:
+                                with open(dst, 'wb') as dst_handle:
+                                    dst_handle.write(src_handle.read())
         finally:
             zip_file.close()
 

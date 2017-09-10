@@ -233,7 +233,7 @@ class GitClient(VcsClientBase):
 
             # fetch updates for existing repo
             cmd_fetch = [GitClient._executable, 'fetch', remote]
-            result_fetch = self._run_command(cmd_fetch)
+            result_fetch = self._run_command(cmd_fetch, retry=command.retry)
             if result_fetch['returncode']:
                 return result_fetch
             cmd = result_fetch['cmd']
@@ -241,7 +241,7 @@ class GitClient(VcsClientBase):
 
         else:
             cmd_clone = [GitClient._executable, 'clone', command.url, '.']
-            result_clone = self._run_command(cmd_clone)
+            result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
                 result_clone['output'] = "Could not clone repository '%s': %s" % (command.url, result_clone['output'])
                 return result_clone

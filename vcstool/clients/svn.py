@@ -122,7 +122,7 @@ class SvnClient(VcsClientBase):
             url += '@%d' % command.version
 
         cmd_checkout = [SvnClient._executable, '--non-interactive', 'checkout', url, '.']
-        result_checkout = self._run_command(cmd_checkout)
+        result_checkout = self._run_command(cmd_checkout, retry=command.retry)
         if result_checkout['returncode']:
             result_checkout['output'] = "Could not checkout repository '%s': %s" % (command.url, result_checkout['output'])
             return result_checkout

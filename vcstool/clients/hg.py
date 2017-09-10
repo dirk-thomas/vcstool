@@ -129,7 +129,7 @@ class HgClient(VcsClientBase):
         if HgClient.is_repository(self.path):
             # pull updates for existing repo
             cmd_pull = [HgClient._executable, 'pull', '--update']
-            result_pull = self._run_command(cmd_pull)
+            result_pull = self._run_command(cmd_pull, retry=command.retry)
             if result_pull['returncode']:
                 return result_pull
             cmd = result_pull['cmd']
@@ -137,7 +137,7 @@ class HgClient(VcsClientBase):
 
         else:
             cmd_clone = [HgClient._executable, 'clone', command.url, '.']
-            result_clone = self._run_command(cmd_clone)
+            result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
                 result_clone['output'] = "Could not clone repository '%s': %s" % (command.url, result_clone['output'])
                 return result_clone

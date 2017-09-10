@@ -85,9 +85,13 @@ class TestCommands(unittest.TestCase):
 
     def test_status(self):
         output = run_command('status')
-        # replace message from git < 2.9.1
+        # replace message from older git versions
+        # https://github.com/git/git/blob/3ec7d702a89c647ddf42a59bc3539361367de9d5/Documentation/RelNotes/2.10.0.txt#L373-L374
         output = output.replace(
             b'working directory clean', b'working tree clean')
+        # the following seems to have changed between git 2.10.0 and 2.14.1
+        output = output.replace(
+            b'.\nnothing to commit', b'.\n\nnothing to commit')
         expected = get_expected_output('status')
         self.assertEqual(output, expected)
 

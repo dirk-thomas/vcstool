@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2017-09-21)
+-------------------
+* add --retry option to import verb (`#52 <https://github.com/dirk-thomas/vcstool/issues/52>`_)
+
 0.1.29 (2017-08-09)
 -------------------
 * add support for zip for import (`#51 <https://github.com/dirk-thomas/vcstool/pull/51>`_)

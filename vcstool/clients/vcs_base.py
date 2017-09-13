@@ -37,8 +37,18 @@ class VcsClientBase(object):
             'returncode': NotImplemented
         }
 
-    def _run_command(self, cmd, env=None):
-        return run_command(cmd, os.path.abspath(self.path), env=env)
+    def _run_command(self, cmd, env=None, retry=0):
+        for i in range(retry + 1):
+            result = run_command(cmd, os.path.abspath(self.path), env=env)
+            if not result['returncode']:
+                # return successful result
+                break
+            if i >= retry:
+                # return the failure after retries
+                break
+            # increasing sleep before each retry
+            time.sleep(i + 1)
+        return result
 
     def _create_path(self):
         if not os.path.exists(self.path):

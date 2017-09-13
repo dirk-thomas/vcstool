@@ -70,14 +70,14 @@ class BzrClient(VcsClientBase):
         if BzrClient.is_repository(self.path):
             # pull updates for existing repo
             cmd_pull = [BzrClient._executable, 'pull']
-            return self._run_command(cmd_pull)
+            return self._run_command(cmd_pull, retry=command.retry)
 
         else:
             cmd_branch = [BzrClient._executable, 'branch']
             if command.version:
                 cmd_branch += ['-r', command.version]
             cmd_branch += [command.url, '.']
-            result_branch = self._run_command(cmd_branch)
+            result_branch = self._run_command(cmd_branch, retry=command.retry)
             if result_branch['returncode']:
                 result_branch['output'] = "Could not branch repository '%s': %s" % (command.url, result_branch['output'])
                 return result_branch

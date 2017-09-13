@@ -49,7 +49,7 @@ class TarClient(VcsClientBase):
 
         # download tarball
         try:
-            data = load_url(command.url)
+            data = load_url(command.url, retry=command.retry)
         except URLError as e:
             return {
                 'cmd': '',

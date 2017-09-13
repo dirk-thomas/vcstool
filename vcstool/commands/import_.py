@@ -29,7 +29,7 @@ def get_parser():
     group = parser.add_argument_group('"import" command parameters')
     group.add_argument('--input', type=argparse.FileType('r'), default=sys.stdin)
     group.add_argument('--force', action='store_true', default=False, help='Potentially overwrite existing folders if they contain different repositories')
-    group.add_argument('--retry', type=int, metavar='N', default=0, help='Retry commands requiring network access N times on failure')
+    group.add_argument('--retry', type=int, metavar='N', default=2, help='Retry commands requiring network access N times on failure')
     return parser
 
 

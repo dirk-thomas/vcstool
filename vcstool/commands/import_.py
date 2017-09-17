@@ -110,7 +110,7 @@ def generate_jobs(repos, args):
             continue
 
         client = clients[0](path)
-        command = ImportCommand(args, repo['url'], repo['version'] if 'version' in repo else None)
+        command = ImportCommand(args, repo['url'], str(repo['version']) if 'version' in repo else None)
         job = {'client': client, 'command': command}
         jobs.append(job)
     return jobs

@@ -2,7 +2,11 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.1.30 (2017-09-21)
+0.1.31 (2017-09-17)
+-------------------
+* ensure to interpret version as string (`#54 <https://github.com/dirk-thomas/vcstool/issues/54>`_)
+
+0.1.30 (2017-09-13)
 -------------------
 * add --retry option to import verb (`#52 <https://github.com/dirk-thomas/vcstool/issues/52>`_)
 

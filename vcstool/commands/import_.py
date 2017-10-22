@@ -5,10 +5,14 @@ import os
 import sys
 
 from vcstool.clients import vcstool_clients
-from vcstool.executor import ansi, execute_jobs, output_repositories, output_results
+from vcstool.executor import ansi
+from vcstool.executor import execute_jobs
+from vcstool.executor import output_repositories
+from vcstool.executor import output_results
 import yaml
 
-from .command import add_common_arguments, Command
+from .command import add_common_arguments
+from .command import Command
 
 
 class ImportCommand(Command):
@@ -25,11 +29,18 @@ class ImportCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Import the list of repositories', prog='vcs import')
+    parser = argparse.ArgumentParser(
+        description='Import the list of repositories', prog='vcs import')
     group = parser.add_argument_group('"import" command parameters')
-    group.add_argument('--input', type=argparse.FileType('r'), default=sys.stdin)
-    group.add_argument('--force', action='store_true', default=False, help='Potentially overwrite existing folders if they contain different repositories')
-    group.add_argument('--retry', type=int, metavar='N', default=2, help='Retry commands requiring network access N times on failure')
+    group.add_argument(
+        '--input', type=argparse.FileType('r'), default=sys.stdin)
+    group.add_argument(
+        '--force', action='store_true', default=False,
+        help='Potentially overwrite existing folders if they contain '
+             'different repositories')
+    group.add_argument(
+        '--retry', type=int, metavar='N', default=2,
+        help='Retry commands requiring network access N times on failure')
     return parser
 
 
@@ -63,7 +74,11 @@ def get_repos_in_vcstool_format(repositories):
             if 'version' in attributes:
                 repo['version'] = attributes['version']
         except AttributeError as e:
-            print(ansi('yellowf') + ("Repository '%s' does not provide the necessary information: %s" % (path, e)) + ansi('reset'), file=sys.stderr)
+            print(
+                ansi('yellowf') + (
+                    "Repository '%s' does not provide the necessary "
+                    'information: %s' % (path, e)) + ansi('reset'),
+                file=sys.stderr)
             continue
         repos[path] = repo
     return repos
@@ -79,14 +94,22 @@ def get_repos_in_rosinstall_format(root):
         try:
             path = attributes['local-name']
         except AttributeError as e:
-            print(ansi('yellowf') + ('Repository #%d does not provide the necessary information: %s' % (i, e)) + ansi('reset'), file=sys.stderr)
+            print(
+                ansi('yellowf') + (
+                    'Repository #%d does not provide the necessary '
+                    'information: %s' % (i, e)) + ansi('reset'),
+                file=sys.stderr)
             continue
         try:
             repo['url'] = attributes['uri']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
         except AttributeError as e:
-            print(ansi('yellowf') + ("Repository '%s' does not provide the necessary information: %s" % (path, e)) + ansi('reset'), file=sys.stderr)
+            print(
+                ansi('yellowf') + (
+                    "Repository '%s' does not provide the necessary "
+                    'information: %s' % (path, e)) + ansi('reset'),
+                file=sys.stderr)
             continue
         repos[path] = repo
     return repos
@@ -103,14 +126,17 @@ def generate_jobs(repos, args):
                 'client': NoneClient(path),
                 'command': None,
                 'cwd': path,
-                'output': "Repository type '%s' is not supported" % repo['type'],
+                'output':
+                    "Repository type '%s' is not supported" % repo['type'],
                 'returncode': NotImplemented
             }
             jobs.append(job)
             continue
 
         client = clients[0](path)
-        command = ImportCommand(args, repo['url'], str(repo['version']) if 'version' in repo else None)
+        command = ImportCommand(
+            args, repo['url'],
+            str(repo['version']) if 'version' in repo else None)
         job = {'client': client, 'command': command}
         jobs.append(job)
     return jobs
@@ -119,7 +145,7 @@ def generate_jobs(repos, args):
 def add_dependencies(jobs):
     paths = [job['client'].path for job in jobs]
     for job in jobs:
-        job['depends'] = set([])
+        job['depends'] = set()
         path = job['client'].path
         while True:
             parent_path = os.path.dirname(path)
@@ -132,7 +158,9 @@ def add_dependencies(jobs):
 
 def main(args=None):
     parser = get_parser()
-    add_common_arguments(parser, skip_hide_empty=True, single_path=True, path_help='Base path to clone repositories to')
+    add_common_arguments(
+        parser, skip_hide_empty=True, single_path=True,
+        path_help='Base path to clone repositories to')
     args = parser.parse_args(args)
     try:
         repos = get_repositories(args.input)
@@ -145,10 +173,12 @@ def main(args=None):
     if args.repos:
         output_repositories([job['client'] for job in jobs])
 
-    results = execute_jobs(jobs, show_progress=True, number_of_workers=args.workers, debug_jobs=args.debug)
+    results = execute_jobs(
+        jobs, show_progress=True, number_of_workers=args.workers,
+        debug_jobs=args.debug)
     output_results(results)
 
-    any_error = any([r['returncode'] != 0 for r in results])
+    any_error = any(r['returncode'] for r in results)
     return 1 if any_error else 0
 
 

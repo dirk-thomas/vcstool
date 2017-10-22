@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from .command import Command, simple_main
+from .command import Command
+from .command import simple_main
 
 
 class LogCommand(Command):
@@ -17,12 +18,19 @@ class LogCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Show commit logs', prog='vcs log')
+    parser = argparse.ArgumentParser(
+        description='Show commit logs', prog='vcs log')
     group = parser.add_argument_group('"log" command parameters')
-    group.add_argument('-l', '--limit', metavar='N', type=int, default=3, help='Limit number of logs (0 for unlimited)')
+    group.add_argument(
+        '-l', '--limit', metavar='N', type=int, default=3,
+        help='Limit number of logs (0 for unlimited)')
     ex_group = group.add_mutually_exclusive_group()
-    ex_group.add_argument('--limit-tag', metavar='TAG', help='Limit number of log to the specified tag')
-    ex_group.add_argument('--limit-untagged', action='store_true', default=False, help='Limit number of log to the last tagged commit')
+    ex_group.add_argument(
+        '--limit-tag', metavar='TAG',
+        help='Limit number of log to the specified tag')
+    ex_group.add_argument(
+        '--limit-untagged', action='store_true', default=False,
+        help='Limit number of log to the last tagged commit')
     return parser
 
 

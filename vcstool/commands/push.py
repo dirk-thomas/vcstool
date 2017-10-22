@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from .command import Command, simple_main
+from .command import Command
+from .command import simple_main
 
 
 class PushCommand(Command):
@@ -14,7 +15,9 @@ class PushCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Push changes from the working copy to the repository', prog='vcs push')
+    parser = argparse.ArgumentParser(
+        description='Push changes from the working copy to the repository',
+        prog='vcs push')
     parser.add_argument_group('"push" command parameters')
     return parser
 

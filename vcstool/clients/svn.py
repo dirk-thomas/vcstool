@@ -18,13 +18,16 @@ class SvnClient(VcsClientBase):
 
     def branch(self, command):
         if command.all:
-            return self._not_applicable(command, message='at least with the option to list all branches')
+            return self._not_applicable(
+                command,
+                message='at least with the option to list all branches')
 
         self._check_executable()
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:
-            result_info['output'] = 'Could not determine url: %s' % result_info['output']
+            result_info['output'] = \
+                'Could not determine url: ' + result_info['output']
             return result_info
         info = result_info['output']
 
@@ -38,7 +41,7 @@ class SvnClient(VcsClientBase):
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': "Could not determine url from xml: %s" % e,
+                'output': 'Could not determine url from xml: %s' % e,
                 'returncode': 1
             }
 
@@ -46,7 +49,9 @@ class SvnClient(VcsClientBase):
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': "Could not determine url suffix. The root url '%s' is not a prefix of the url '%s'" % (root_url, url),
+                'output':
+                    "Could not determine url suffix. The root url '%s' is not "
+                    "a prefix of the url '%s'" % (root_url, url),
                 'returncode': 1
             }
 
@@ -74,7 +79,8 @@ class SvnClient(VcsClientBase):
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:
-            result_info['output'] = 'Could not determine url: %s' % result_info['output']
+            result_info['output'] = \
+                'Could not determine url: ' + result_info['output']
             return result_info
         info = result_info['output']
 
@@ -87,7 +93,7 @@ class SvnClient(VcsClientBase):
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': "Could not determine url from xml: %s" % e,
+                'output': 'Could not determine url from xml: %s' % e,
                 'returncode': 1
             }
 
@@ -121,10 +127,13 @@ class SvnClient(VcsClientBase):
         if command.version:
             url += '@%d' % command.version
 
-        cmd_checkout = [SvnClient._executable, '--non-interactive', 'checkout', url, '.']
+        cmd_checkout = [
+            SvnClient._executable, '--non-interactive', 'checkout', url, '.']
         result_checkout = self._run_command(cmd_checkout, retry=command.retry)
         if result_checkout['returncode']:
-            result_checkout['output'] = "Could not checkout repository '%s': %s" % (command.url, result_checkout['output'])
+            result_checkout['output'] = \
+                "Could not checkout repository '%s': %s" % \
+                (command.url, result_checkout['output'])
             return result_checkout
 
         return {
@@ -169,7 +178,8 @@ class SvnClient(VcsClientBase):
         cmd_info = [SvnClient._executable, 'info', '--xml']
         result_info = self._run_command(cmd_info)
         if result_info['returncode']:
-            result_info['output'] = 'Could not determine url: %s' % result_info['output']
+            result_info['output'] = \
+                'Could not determine url: ' + result_info['output']
             return result_info
         info = result_info['output']
 
@@ -181,7 +191,7 @@ class SvnClient(VcsClientBase):
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': "Could not determine url from xml: %s" % e,
+                'output': 'Could not determine url from xml: %s' % e,
                 'returncode': 1
             }
 
@@ -200,7 +210,8 @@ class SvnClient(VcsClientBase):
         return self._run_command(cmd)
 
     def _check_executable(self):
-        assert SvnClient._executable is not None, "Could not find 'svn' executable"
+        assert SvnClient._executable is not None, \
+            "Could not find 'svn' executable"
 
 
 if not SvnClient._executable:

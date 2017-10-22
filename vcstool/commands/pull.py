@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from .command import Command, simple_main
+from .command import Command
+from .command import simple_main
 
 
 class PullCommand(Command):
@@ -14,7 +15,9 @@ class PullCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Bring changes from the repository into the working copy', prog='vcs pull')
+    parser = argparse.ArgumentParser(
+        description='Bring changes from the repository into the working copy',
+        prog='vcs pull')
     parser.add_argument_group('"pull" command parameters')
     return parser
 

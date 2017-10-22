@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from .command import Command, simple_main
+from .command import Command
+from .command import simple_main
 
 
 class StatusCommand(Command):
@@ -15,9 +16,12 @@ class StatusCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Show the working tree status', prog='vcs status')
+    parser = argparse.ArgumentParser(
+        description='Show the working tree status', prog='vcs status')
     group = parser.add_argument_group('"status" command parameters')
-    group.add_argument('-q', '--quiet', action='store_true', default=False, help="Don't show unversioned items")
+    group.add_argument(
+        '-q', '--quiet', action='store_true', default=False,
+        help="Don't show unversioned items")
     return parser
 
 

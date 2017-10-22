@@ -13,7 +13,7 @@ logging.basicConfig()
 
 
 def output_repositories(clients):
-    ordered_clients = dict((client.path, client) for client in clients)
+    ordered_clients = {client.path: client for client in clients}
     for k in sorted(ordered_clients.keys()):
         client = ordered_clients[k]
         print('%s (%s)' % (k, client.__class__.type))
@@ -28,13 +28,15 @@ def generate_jobs(clients, command):
         if realpath not in realpaths:
             realpaths[realpath] = [client.path]
         else:
-            # override command on client to ignore multiple invocation on same repository
+            # override command on client to ignore multiple invocations
+            # on same repository
             duplicate_path = realpaths[realpath][0]
             realpaths[realpath].append(client.path)
             method_name = command.__class__.command
             method = getattr(client, method_name, None)
             if method is not None:
-                setattr(client, method_name, DuplicateCommandHandler(client, duplicate_path))
+                setattr(client, method_name, DuplicateCommandHandler(
+                    client, duplicate_path))
 
         job = {'client': client, 'command': command}
         jobs.append(job)
@@ -42,6 +44,7 @@ def generate_jobs(clients, command):
 
 
 class DuplicateCommandHandler(object):
+
     def __init__(self, client, duplicate_path):
         self.client = client
         self.duplicate_path = duplicate_path
@@ -57,13 +60,15 @@ class DuplicateCommandHandler(object):
 
 def get_ready_job(jobs):
     for job in jobs:
-        if not job.get('depends', set([])):
+        if not job.get('depends', set()):
             jobs.remove(job)
             return job
     return None
 
 
-def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=False):
+def execute_jobs(
+    jobs, show_progress=False, number_of_workers=10, debug_jobs=False
+):
     if debug_jobs:
         logger.setLevel(logging.DEBUG)
 
@@ -112,7 +117,7 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=Fal
         results.append(result)
         if pending_jobs:
             for pending_job in pending_jobs:
-                pending_job.get('depends', set([])).discard(job['client'].path)
+                pending_job.get('depends', set()).discard(job['client'].path)
             while job_queue.qsize() < len(workers):
                 job = get_ready_job(pending_jobs)
                 if not job:
@@ -122,7 +127,7 @@ def execute_jobs(jobs, show_progress=False, number_of_workers=10, debug_jobs=Fal
                 job_queue.put(job)
             assert running_job_paths
         if running_job_paths:
-            logger.debug('ongoing %s' % running_job_paths)
+            logger.debug('ongoing ' + str(running_job_paths))
     if show_progress and len(jobs) > 1 and not debug_jobs:
         print('')  # finish progress line
 
@@ -169,9 +174,14 @@ class Worker(threading.Thread):
             method = getattr(job['client'], method_name, None)
             if method is None:
                 return {
-                    'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
+                    'cmd': '%s.%s(%s)' % (
+                        job['client'].__class__.type, method_name,
+                        job['command'].__class__.command),
                     'job': job,
-                    'output': "Command '%s' not implemented for client '%s'" % (job['command'].__class__.command, job['client'].__class__.type),
+                    'output':
+                        "Command '%s' not implemented for client '%s'" % (
+                            job['command'].__class__.command,
+                            job['client'].__class__.type),
                     'returncode': NotImplemented
                 }
             result = method(job['command'])
@@ -181,9 +191,16 @@ class Worker(threading.Thread):
             exc_tb = sys.exc_info()[2]
             filename, lineno, _, _ = traceback.extract_tb(exc_tb)[-1]
             return {
-                'cmd': '%s.%s(%s)' % (job['client'].__class__.type, method_name, job['command'].__class__.command),
+                'cmd': '%s.%s(%s)' % (
+                    job['client'].__class__.type, method_name,
+                    job['command'].__class__.command),
                 'job': job,
-                'output': "Invocation of command '%s' on client '%s' failed: %s: %s (%s:%s)" % (job['command'].__class__.command, job['client'].__class__.type, type(e).__name__, e, filename, lineno),
+                'output':
+                    "Invocation of command '%s' on client '%s' failed: "
+                    '%s: %s (%s:%s)' % (
+                        job['command'].__class__.command,
+                        job['client'].__class__.type,
+                        type(e).__name__, e, filename, lineno),
                 'returncode': 1
             }
 
@@ -204,7 +221,10 @@ def output_result(result, hide_empty=False):
             output = ansi('yellowf') + output + ansi('reset')
     if output or not hide_empty:
         client = result['client']
-        print(ansi('bluef') + '=== ' + ansi('boldon') + client.path + ansi('boldoff') + ' (' + client.__class__.type + ') ===' + ansi('reset'))
+        print(
+            ansi('bluef') + '=== ' +
+            ansi('boldon') + client.path + ansi('boldoff') +
+            ' (' + client.__class__.type + ') ===' + ansi('reset'))
     if output:
         try:
             print(output)
@@ -214,7 +234,8 @@ def output_result(result, hide_empty=False):
 
 def output_results(results, output_handler=output_result, hide_empty=False):
     # output results in alphabetic order
-    path_to_idx = {result['client'].path: i for i, result in enumerate(results)}
+    path_to_idx = {
+        result['client'].path: i for i, result in enumerate(results)}
     idxs_in_order = [path_to_idx[path] for path in sorted(path_to_idx.keys())]
     for i in idxs_in_order:
         output_handler(results[i], hide_empty=hide_empty)

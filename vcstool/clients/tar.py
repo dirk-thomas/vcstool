@@ -54,7 +54,8 @@ class TarClient(VcsClientBase):
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': "Could not fetch tarball from '%s': %s" % (command.url, e),
+                'output':
+                    "Could not fetch tarball from '%s': %s" % (command.url, e),
                 'returncode': 1
             }
 
@@ -66,7 +67,9 @@ class TarClient(VcsClientBase):
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': "Failed to read tarball fetched from '%s': %s" % (command.url, e),
+                'output':
+                    "Failed to read tarball fetched from '%s': %s" %
+                    (command.url, e),
                 'returncode': 1
             }
 
@@ -86,6 +89,7 @@ class TarClient(VcsClientBase):
         return {
             'cmd': '',
             'cwd': self.path,
-            'output': "Downloaded tarball from '%s' and unpacked it" % command.url,
+            'output':
+                "Downloaded tarball from '%s' and unpacked it" % command.url,
             'returncode': 0
         }

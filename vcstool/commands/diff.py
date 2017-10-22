@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from .command import Command, simple_main
+from .command import Command
+from .command import simple_main
 
 
 class DiffCommand(Command):
@@ -15,9 +16,12 @@ class DiffCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Show changes in the working tree', prog='vcs diff')
+    parser = argparse.ArgumentParser(
+        description='Show changes in the working tree', prog='vcs diff')
     group = parser.add_argument_group('"diff" command parameters')
-    group.add_argument('--context', metavar='N', type=int, help='Generate diffs with <n> lines of context')
+    group.add_argument(
+        '--context', metavar='N', type=int,
+        help='Generate diffs with <n> lines of context')
     return parser
 
 

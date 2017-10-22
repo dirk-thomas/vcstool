@@ -29,7 +29,7 @@ def main(args=None):
     if ns.clients:
         print('The available VCS clients are:')
         for client in vcstool_clients:
-            print('  %s' % client.type)
+            print('  ' + client.type)
         return 0
 
     if ns.commands:
@@ -43,13 +43,24 @@ def main(args=None):
 
 
 def get_parser(add_help=True):
-    parser = argparse.ArgumentParser(prog='vcs', description=_get_description(), epilog=_get_epilog(), add_help=add_help)
+    parser = argparse.ArgumentParser(
+        prog='vcs', description=_get_description(),
+        epilog=_get_epilog(), add_help=add_help)
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('command', metavar='<command>', nargs='?', help='The available commands: %s' % ', '.join([cmd.command for cmd in vcstool_commands]))
-    group.add_argument('--clients', action='store_true', default=False, help='Show the available VCS clients')
-    group.add_argument('--commands', action='store_true', default=False, help='Output the available commands for auto-completion')
+    group.add_argument(
+        'command', metavar='<command>', nargs='?',
+        help='The available commands: ' + ', '.join(
+            [cmd.command for cmd in vcstool_commands]))
+    group.add_argument(
+        '--clients', action='store_true', default=False,
+        help='Show the available VCS clients')
+    group.add_argument(
+        '--commands', action='store_true', default=False,
+        help='Output the available commands for auto-completion')
     from vcstool import __version__
-    group.add_argument('--version', action='version', version='%(prog)s ' + __version__, help='Show the vcstool version')
+    group.add_argument(
+        '--version', action='version', version='%(prog)s ' + __version__,
+        help='Show the vcstool version')
     return parser
 
 
@@ -58,37 +69,51 @@ def get_entrypoint(command):
     commands = [cmd.command for cmd in vcstool_commands]
     commands = [cmd for cmd in commands if cmd.startswith(command)]
     if len(commands) != 1:
-        print("vcs: '%s' is not a vcs command. See 'vcs help'." % command, file=sys.stderr)
+        print(
+            "vcs: '%s' is not a vcs command. See 'vcs help'." % command,
+            file=sys.stderr)
         if commands:
-            print('\n\
-Did you mean one of these?\n\
-   %s' % '\n   '.join(commands), file=sys.stderr)
+            print(
+                '\nDid you mean one of these?\n' + '\n   '.join(commands),
+                file=sys.stderr)
         return None
 
-    return load_entry_point('vcstool', 'console_scripts', 'vcs-%s' % commands[0])
+    return load_entry_point(
+        'vcstool', 'console_scripts', 'vcs-' + commands[0])
 
 
 def get_parser_with_command_only():
-    parser = argparse.ArgumentParser(prog='vcs', usage='%(prog)s <command>', formatter_class=argparse.RawDescriptionHelpFormatter, description='%s\n\n%s' % (_get_description(), '\n'.join(_get_command_help(vcstool_commands))), epilog=_get_epilog(), add_help=False)
+    parser = argparse.ArgumentParser(
+        prog='vcs', usage='%(prog)s <command>',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description='%s\n\n%s' % (
+            _get_description(),
+            '\n'.join(_get_command_help(vcstool_commands))),
+        epilog=_get_epilog(), add_help=False)
     parser.add_argument('command', help=argparse.SUPPRESS)
     return parser
 
 
 def _get_description():
-    return 'Most commands take directory arguments, recursively searching for repositories\n\
-in these directories.  If no arguments are supplied to a command, it recurses\n\
-on the current directory (inclusive) by default.'
+    return 'Most commands take directory arguments, ' \
+        'recursively searching for repositories\n' \
+        'in these directories.  ' \
+        'If no arguments are supplied to a command, it recurses\n' \
+        'on the current directory (inclusive) by default.'
 
 
 def _get_epilog():
-    return "See '%(prog)s <command> --help' for more information on a specific command."
+    return "See '%(prog)s <command> --help' for more information " \
+        'on a specific command.'
 
 
 def _get_command_help(commands):
     lines = ['The available commands are:']
-    max_len = max([len(cmd.command) for cmd in commands])
+    max_len = max(len(cmd.command) for cmd in commands)
     for cmd in vcstool_commands:
-        lines.append('   %s%s   %s' % (cmd.command, ' ' * (max_len - len(cmd.command)), cmd.help))
+        lines.append(
+            '   %s%s   %s' %
+            (cmd.command, ' ' * (max_len - len(cmd.command)), cmd.help))
     return lines
 
 

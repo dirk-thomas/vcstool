@@ -4,7 +4,8 @@ from threading import Lock
 
 from vcstool.executor import USE_COLOR
 
-from .vcs_base import VcsClientBase, which
+from .vcs_base import VcsClientBase
+from .vcs_base import which
 
 
 class HgClient(VcsClientBase):
@@ -50,7 +51,8 @@ class HgClient(VcsClientBase):
         cmd_id = [HgClient._executable, 'identify', '--id']
         result_id = self._run_command(cmd_id)
         if result_id['returncode']:
-            result_id['output'] = 'Could not determine id: %s' % result_id['output']
+            result_id['output'] = \
+                'Could not determine id: ' + result_id['output']
             return result_id
         id_ = result_id['output']
 
@@ -58,14 +60,18 @@ class HgClient(VcsClientBase):
             cmd_branch = [HgClient._executable, 'identify', '--branch']
             result_branch = self._run_command(cmd_branch)
             if result_branch['returncode']:
-                result_branch['output'] = 'Could not determine branch: %s' % result_branch['output']
+                result_branch['output'] = \
+                    'Could not determine branch: ' + result_branch['output']
                 return result_branch
             branch = result_branch['output']
 
-            cmd_branch_id = [HgClient._executable, 'identify', '-r', branch, '--id']
+            cmd_branch_id = [
+                HgClient._executable, 'identify', '-r', branch, '--id']
             result_branch_id = self._run_command(cmd_branch_id)
             if result_branch_id['returncode']:
-                result_branch_id['output'] = 'Could not determine branch id: %s' % result_branch_id['output']
+                result_branch_id['output'] = \
+                    'Could not determine branch id: ' + \
+                    result_branch_id['output']
                 return result_branch_id
             if result_branch_id['output'] == id_:
                 id_ = branch
@@ -83,7 +89,8 @@ class HgClient(VcsClientBase):
         cmd_url = [HgClient._executable, 'paths', 'default']
         result_url = self._run_command(cmd_url)
         if result_url['returncode']:
-            result_url['output'] = 'Could not determine url: %s' % result_url['output']
+            result_url['output'] = \
+                'Could not determine url: ' + result_url['output']
             return result_url
         return result_url
 
@@ -114,7 +121,9 @@ class HgClient(VcsClientBase):
                     return {
                         'cmd': '',
                         'cwd': self.path,
-                        'output': 'Path already exists and contains a different repository',
+                        'output':
+                            'Path already exists and contains a different '
+                            'repository',
                         'returncode': 1
                     }
                 try:
@@ -139,7 +148,9 @@ class HgClient(VcsClientBase):
             cmd_clone = [HgClient._executable, 'clone', command.url, '.']
             result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
-                result_clone['output'] = "Could not clone repository '%s': %s" % (command.url, result_clone['output'])
+                result_clone['output'] = \
+                    "Could not clone repository '%s': %s" % \
+                    (command.url, result_clone['output'])
                 return result_clone
             cmd = result_clone['cmd']
             output = result_clone['output']
@@ -148,7 +159,9 @@ class HgClient(VcsClientBase):
             cmd_checkout = [HgClient._executable, 'checkout', command.version]
             result_checkout = self._run_command(cmd_checkout)
             if result_checkout['returncode']:
-                result_checkout['output'] = "Could not checkout '%s': %s" % (command.version, result_clone['output'])
+                result_checkout['output'] = \
+                    "Could not checkout '%s': %s" % \
+                    (command.version, result_clone['output'])
                 return result_checkout
             cmd += ' && ' + ' '.join(cmd_checkout)
             output = '\n'.join([output, result_checkout['output']])
@@ -164,25 +177,35 @@ class HgClient(VcsClientBase):
         self._check_executable()
         if command.limit_tag:
             # check if specific tag exists
-            cmd_log = [HgClient._executable, 'log', '--rev', 'tag(%s)' % command.limit_tag]
+            cmd_log = [
+                HgClient._executable, 'log',
+                '--rev', 'tag(%s)' % command.limit_tag]
             result_log = self._run_command(cmd_log)
             if result_log['returncode']:
                 return {
                     'cmd': '',
                     'cwd': self.path,
-                    'output': "Repository lacks the tag '%s'" % command.limit_tag,
+                    'output':
+                        "Repository lacks the tag '%s'" % command.limit_tag,
                     'returncode': 1
                 }
             # output log since specific tag
-            cmd = [HgClient._executable, 'log', '--rev', 'sort(tag(%s)::, -rev) and not tag (%s)' % (command.limit_tag, command.limit_tag)]
+            cmd = [
+                HgClient._executable, 'log', '--rev',
+                'sort(tag(%s)::, -rev) and not tag (%s)' %
+                (command.limit_tag, command.limit_tag)]
         elif command.limit_untagged:
             # determine distance to nearest tag
-            cmd_log = [HgClient._executable, 'log', '--rev', '.', '--template', '{latesttagdistance}']
+            cmd_log = [
+                HgClient._executable, 'log',
+                '--rev', '.', '--template', '{latesttagdistance}']
             result_log = self._run_command(cmd_log)
             if result_log['returncode']:
                 return result_log
             # output log since nearest tag
-            cmd = [HgClient._executable, 'log', '--limit', result_log['output'], '-b', '.']
+            cmd = [
+                HgClient._executable, 'log',
+                '--limit', result_log['output'], '-b', '.']
         else:
             cmd = [HgClient._executable, 'log']
         if command.limit != 0:
@@ -224,17 +247,17 @@ class HgClient(VcsClientBase):
                 # check if config extension is available
                 _cmd = [HgClient._executable, 'config', '--help']
                 result = self._run_command(_cmd)
-                if result['returncode'] != 0:
+                if result['returncode']:
                     return
                 # check if color extension is available and not disabled
                 _cmd = [HgClient._executable, 'config', 'extensions.color']
                 result = self._run_command(_cmd)
-                if result['returncode'] != 0 or result['output'].startswith('!'):
+                if result['returncode'] or result['output'].startswith('!'):
                     return
                 # check if color mode is not off or not set
                 _cmd = [HgClient._executable, 'config', 'color.mode']
                 result = self._run_command(_cmd)
-                if result['returncode'] == 0 and result['output'] == 'off':
+                if not result['returncode'] and result['output'] == 'off':
                     return
                 HgClient._config_color = True
 
@@ -243,7 +266,8 @@ class HgClient(VcsClientBase):
             cmd[1:1] = '--color', 'always'
 
     def _check_executable(self):
-        assert HgClient._executable is not None, "Could not find 'hg' executable"
+        assert HgClient._executable is not None, \
+            "Could not find 'hg' executable"
 
 
 if not HgClient._executable:

@@ -2,7 +2,8 @@ import copy
 import os
 import shutil
 
-from .vcs_base import VcsClientBase, which
+from .vcs_base import VcsClientBase
+from .vcs_base import which
 
 
 class BzrClient(VcsClientBase):
@@ -19,7 +20,9 @@ class BzrClient(VcsClientBase):
 
     def branch(self, command):
         if command.all:
-            return self._not_applicable(command, message='at least with the option to list all branches')
+            return self._not_applicable(
+                command,
+                message='at least with the option to list all branches')
 
         self._check_executable()
         return self._get_parent_branch()
@@ -55,7 +58,9 @@ class BzrClient(VcsClientBase):
                     return {
                         'cmd': '',
                         'cwd': self.path,
-                        'output': 'Path already exists and contains a different repository',
+                        'output':
+                            'Path already exists and contains a different '
+                            'repository',
                         'returncode': 1
                     }
                 try:
@@ -79,7 +84,9 @@ class BzrClient(VcsClientBase):
             cmd_branch += [command.url, '.']
             result_branch = self._run_command(cmd_branch, retry=command.retry)
             if result_branch['returncode']:
-                result_branch['output'] = "Could not branch repository '%s': %s" % (command.url, result_branch['output'])
+                result_branch['output'] = \
+                    "Could not branch repository '%s': %s" % \
+                    (command.url, result_branch['output'])
                 return result_branch
             return result_branch
 
@@ -104,11 +111,13 @@ class BzrClient(VcsClientBase):
                     result_tag['returncode'] = 1
                     return result_tag
             # determine revision number of tag
-            cmd_tag_rev = [BzrClient._executable, 'revno', '--rev', 'tag:%s' % tag]
+            cmd_tag_rev = [
+                BzrClient._executable, 'revno', '--rev', 'tag:' + tag]
             result_tag_rev = self._run_command(cmd_tag_rev)
             if result_tag_rev['returncode']:
                 if command.limit_tag:
-                    result_tag_rev['output'] = "Repository lacks the tag '%s'" % tag
+                    result_tag_rev['output'] = \
+                        "Repository lacks the tag '%s'" % tag
                 return result_tag_rev
             try:
                 tag_rev = int(result_tag_rev['output'])
@@ -126,7 +135,9 @@ class BzrClient(VcsClientBase):
             except ValueError:
                 head_rev = result_head_rev['output']
             # output log since nearest tag
-            cmd_log = [BzrClient._executable, 'log', '--rev', 'revno:%s..' % str(tag_next_rev)]
+            cmd_log = [
+                BzrClient._executable, 'log',
+                '--rev', 'revno:%s..' % str(tag_next_rev)]
             if tag_rev == head_rev:
                 return {
                     'cmd': ' '.join(cmd_log),
@@ -184,7 +195,8 @@ class BzrClient(VcsClientBase):
         return result
 
     def _check_executable(self):
-        assert BzrClient._executable is not None, "Could not find 'bzr' executable"
+        assert BzrClient._executable is not None, \
+            "Could not find 'bzr' executable"
 
 
 if not BzrClient._executable:

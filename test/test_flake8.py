@@ -13,9 +13,8 @@ log.level = logging.INFO
 def test_flake8():
     configure_logging(1)
     argv = [
-        '--ignore=%s' % ','.join([
-            'D100', 'D101', 'D102', 'D103', 'D104', 'D105',
-            'E501']),
+        '--ignore=' + ','.join([
+            'A003', 'D100', 'D101', 'D102', 'D103', 'D104', 'D105', 'D107']),
         '--exclude', 'vcstool/compat/shutil.py',
         '--import-order-style=google']
     style_guide = get_style_guide(argv)

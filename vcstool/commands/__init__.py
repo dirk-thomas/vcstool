@@ -23,4 +23,6 @@ vcstool_commands.append(StatusCommand)
 
 _commands = [c.command for c in vcstool_commands]
 if len(_commands) != len(set(_commands)):
-    raise RuntimeError('Multiple commands share the same command name: %s' % ', '.join(sorted(_commands)))
+    raise RuntimeError(
+        'Multiple commands share the same command name: ' +
+        ', '.join(sorted(_commands)))

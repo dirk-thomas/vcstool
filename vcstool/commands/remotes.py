@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from .command import Command, simple_main
+from .command import Command
+from .command import simple_main
 
 
 class RemotesCommand(Command):
@@ -14,7 +15,8 @@ class RemotesCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Show the URL of the repository', prog='vcs remotes')
+    parser = argparse.ArgumentParser(
+        description='Show the URL of the repository', prog='vcs remotes')
     parser.add_argument_group('"remotes" command parameters')
     return parser
 

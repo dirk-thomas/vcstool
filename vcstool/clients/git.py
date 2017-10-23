@@ -3,7 +3,8 @@ import shutil
 
 from vcstool.executor import USE_COLOR
 
-from .vcs_base import VcsClientBase, which
+from .vcs_base import VcsClientBase
+from .vcs_base import which
 
 
 class GitClient(VcsClientBase):
@@ -170,7 +171,7 @@ class GitClient(VcsClientBase):
             GitClient._executable, 'config', '--get', 'remote.%s.url' % remote]
         result_url = self._run_command(cmd_url)
         if result_url['returncode']:
-            result_url['output'] = 'Could not determine remote url: %s' % \
+            result_url['output'] = 'Could not determine remote url: ' + \
                 result_url['output']
         return result_url
 
@@ -196,7 +197,9 @@ class GitClient(VcsClientBase):
                     return {
                         'cmd': '',
                         'cwd': self.path,
-                        'output': 'Path already exists and contains a different repository',
+                        'output':
+                            'Path already exists and contains a different '
+                            'repository',
                         'returncode': 1
                     }
                 try:
@@ -219,7 +222,9 @@ class GitClient(VcsClientBase):
                 env['LC_ALL'] = 'C'
                 result_remote = self._run_command(cmd_remote, env=env)
                 if result_remote['returncode']:
-                    result_remote['output'] = "Could not get remote information of repository '%s': %s" % (url, result_remote['output'])
+                    result_remote['output'] = \
+                        'Could not get remote information of repository ' \
+                        "'%s': %s" % (url, result_remote['output'])
                     return result_remote
                 prefix = '  HEAD branch: '
                 for line in result_remote['output'].splitlines():
@@ -228,7 +233,9 @@ class GitClient(VcsClientBase):
                         break
                 else:
                     result_remote['returncode'] = 1
-                    result_remote['output'] = "Could not determine remote HEAD branch of repository '%s': %s" % (url, result_remote['output'])
+                    result_remote['output'] = \
+                        'Could not determine remote HEAD branch of ' \
+                        "repository '%s': %s" % (url, result_remote['output'])
                     return result_remote
 
             # fetch updates for existing repo
@@ -243,7 +250,9 @@ class GitClient(VcsClientBase):
             cmd_clone = [GitClient._executable, 'clone', command.url, '.']
             result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
-                result_clone['output'] = "Could not clone repository '%s': %s" % (command.url, result_clone['output'])
+                result_clone['output'] = \
+                    "Could not clone repository '%s': %s" % \
+                    (command.url, result_clone['output'])
                 return result_clone
             cmd = result_clone['cmd']
             output = result_clone['output']
@@ -251,10 +260,13 @@ class GitClient(VcsClientBase):
             checkout_version = command.version
 
         if checkout_version:
-            cmd_checkout = [GitClient._executable, 'checkout', checkout_version]
+            cmd_checkout = [
+                GitClient._executable, 'checkout', checkout_version]
             result_checkout = self._run_command(cmd_checkout)
             if result_checkout['returncode']:
-                result_checkout['output'] = "Could not checkout ref '%s': %s" % (checkout_version, result_checkout['output'])
+                result_checkout['output'] = \
+                    "Could not checkout ref '%s': %s" % \
+                    (checkout_version, result_checkout['output'])
                 return result_checkout
             cmd += ' && ' + ' '.join(cmd_checkout)
             output = '\n'.join([output, result_checkout['output']])
@@ -270,7 +282,7 @@ class GitClient(VcsClientBase):
         cmd_remote = [GitClient._executable, 'remote', 'show']
         result_remote = self._run_command(cmd_remote)
         if result_remote['returncode']:
-            result_remote['output'] = 'Could not determine remote: %s' % \
+            result_remote['output'] = 'Could not determine remote: ' + \
                 result_remote['output']
             return result_remote
         remote = result_remote['output']
@@ -297,14 +309,16 @@ class GitClient(VcsClientBase):
                 return {
                     'cmd': '',
                     'cwd': self.path,
-                    'output': "Repository lacks the tag '%s'" % command.limit_tag,
+                    'output':
+                        "Repository lacks the tag '%s'" % command.limit_tag,
                     'returncode': 1
                 }
             # output log since specific tag
             cmd = [GitClient._executable, 'log', '%s..' % command.limit_tag]
         elif command.limit_untagged:
             # determine nearest tag
-            cmd_tag = [GitClient._executable, 'describe', '--abbrev=0', '--tags']
+            cmd_tag = [
+                GitClient._executable, 'describe', '--abbrev=0', '--tags']
             result_tag = self._run_command(cmd_tag)
             if result_tag['returncode']:
                 return result_tag
@@ -368,14 +382,15 @@ class GitClient(VcsClientBase):
         if GitClient._config_color_is_auto is None:
             _cmd = [GitClient._executable, 'config', '--get', 'color.ui']
             result = self._run_command(_cmd)
-            GitClient._config_color_is_auto = (result['output'] in ['', 'auto'])
+            GitClient._config_color_is_auto = result['output'] in ['', 'auto']
 
         # inject arguments to force colorization
         if GitClient._config_color_is_auto:
             cmd[1:1] = '-c', 'color.ui=always'
 
     def _check_executable(self):
-        assert GitClient._executable is not None, "Could not find 'git' executable"
+        assert GitClient._executable is not None, \
+            "Could not find 'git' executable"
 
 
 if not GitClient._executable:

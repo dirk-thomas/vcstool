@@ -5,9 +5,14 @@ import os
 import sys
 
 from vcstool.crawler import find_repositories
-from vcstool.executor import ansi, execute_jobs, generate_jobs, output_repositories, output_results
+from vcstool.executor import ansi
+from vcstool.executor import execute_jobs
+from vcstool.executor import generate_jobs
+from vcstool.executor import output_repositories
+from vcstool.executor import output_results
 
-from .command import add_common_arguments, Command
+from .command import add_common_arguments
+from .command import Command
 
 
 class ExportCommand(Command):
@@ -21,9 +26,12 @@ class ExportCommand(Command):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Export the list of repositories', prog='vcs export')
+    parser = argparse.ArgumentParser(
+        description='Export the list of repositories', prog='vcs export')
     group = parser.add_argument_group('"export" command parameters')
-    group.add_argument('--exact', action='store_true', default=False, help='Export exact commit hash instead of branch names')
+    group.add_argument(
+        '--exact', action='store_true', default=False,
+        help='Export exact commit hash instead of branch names')
     return parser
 
 
@@ -37,14 +45,20 @@ def output_export_data(result, hide_empty=False):
     try:
         lines = []
         lines.append('  %s:' % path)
-        lines.append('    type: %s' % result['client'].__class__.type)
+        lines.append('    type: ' + result['client'].__class__.type)
         export_data = result['export_data']
-        lines.append('    url: %s' % export_data['url'])
+        lines.append('    url: ' + export_data['url'])
         if 'version' in export_data and export_data['version']:
-            lines.append('    version: %s' % export_data['version'])
+            lines.append('    version: ' + export_data['version'])
         print('\n'.join(lines))
     except KeyError as e:
-        print(ansi('redf') + ("Command '%s' failed for path '%s': %s: %s" % (result['command'].__class__.command, result['client'].path, e.__class__.__name__, e)) + ansi('reset'), file=sys.stderr)
+        print(
+            ansi('redf') + (
+                "Command '%s' failed for path '%s': %s: %s" % (
+                    result['command'].__class__.command,
+                    result['client'].path, e.__class__.__name__, e)) +
+            ansi('reset'),
+            file=sys.stderr)
 
 
 def output_error_information(result, hide_empty=False):
@@ -86,7 +100,7 @@ def main(args=None):
     output_results(results, output_handler=output_export_data)
     output_results(results, output_handler=output_error_information)
 
-    any_error = any([r['returncode'] != 0 for r in results])
+    any_error = any(r['returncode'] for r in results)
     return 1 if any_error else 0
 
 

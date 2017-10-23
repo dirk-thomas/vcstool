@@ -26,10 +26,11 @@ setup(
                  'Programming Language :: Python',
                  'Topic :: Software Development :: Version Control',
                  'Topic :: Utilities'],
-    description='vcstool provides a command line tool to invoke vcs commands on multiple repositories.',
-    long_description='''\
+    description='vcstool provides a command line tool to invoke vcs commands '
+        'on multiple repositories.',
+    long_description='\
 vcstool enables batch commands on multiple different vcs repositories. \
-Currently it supports git, hg, svn and bzr.''',
+Currently it supports git, hg, svn and bzr.',
     license='Apache License, Version 2.0',
     data_files=[
         ('share/vcstool-completion', [

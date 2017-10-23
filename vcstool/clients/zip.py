@@ -54,7 +54,8 @@ class ZipClient(VcsClientBase):
             return {
                 'cmd': '',
                 'cwd': self.path,
-                'output': "Could not fetch zipfile from '%s': %s" % (command.url, e),
+                'output':
+                    "Could not fetch zipfile from '%s': %s" % (command.url, e),
                 'returncode': 1
             }
 
@@ -66,7 +67,8 @@ class ZipClient(VcsClientBase):
                     return {
                         'cmd': 'os.makedirs(%s)' % path,
                         'cwd': path,
-                        'output': "Could not create directory '%s': %s" % (path, e),
+                        'output':
+                            "Could not create directory '%s': %s" % (path, e),
                         'returncode': 1
                     }
             return None
@@ -78,7 +80,8 @@ class ZipClient(VcsClientBase):
             return {
                 'cmd': 'ZipFile(%s)' % command.url,
                 'cwd': self.path,
-                'output': "Could not read zipfile from '%s': %s" % (command.url, e),
+                'output':
+                    "Could not read zipfile from '%s': %s" % (command.url, e),
                 'returncode': 1
             }
         try:
@@ -90,7 +93,7 @@ class ZipClient(VcsClientBase):
                     if name.startswith(prefix):
                         if not name[len(prefix):]:
                             continue
-                        # remap all members from version subfolder into destination
+                        # remap members from version subfolder into destination
                         dst = os.path.join(self.path, name[len(prefix):])
                         if dst.endswith('/'):
                             # create directories
@@ -107,6 +110,7 @@ class ZipClient(VcsClientBase):
         return {
             'cmd': '',
             'cwd': self.path,
-            'output': "Downloaded zipfile from '%s' and unpacked it" % command.url,
+            'output':
+                "Downloaded zipfile from '%s' and unpacked it" % command.url,
             'returncode': 0
         }

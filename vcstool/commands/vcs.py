@@ -2,7 +2,8 @@ from __future__ import print_function
 
 import sys
 
-from vcstool.commands.help import get_entrypoint, get_parser
+from vcstool.commands.help import get_entrypoint
+from vcstool.commands.help import get_parser
 from vcstool.commands.help import main as help_main
 
 

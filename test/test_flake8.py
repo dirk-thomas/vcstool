@@ -4,7 +4,6 @@ import os
 from flake8 import configure_logging
 from flake8.api.legacy import StyleGuide
 from flake8.main.application import Application
-
 from pydocstyle.config import log
 
 log.level = logging.INFO
@@ -38,6 +37,8 @@ def get_style_guide(argv=None):
     # this is a fork of flake8.api.legacy.get_style_guide
     # to allow passing command line argument
     application = Application()
+    application.parse_preliminary_options_and_args([])
+    application.make_config_finder()
     application.find_plugins()
     application.register_plugin_options()
     application.parse_configuration_and_cli(argv)

@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.32 (2017-12-06)
+-------------------
+* add --nested option to all verb except import (`#58 <https://github.com/dirk-thomas/vcstool/issues/58>`_)
+
 0.1.31 (2017-09-17)
 -------------------
 * ensure to interpret version as string (`#54 <https://github.com/dirk-thomas/vcstool/issues/54>`_)

@@ -90,7 +90,7 @@ def main(args=None):
     args = parser.parse_args(args)
 
     command = ExportCommand(args)
-    clients = find_repositories(command.paths)
+    clients = find_repositories(command.paths, nested=command.nested)
     if command.output_repos:
         output_repositories(clients)
     jobs = generate_jobs(clients, command)

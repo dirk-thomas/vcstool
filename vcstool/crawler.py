@@ -3,15 +3,15 @@ import os
 from . import vcstool_clients
 
 
-def find_repositories(paths):
+def find_repositories(paths, nested=False):
     repos = []
     visited = []
     for path in paths:
-        _find_repositories(path, repos, visited)
+        _find_repositories(path, repos, visited, nested=nested)
     return repos
 
 
-def _find_repositories(path, repos, visited):
+def _find_repositories(path, repos, visited, nested=False):
     abs_path = os.path.abspath(path)
     if abs_path in visited:
         return
@@ -20,16 +20,18 @@ def _find_repositories(path, repos, visited):
     client = get_vcs_client(path)
     if client:
         repos.append(client)
-    else:
-        try:
-            listdir = os.listdir(path)
-        except OSError:
-            listdir = []
-        for name in sorted(listdir):
-            subpath = os.path.join(path, name)
-            if not os.path.isdir(subpath):
-                continue
-            _find_repositories(subpath, repos, visited)
+        if not nested:
+            return
+
+    try:
+        listdir = os.listdir(path)
+    except OSError:
+        listdir = []
+    for name in sorted(listdir):
+        subpath = os.path.join(path, name)
+        if not os.path.isdir(subpath):
+            continue
+        _find_repositories(subpath, repos, visited, nested=nested)
 
 
 def get_vcs_client(path):

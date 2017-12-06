@@ -16,6 +16,7 @@ class Command(object):
     def __init__(self, args):
         self.debug = args.debug if 'debug' in args else False
         self.hide_empty = args.hide_empty if 'hide_empty' in args else False
+        self.nested = args.nested if 'nested' in args else False
         self.output_repos = args.repos if 'repos' in args else False
         if 'paths' in args:
             self.paths = args.paths
@@ -35,7 +36,8 @@ def check_greater_zero(value):
 
 
 def add_common_arguments(
-    parser, skip_hide_empty=False, single_path=False, path_help=None
+    parser, skip_hide_empty=False, skip_nested=False, single_path=False,
+    path_help=None
 ):
     parser.formatter_class = argparse.ArgumentDefaultsHelpFormatter
     group = parser.add_argument_group('Common parameters')
@@ -46,6 +48,10 @@ def add_common_arguments(
         group.add_argument(
             '-s', '--hide-empty', '--skip-empty', action='store_true',
             default=False, help='Hide repositories with empty output')
+    if not skip_nested:
+        group.add_argument(
+            '-n', '--nested', action='store_true',
+            default=False, help='Search for nested repositories')
     try:
         default_workers = cpu_count()
     except NotImplementedError:
@@ -81,7 +87,7 @@ def simple_main(parser, command_class, args=None):
     args = parser.parse_args(args)
 
     command = command_class(args)
-    clients = find_repositories(command.paths)
+    clients = find_repositories(command.paths, nested=command.nested)
     if command.output_repos:
         output_repositories(clients)
     jobs = generate_jobs(clients, command)

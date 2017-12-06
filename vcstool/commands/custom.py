@@ -73,7 +73,7 @@ def main(args=None):
     command = CustomCommand(args)
 
     # filter repositories by specified client types
-    clients = find_repositories(command.paths)
+    clients = find_repositories(command.paths, nested=command.nested)
     clients = [c for c in clients if c.type in args and args.__dict__[c.type]]
 
     if command.output_repos:

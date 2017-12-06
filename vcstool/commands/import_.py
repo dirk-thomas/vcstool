@@ -159,7 +159,7 @@ def add_dependencies(jobs):
 def main(args=None):
     parser = get_parser()
     add_common_arguments(
-        parser, skip_hide_empty=True, single_path=True,
+        parser, skip_hide_empty=True, skip_nested=True, single_path=True,
         path_help='Base path to clone repositories to')
     args = parser.parse_args(args)
     try:

@@ -12,4 +12,4 @@ See git-pull(1) for details.
 
     git pull <remote> <branch>
 === ./vcstool (git) ===
-Already up-to-date.
+Already up to date.

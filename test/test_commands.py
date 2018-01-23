@@ -114,7 +114,21 @@ def run_command(command, args=None, subfolder=None):
 def get_expected_output(name):
     path = os.path.join(os.path.dirname(__file__), name + '.txt')
     with open(path, 'rb') as h:
-        return h.read()
+        content = h.read()
+    # change in git version 2.15.0
+    # https://github.com/git/git/commit/7560f547e6
+    if _get_git_version() < [2, 15, 0]:
+        # use hyphenation for older git versions
+        content = content.replace(b'up to date', b'up-to-date')
+    return content
+
+
+def _get_git_version():
+    output = subprocess.check_output(['git', '--version'])
+    prefix = b'git version '
+    assert output.startswith(prefix)
+    output = output[len(prefix):].rstrip()
+    return [int(x) for x in output.split(b'.')]
 
 
 if __name__ == '__main__':

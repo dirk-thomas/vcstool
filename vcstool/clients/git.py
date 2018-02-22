@@ -247,7 +247,10 @@ class GitClient(VcsClientBase):
             output = result_fetch['output']
 
         else:
-            cmd_clone = [GitClient._executable, 'clone', command.url, '.']
+            cmd_clone = [GitClient._executable, 'clone']
+            if command.recursive:
+                cmd_clone.append('--recursive')
+            cmd_clone += [command.url, '.']
             result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
                 result_clone['output'] = \

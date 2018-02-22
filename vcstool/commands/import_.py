@@ -20,12 +20,13 @@ class ImportCommand(Command):
     command = 'import'
     help = 'Import the list of repositories'
 
-    def __init__(self, args, url, version=None):
+    def __init__(self, args, url, version=None, recursive=False):
         super(ImportCommand, self).__init__(args)
         self.url = url
         self.version = version
         self.force = args.force
         self.retry = args.retry
+        self.recursive = recursive
 
 
 def get_parser():
@@ -38,6 +39,9 @@ def get_parser():
         '--force', action='store_true', default=False,
         help='Potentially overwrite existing folders if they contain '
              'different repositories')
+    group.add_argument(
+        '--recursive', action='store_true', default=False,
+        help='Recurse into submodules')
     group.add_argument(
         '--retry', type=int, metavar='N', default=2,
         help='Retry commands requiring network access N times on failure')
@@ -136,7 +140,8 @@ def generate_jobs(repos, args):
         client = clients[0](path)
         command = ImportCommand(
             args, repo['url'],
-            str(repo['version']) if 'version' in repo else None)
+            str(repo['version']) if 'version' in repo else None,
+            recursive=args.recursive)
         job = {'client': client, 'command': command}
         jobs.append(job)
     return jobs

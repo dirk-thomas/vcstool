@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.33 (2018-03-01)
+-------------------
+* add import --recursive option for git submodules (`#63 <https://github.com/dirk-thomas/vcstool/pull/63>`_)
+
 0.1.32 (2017-12-06)
 -------------------
 * add --nested option to all verb except import (`#58 <https://github.com/dirk-thomas/vcstool/issues/58>`_)

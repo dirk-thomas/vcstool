@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.34 (2018-03-09)
+-------------------
+* add explicit dependency on setuptools (`#65 <https://github.com/dirk-thomas/vcstool/issues/65>`_)
+
 0.1.33 (2018-03-01)
 -------------------
 * add import --recursive option for git submodules (`#63 <https://github.com/dirk-thomas/vcstool/pull/63>`_)

@@ -187,12 +187,13 @@ class GitClient(VcsClientBase):
         self._check_executable()
         if GitClient.is_repository(self.path):
             # verify that existing repository is the same
-            result_url = self._get_url()
-            if result_url['returncode']:
-                return result_url
-            url = result_url['output'][0]
-            remote = result_url['output'][1]
-            if url != command.url:
+            result_urls = self._get_remote_urls()
+            if result_urls['returncode']:
+                return result_urls
+            for url, remote in result_urls['output']:
+                if url == command.url:
+                    break
+            else:
                 if not command.force:
                     return {
                         'cmd': '',
@@ -281,23 +282,26 @@ class GitClient(VcsClientBase):
             'returncode': 0
         }
 
-    def _get_url(self):
+    def _get_remote_urls(self):
         cmd_remote = [GitClient._executable, 'remote', 'show']
         result_remote = self._run_command(cmd_remote)
         if result_remote['returncode']:
-            result_remote['output'] = 'Could not determine remote: ' + \
+            result_remote['output'] = 'Could not determine remotes: ' + \
                 result_remote['output']
             return result_remote
-        remote = result_remote['output']
-        result_url = self._get_remote_url(remote)
-        if result_url['returncode']:
-            return result_url
-        url = result_url['output']
+        remote_urls = []
+        cmd = result_remote['cmd']
+        for remote in result_remote['output'].splitlines():
+            result_url = self._get_remote_url(remote)
+            cmd += ' && ' + result_url['cmd']
+            if not result_url['returncode']:
+                remote_urls.append((result_url['output'], remote))
         return {
-            'cmd': ' && '.join([result_remote['cmd'], result_url['cmd']]),
+            'cmd': cmd,
             'cwd': self.path,
-            'output': [url, remote],
-            'returncode': 0
+            'output': (remote_urls if remote_urls else
+                       'Could not determine any of the remote urls'),
+            'returncode': 0 if remote_urls else 1
         }
 
     def log(self, command):

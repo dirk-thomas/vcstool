@@ -78,6 +78,19 @@ class TestCommands(unittest.TestCase):
         expected = get_expected_output('pull')
         self.assertEqual(e.exception.output, expected)
 
+    def test_reimport(self):
+        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
+        subprocess.check_output(
+            ['git', 'remote', 'add', 'foo', 'http://foo.com/bar.git'],
+            stderr=subprocess.STDOUT, cwd=cwd)
+        output = run_command(
+            'import', ['--input', REPOS_FILE, '.'])
+        expected = get_expected_output('reimport')
+        subprocess.check_output(
+            ['git', 'remote', 'remove', 'foo'],
+            stderr=subprocess.STDOUT, cwd=cwd)
+        self.assertEqual(output, expected)
+
     def test_remote(self):
         output = run_command('remotes', args=['--repos'])
         expected = get_expected_output('remotes_repos')

@@ -30,19 +30,6 @@ class TestCommands(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(TEST_WORKSPACE)
 
-    def test_reimport(self):
-        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
-        subprocess.check_output(
-            ['git', 'remote', 'add', 'foo', 'http://foo.com/bar.git'],
-            stderr=subprocess.STDOUT, cwd=cwd, env=dict(os.environ))
-        output = run_command(
-            'import', ['--input', REPOS_FILE, '.'])
-        expected = get_expected_output('reimport')
-        subprocess.check_output(
-            ['git', 'remote', 'remove', 'foo'],
-            stderr=subprocess.STDOUT, cwd=cwd, env=dict(os.environ))
-        assert output == expected
-
     def test_branch(self):
         output = run_command('branch')
         expected = get_expected_output('branch')
@@ -90,6 +77,19 @@ class TestCommands(unittest.TestCase):
             run_command('pull', args=['--workers', '1'])
         expected = get_expected_output('pull')
         self.assertEqual(e.exception.output, expected)
+
+    def test_reimport(self):
+        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
+        subprocess.check_output(
+            ['git', 'remote', 'add', 'foo', 'http://foo.com/bar.git'],
+            stderr=subprocess.STDOUT, cwd=cwd)
+        output = run_command(
+            'import', ['--input', REPOS_FILE, '.'])
+        expected = get_expected_output('reimport')
+        subprocess.check_output(
+            ['git', 'remote', 'remove', 'foo'],
+            stderr=subprocess.STDOUT, cwd=cwd)
+        self.assertEqual(output, expected)
 
     def test_remote(self):
         output = run_command('remotes', args=['--repos'])

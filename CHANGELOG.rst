@@ -2,6 +2,10 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.35 (2018-04-02)
+-------------------
+* fix git import when multiple remotes are present (`#66 <https://github.com/dirk-thomas/vcstool/issues/66>`_)
+
 0.1.34 (2018-03-09)
 -------------------
 * add explicit dependency on setuptools (`#65 <https://github.com/dirk-thomas/vcstool/issues/65>`_)

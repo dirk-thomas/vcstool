@@ -1,7 +1,7 @@
-What is vcstool?
-================
+vcstool (ROS2)
+==============
 
-Vcstool is a version control system (VCS) tool, designed to make working with multiple repositories easier.
+Vcstool is a version control system (VCS) tool, designed to make working with multiple repositories easier for [ROS 2](http://www.ros2.org). For ROS 1 see [vcstools](https://github.com/vcstools/vcstools).
 
 
 How does it work?

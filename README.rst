@@ -3,6 +3,14 @@ What is vcstool?
 
 Vcstool is a version control system (VCS) tool, designed to make working with multiple repositories easier.
 
+Note:
+  This tool should not be confused with `vcstools <https://github.com/vcstools/vcstools/>`_ (with a trailing ``s``) which provides a Python API for interacting with different version control systems.
+  The biggest differences between the two are:
+
+  * ``vcstool`` doesn't use any state beside the repository working copies available in the filesystem.
+  * The file format of ``vcstool export`` uses the relative paths of the repositories as keys in YAML which avoids collisions by design.
+  * ``vcstool`` has significantly less lines of code than ``vcstools`` including the command line tools built on top.
+
 
 How does it work?
 -----------------

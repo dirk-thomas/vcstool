@@ -125,7 +125,7 @@ class SvnClient(VcsClientBase):
 
         url = command.url
         if command.version:
-            url += '@%d' % command.version
+            url += '@%s' % command.version
 
         cmd_checkout = [
             SvnClient._executable, '--non-interactive', 'checkout', url, '.']

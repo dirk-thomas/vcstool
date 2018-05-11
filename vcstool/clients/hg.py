@@ -137,7 +137,8 @@ class HgClient(VcsClientBase):
 
         if HgClient.is_repository(self.path):
             # pull updates for existing repo
-            cmd_pull = [HgClient._executable, 'pull', '--update']
+            cmd_pull = [
+                HgClient._executable, '--noninteractive', 'pull', '--update']
             result_pull = self._run_command(cmd_pull, retry=command.retry)
             if result_pull['returncode']:
                 return result_pull
@@ -145,7 +146,9 @@ class HgClient(VcsClientBase):
             output = result_pull['output']
 
         else:
-            cmd_clone = [HgClient._executable, 'clone', command.url, '.']
+            cmd_clone = [
+                HgClient._executable, '--noninteractive', 'clone', command.url,
+                '.']
             result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
                 result_clone['output'] = \
@@ -156,7 +159,9 @@ class HgClient(VcsClientBase):
             output = result_clone['output']
 
         if command.version:
-            cmd_checkout = [HgClient._executable, 'checkout', command.version]
+            cmd_checkout = [
+                HgClient._executable, '--noninteractive', 'checkout',
+                command.version]
             result_checkout = self._run_command(cmd_checkout)
             if result_checkout['returncode']:
                 result_checkout['output'] = \
@@ -215,13 +220,13 @@ class HgClient(VcsClientBase):
 
     def pull(self, _command):
         self._check_executable()
-        cmd = [HgClient._executable, 'pull', '--update']
+        cmd = [HgClient._executable, '--noninteractive', 'pull', '--update']
         self._check_color(cmd)
         return self._run_command(cmd)
 
     def push(self, _command):
         self._check_executable()
-        cmd = [HgClient._executable, 'push']
+        cmd = [HgClient._executable, '--noninteractive', 'push']
         return self._run_command(cmd)
 
     def remotes(self, _command):

@@ -2,6 +2,12 @@
 Changelog for package vcstool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.36 (2018-04-14)
+-------------------
+* make hg use non interactive (`#70 <https://github.com/dirk-thomas/vcstool/pull/70>`_)
+* fix usage of version with svn import (`#71 <https://github.com/dirk-thomas/vcstool/pull/71>`_)
+* add note about vcstools (`#68 <https://github.com/dirk-thomas/vcstool/pull/68>`_)
+
 0.1.35 (2018-04-02)
 -------------------
 * fix git import when multiple remotes are present (`#66 <https://github.com/dirk-thomas/vcstool/issues/66>`_)

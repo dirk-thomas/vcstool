@@ -251,6 +251,12 @@ class GitClient(VcsClientBase):
             cmd_clone = [GitClient._executable, 'clone']
             if command.recursive:
                 cmd_clone.append('--recursive')
+            if command.shallow:
+                cmd_clone.extend(['--depth', '1'])
+                if command.recursive:
+                    cmd_clone.append('--shallow-submodules')
+                if command.version:
+                    cmd_clone.extend(['--branch', command.version])
             cmd_clone += [command.url, '.']
             result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:

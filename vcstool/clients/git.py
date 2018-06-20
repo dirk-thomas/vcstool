@@ -255,8 +255,6 @@ class GitClient(VcsClientBase):
                 cmd_clone.extend(['--depth', '1'])
                 if command.recursive:
                     cmd_clone.append('--shallow-submodules')
-                if command.version:
-                    cmd_clone.extend(['--branch', command.version])
             cmd_clone += [command.url, '.']
             result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
@@ -270,6 +268,16 @@ class GitClient(VcsClientBase):
             checkout_version = command.version
 
         if checkout_version:
+            if command.shallow:
+                cmd_fetch = [
+                    GitClient._executable, 'fetch', '--depth', '1', 'origin', checkout_version]
+                result_fetch = self._run_command(cmd_fetch)
+                if result_fetch['returncode']:
+                    result_fetch['output'] = \
+                        "Could not fetch ref '%s': %s" % \
+                        (checkout_version, result_fetch['output'])
+                    return result_fetch
+                checkout_version = 'FETCH_HEAD'
             cmd_checkout = [
                 GitClient._executable, 'checkout', checkout_version]
             result_checkout = self._run_command(cmd_checkout)

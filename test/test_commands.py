@@ -21,7 +21,9 @@ class TestCommands(unittest.TestCase):
             output = run_command(
                 'import', ['--input', REPOS_FILE, '.'])
             expected = get_expected_output('import')
-            assert output == expected
+            # newer git versions don't append three dots after the commit hash
+            assert output == expected or \
+                output == expected.replace(b'... ', b' ')
         except Exception:
             cls.tearDownClass()
             raise
@@ -89,7 +91,8 @@ class TestCommands(unittest.TestCase):
         subprocess.check_output(
             ['git', 'remote', 'remove', 'foo'],
             stderr=subprocess.STDOUT, cwd=cwd)
-        self.assertEqual(output, expected)
+        # newer git versions don't append three dots after the commit hash
+        assert output == expected or output == expected.replace(b'... ', b' ')
 
     def test_remote(self):
         output = run_command('remotes', args=['--repos'])

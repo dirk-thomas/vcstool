@@ -252,7 +252,7 @@ class GitClient(VcsClientBase):
             if command.recursive:
                 cmd_clone.append('--recursive')
             if command.shallow:
-                cmd_clone.extend(['--depth', '1'])
+                cmd_clone += ['--depth', '1']
                 if command.recursive:
                     cmd_clone.append('--shallow-submodules')
             cmd_clone += [command.url, '.']

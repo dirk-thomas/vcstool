@@ -147,8 +147,7 @@ def generate_jobs(repos, args):
         command = ImportCommand(
             args, repo['url'],
             str(repo['version']) if 'version' in repo else None,
-            recursive=args.recursive,
-            shallow=args.shallow)
+            recursive=args.recursive, shallow=args.shallow)
         job = {'client': client, 'command': command}
         jobs.append(job)
     return jobs

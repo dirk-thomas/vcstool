@@ -270,7 +270,8 @@ class GitClient(VcsClientBase):
         if checkout_version:
             if command.shallow:
                 cmd_fetch = [
-                    GitClient._executable, 'fetch', '--depth', '1', 'origin', checkout_version]
+                    GitClient._executable, 'fetch',
+                    '--depth', '1', 'origin', checkout_version]
                 result_fetch = self._run_command(cmd_fetch)
                 if result_fetch['returncode']:
                     result_fetch['output'] = \

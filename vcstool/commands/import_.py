@@ -67,7 +67,7 @@ def get_repos_in_vcstool_format(repositories):
     repos = {}
     if repositories is None:
         print(
-            ansi('yellowf') + "List of repositories is empty" + ansi('reset'),
+            ansi('yellowf') + 'List of repositories is empty' + ansi('reset'),
             file=sys.stderr)
         return repos
     for path in repositories:

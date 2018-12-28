@@ -1,6 +1,8 @@
 What is vcstool?
 ================
 
+Boom!
+
 Vcstool is a version control system (VCS) tool, designed to make working with multiple repositories easier.
 
 Note:

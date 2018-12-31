@@ -134,7 +134,8 @@ class GitClient(VcsClientBase):
             for remote in remotes:
                 # get all remote names
                 cmd_refs = [
-                    GitClient._executable, 'rev-list', '--remotes=' + remote]
+                    GitClient._executable, 'rev-list', '--remotes=' + remote,
+                    '--tags']
                 result_refs = self._run_command(cmd_refs)
                 if result_refs['returncode']:
                     result_refs['output'] = \

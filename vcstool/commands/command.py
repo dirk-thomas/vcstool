@@ -45,7 +45,7 @@ def add_common_arguments(
         '--debug', action='store_true', default=False,
         help='Show debug messages')
     group.add_argument(
-        '-q', '--quiet', action='store_true',
+        '--no-output', action='store_true',
         default=False, help='Be quiet, no output from VCS tool execution')
     if not skip_hide_empty:
         group.add_argument(
@@ -98,7 +98,7 @@ def simple_main(parser, command_class, args=None):
         jobs, show_progress=True, number_of_workers=args.workers,
         debug_jobs=args.debug)
 
-    if not args.quiet:
+    if not args.no_output:
         output_results(results, hide_empty=args.hide_empty)
 
     any_error = any(r['returncode'] for r in results)

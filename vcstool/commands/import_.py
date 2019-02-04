@@ -9,6 +9,7 @@ from vcstool.executor import ansi
 from vcstool.executor import execute_jobs
 from vcstool.executor import output_repositories
 from vcstool.executor import output_results
+from vcstool.streams import set_streams
 import yaml
 
 from .command import add_common_arguments
@@ -166,7 +167,9 @@ def add_dependencies(jobs):
                 job['depends'].add(path)
 
 
-def main(args=None):
+def main(args=None, stdout=None, stderr=None):
+    set_streams(stdout=stdout, stderr=stderr)
+
     parser = get_parser()
     add_common_arguments(
         parser, skip_hide_empty=True, skip_nested=True, single_path=True,

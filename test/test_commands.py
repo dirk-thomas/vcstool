@@ -80,6 +80,46 @@ class TestCommands(unittest.TestCase):
         expected = get_expected_output('pull')
         self.assertEqual(e.exception.output, expected)
 
+    def test_pull_api(self):
+        try:
+            from cStringIO import StringIO
+        except ImportError:
+            from io import StringIO
+        from vcstool.commands.pull import main
+        stdout_stderr = StringIO()
+
+        # change and restore cwd
+        cwd_bck = os.getcwd()
+        os.chdir(TEST_WORKSPACE)
+        try:
+            # change and restore USE_COLOR flag
+            from vcstool import executor
+            use_color_bck = executor.USE_COLOR
+            executor.USE_COLOR = False
+            try:
+                # change and restore os.environ
+                env_bck = os.environ
+                os.environ = dict(os.environ)
+                os.environ.update(
+                    LANG='en_US.UTF-8',
+                    PYTHONPATH=(
+                        os.path.dirname(os.path.dirname(__file__)) +
+                        os.pathsep + os.environ.get('PYTHONPATH', '')))
+                try:
+                    rc = main(
+                        args=['--workers', '1'],
+                        stdout=stdout_stderr, stderr=stdout_stderr)
+                finally:
+                    os.environ = env_bck
+            finally:
+                executor.USE_COLOR = use_color_bck
+        finally:
+            os.chdir(cwd_bck)
+
+        assert rc == 1
+        expected = get_expected_output('pull').decode()
+        assert stdout_stderr.getvalue() == expected
+
     def test_reimport(self):
         cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
         subprocess.check_output(

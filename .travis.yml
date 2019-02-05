@@ -19,6 +19,6 @@ matrix:
 install:
   - pip install coverage flake8 flake8-docstrings flake8-import-order pytest PyYAML
 script:
-  - pytest -s -v test
+  - PYTHONPATH=`pwd` pytest -s -v test
 notifications:
   email: false

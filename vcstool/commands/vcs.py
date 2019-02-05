@@ -5,9 +5,12 @@ import sys
 from vcstool.commands.help import get_entrypoint
 from vcstool.commands.help import get_parser
 from vcstool.commands.help import main as help_main
+from vcstool.streams import set_streams
 
 
-def main(args=None):
+def main(args=None, stdout=None, stderr=None):
+    set_streams(stdout=stdout, stderr=stderr)
+
     # no help to extract command first (which might be followed by --help)
     parser = get_parser(add_help=False)
     ns, _ = parser.parse_known_args(args)

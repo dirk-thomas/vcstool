@@ -6,9 +6,12 @@ import sys
 from pkg_resources import load_entry_point
 from vcstool.clients import vcstool_clients
 from vcstool.commands import vcstool_commands
+from vcstool.streams import set_streams
 
 
-def main(args=None):
+def main(args=None, stdout=None, stderr=None):
+    set_streams(stdout=stdout, stderr=stderr)
+
     # no help to extract command first (which might be followed by --help)
     parser = get_parser(add_help=False)
     ns, _ = parser.parse_known_args(args)

@@ -10,6 +10,7 @@ from vcstool.executor import execute_jobs
 from vcstool.executor import generate_jobs
 from vcstool.executor import output_repositories
 from vcstool.executor import output_results
+from vcstool.streams import set_streams
 
 from .command import add_common_arguments
 from .command import Command
@@ -84,7 +85,9 @@ def get_path_of_result(result):
     return path
 
 
-def main(args=None):
+def main(args=None, stdout=None, stderr=None):
+    set_streams(stdout=stdout, stderr=stderr)
+
     parser = get_parser()
     add_common_arguments(parser, skip_hide_empty=True, single_path=True)
     args = parser.parse_args(args)

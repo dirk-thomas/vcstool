@@ -1,6 +1,8 @@
 import argparse
 import sys
 
+from vcstool.streams import set_streams
+
 from .command import Command
 from .command import simple_main
 
@@ -22,7 +24,8 @@ def get_parser():
     return parser
 
 
-def main(args=None):
+def main(args=None, stdout=None, stderr=None):
+    set_streams(stdout=stdout, stderr=stderr)
     parser = get_parser()
     return simple_main(parser, PushCommand, args)
 

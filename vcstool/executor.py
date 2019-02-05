@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import logging
 import os
 try:
@@ -13,10 +15,11 @@ logging.basicConfig()
 
 
 def output_repositories(clients):
+    from vcstool.streams import stdout
     ordered_clients = {client.path: client for client in clients}
     for k in sorted(ordered_clients.keys()):
         client = ordered_clients[k]
-        print('%s (%s)' % (k, client.__class__.type))
+        print('%s (%s)' % (k, client.__class__.type), file=stdout)
 
 
 def generate_jobs(clients, command):
@@ -69,6 +72,7 @@ def get_ready_job(jobs):
 def execute_jobs(
     jobs, show_progress=False, number_of_workers=10, debug_jobs=False
 ):
+    from vcstool.streams import stdout
     if debug_jobs:
         logger.setLevel(logging.DEBUG)
 
@@ -105,14 +109,14 @@ def execute_jobs(
         running_job_paths.remove(result['job']['client'].path)
         if show_progress and len(jobs) > 1:
             if result['returncode'] == NotImplemented:
-                sys.stdout.write('s')
+                stdout.write('s')
             elif result['returncode']:
-                sys.stdout.write('E')
+                stdout.write('E')
             else:
-                sys.stdout.write('.')
+                stdout.write('.')
             if debug_jobs:
-                sys.stdout.write('\n')
-            sys.stdout.flush()
+                stdout.write('\n')
+            stdout.flush()
         result.update(job)
         results.append(result)
         if pending_jobs:
@@ -129,7 +133,7 @@ def execute_jobs(
         if running_job_paths:
             logger.debug('ongoing ' + str(running_job_paths))
     if show_progress and len(jobs) > 1 and not debug_jobs:
-        print('')  # finish progress line
+        print('', file=stdout)  # finish progress line
 
     # join all workers
     for w in workers:
@@ -206,6 +210,7 @@ class Worker(threading.Thread):
 
 
 def output_result(result, hide_empty=False):
+    from vcstool.streams import stdout
     output = result['output']
     if hide_empty and result['returncode'] is None:
         output = ''
@@ -224,12 +229,15 @@ def output_result(result, hide_empty=False):
         print(
             ansi('bluef') + '=== ' +
             ansi('boldon') + client.path + ansi('boldoff') +
-            ' (' + client.__class__.type + ') ===' + ansi('reset'))
+            ' (' + client.__class__.type + ') ===' + ansi('reset'),
+            file=stdout)
     if output:
         try:
-            print(output)
+            print(output, file=stdout)
         except UnicodeEncodeError:
-            print(output.encode(sys.getdefaultencoding(), 'replace'))
+            print(
+                output.encode(sys.getdefaultencoding(), 'replace'),
+                file=stdout)
 
 
 def output_results(results, output_handler=output_result, hide_empty=False):

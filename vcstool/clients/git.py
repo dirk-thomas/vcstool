@@ -248,6 +248,18 @@ class GitClient(VcsClientBase):
             cmd = result_fetch['cmd']
             output = result_fetch['output']
 
+            if command.recursive:
+                cmd_submodule = [
+                    GitClient._executable, 'submodule', 'update', '--init']
+                result_submodule = self._run_command(cmd_submodule)
+                if result_submodule['returncode']:
+                    result_submodule['output'] = \
+                        'Could not init/update submodules: %s' % \
+                        result_submodule['output']
+                    return result_submodule
+                cmd += ' && ' + ' '.join(cmd_submodule)
+                output = '\n'.join([output, result_submodule['output']])
+
         else:
             cmd_clone = [GitClient._executable, 'clone']
             if command.recursive:

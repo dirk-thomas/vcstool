@@ -51,7 +51,7 @@ def get_parser():
 
 def get_repositories(yaml_file):
     try:
-        root = yaml.load(yaml_file)
+        root = yaml.safe_load(yaml_file)
     except yaml.YAMLError as e:
         raise RuntimeError('Input data is not valid yaml format: %s' % e)
 

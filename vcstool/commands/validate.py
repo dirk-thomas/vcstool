@@ -83,12 +83,12 @@ def output_result(result, hide_empty=False):
     if output or not hide_empty:
         client = result['client']
         command = result['command']
-        
         print(
             (ansi('redf') if result['returncode'] else ansi('bluef')) +
             ('INVALID ' if result['returncode'] else 'VALID ') +
-            ansi('bluef') + ansi('boldon') + command.real_path + ansi('boldoff') +
-            ' (' + client.__class__.type + ') ' + ansi('reset'),
+            ansi('bluef') + ansi('boldon') + command.real_path +
+            ansi('boldoff') + ' (' + client.__class__.type + ') ' +
+            ansi('reset'),
             file=stdout)
     if result['command'].debug and result['returncode']:
         if output:

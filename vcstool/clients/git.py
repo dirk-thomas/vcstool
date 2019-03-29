@@ -317,39 +317,6 @@ class GitClient(VcsClientBase):
             'returncode': 0 if remote_urls else 1
         }
 
-    def validate(self, command):
-        if not command.url:
-            return {
-                'cmd': '',
-                'cwd': self.path,
-                'output': "Repository data lacks the 'url' value",
-                'returncode': 1
-            }
-
-        self._check_executable()
-
-        cmd_ls_remote = [GitClient._executable, 'ls-remote']
-        cmd_ls_remote += ['-q', '--exit-code']
-        cmd_ls_remote += [command.url]
-        result_ls_remote = self._run_command(
-            cmd_ls_remote,
-            retry=command.retry,
-            env={'GIT_TERMINAL_PROMPT': '0'})
-        if result_ls_remote['returncode']:
-            result_ls_remote['output'] = \
-                "Could not contact remote repository '%s': %s" % \
-                (command.url, result_ls_remote['output'])
-            return result_ls_remote
-        cmd = result_ls_remote['cmd']
-        output = result_ls_remote['output']
-
-        return {
-            'cmd': cmd,
-            'cwd': self.path,
-            'output': output,
-            'returncode': 0
-        }
-
     def log(self, command):
         self._check_executable()
         if command.limit_tag:
@@ -427,6 +394,39 @@ class GitClient(VcsClientBase):
         if command.quiet:
             cmd += ['--untracked-files=no']
         return self._run_command(cmd)
+
+    def validate(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        self._check_executable()
+
+        cmd_ls_remote = [GitClient._executable, 'ls-remote']
+        cmd_ls_remote += ['-q', '--exit-code']
+        cmd_ls_remote += [command.url]
+        result_ls_remote = self._run_command(
+            cmd_ls_remote,
+            retry=command.retry,
+            env={'GIT_TERMINAL_PROMPT': '0'})
+        if result_ls_remote['returncode']:
+            result_ls_remote['output'] = \
+                "Could not contact remote repository '%s': %s" % \
+                (command.url, result_ls_remote['output'])
+            return result_ls_remote
+        cmd = result_ls_remote['cmd']
+        output = result_ls_remote['output']
+
+        return {
+            'cmd': cmd,
+            'cwd': self.path,
+            'output': output,
+            'returncode': 0
+        }
 
     def _check_color(self, cmd):
         if not USE_COLOR:

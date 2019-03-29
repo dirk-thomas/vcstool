@@ -209,6 +209,37 @@ class SvnClient(VcsClientBase):
             cmd += ['--quiet']
         return self._run_command(cmd)
 
+    def validate(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        self._check_executable()
+
+        cmd_ls_remote = [SvnClient._executable, 'ls']
+        cmd_ls_remote += [command.url]
+        result_ls_remote = self._run_command(
+            cmd_ls_remote,
+            retry=command.retry)
+        if result_ls_remote['returncode']:
+            result_ls_remote['output'] = \
+                "Could not contact remote repository '%s': %s" % \
+                (command.url, result_ls_remote['output'])
+            return result_ls_remote
+        cmd = result_ls_remote['cmd']
+        output = result_ls_remote['output']
+
+        return {
+            'cmd': cmd,
+            'cwd': self.path,
+            'output': output,
+            'returncode': 0
+        }
+
     def _check_executable(self):
         assert SvnClient._executable is not None, \
             "Could not find 'svn' executable"

@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import argparse
-import os
 import sys
 
 from vcstool.clients import vcstool_clients
@@ -25,6 +24,7 @@ class ValidateCommand(Command):
         self.version = version
         self.retry = args.retry
         self.real_path = args.real_path
+
 
 def get_parser():
     parser = argparse.ArgumentParser(
@@ -99,6 +99,7 @@ def output_result(result, hide_empty=False):
     else:
         print('Valid', file=stdout)
 
+
 def output_results(results, output_handler=output_result, hide_empty=False):
     # output results in alphabetic order
     path_to_idx = {
@@ -136,7 +137,8 @@ def main(args=None, stdout=None, stderr=None):
     any_error = any(r['returncode'] for r in results)
 
     if any_error:
-        print('An error was encountered while validating an endpoint.', file=sys.stderr)
+        print('An error was encountered while validating an endpoint.',
+              file=sys.stderr)
         return 1
     else:
         print('Endpoint validation succeeded!')

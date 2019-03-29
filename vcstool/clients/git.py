@@ -317,7 +317,6 @@ class GitClient(VcsClientBase):
             'returncode': 0 if remote_urls else 1
         }
 
-
     def validate(self, command):
         if not command.url:
             return {
@@ -329,9 +328,13 @@ class GitClient(VcsClientBase):
 
         self._check_executable()
 
-        cmd_ls_remote = [GitClient._executable, 'ls-remote', '-q', '--exit-code']
+        cmd_ls_remote = [GitClient._executable, 'ls-remote']
+        cmd_ls_remote += ['-q', '--exit-code']
         cmd_ls_remote += [command.url]
-        result_ls_remote = self._run_command(cmd_ls_remote, retry=command.retry, env={'GIT_TERMINAL_PROMPT': '0'})
+        result_ls_remote = self._run_command(
+            cmd_ls_remote,
+            retry=command.retry,
+            env={'GIT_TERMINAL_PROMPT': '0'})
         if result_ls_remote['returncode']:
             result_ls_remote['output'] = \
                 "Could not contact remote repository '%s': %s" % \

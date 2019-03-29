@@ -135,7 +135,6 @@ class TestCommands(unittest.TestCase):
         assert output == expected or output == expected.replace(b'... ', b' ')
 
     def test_validate(self):
-        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
         output = run_command(
             'validate', ['--input', REPOS_FILE, '.'])
         expected = get_expected_output('validate')

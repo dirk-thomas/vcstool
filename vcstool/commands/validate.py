@@ -2,9 +2,9 @@ from __future__ import print_function
 
 import sys
 
+from vcstool.commands import import_
 from vcstool.executor import ansi
 from vcstool.streams import set_streams
-from vcstool.commands import import_
 
 from .command import add_common_arguments
 from .command import Command
@@ -33,7 +33,7 @@ def main(args=None, stdout=None, stderr=None):
         path_help='Base path to clone repositories to')
     args = parser.parse_args(args)
     try:
-        repos = import_.get_repositories(args.input)
+        import_.get_repositories(args.input)
     except RuntimeError as e:
         print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
         return 1

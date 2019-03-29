@@ -134,6 +134,13 @@ class TestCommands(unittest.TestCase):
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
 
+    def test_validate(self):
+        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
+        output = run_command(
+            'validate', ['--input', REPOS_FILE, '.'])
+        expected = get_expected_output('validate')
+        self.assertEqual(output, expected)
+
     def test_remote(self):
         output = run_command('remotes', args=['--repos'])
         expected = get_expected_output('remotes_repos')

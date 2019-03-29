@@ -83,12 +83,14 @@ def output_result(result, hide_empty=False):
     if output or not hide_empty:
         client = result['client']
         command = result['command']
+        
         print(
-            ansi('bluef') + '=== ' +
-            ansi('boldon') + command.real_path + ansi('boldoff') +
-            ' (' + client.__class__.type + ') ===' + ansi('reset'),
+            (ansi('redf') if result['returncode'] else ansi('bluef')) +
+            ('INVALID ' if result['returncode'] else 'VALID ') +
+            ansi('bluef') + ansi('boldon') + command.real_path + ansi('boldoff') +
+            ' (' + client.__class__.type + ') ' + ansi('reset'),
             file=stdout)
-    if result['returncode']:
+    if result['command'].debug and result['returncode']:
         if output:
             try:
                 print(output, file=stdout)
@@ -96,8 +98,6 @@ def output_result(result, hide_empty=False):
                 print(
                     output.encode(sys.getdefaultencoding(), 'replace'),
                     file=stdout)
-    else:
-        print('Valid', file=stdout)
 
 
 def output_results(results, output_handler=output_result, hide_empty=False):
@@ -132,6 +132,7 @@ def main(args=None, stdout=None, stderr=None):
     results = execute_jobs(
         jobs, number_of_workers=args.workers,
         debug_jobs=args.debug)
+
     output_results(results)
 
     any_error = any(r['returncode'] for r in results)

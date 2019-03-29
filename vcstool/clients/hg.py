@@ -178,6 +178,37 @@ class HgClient(VcsClientBase):
             'returncode': 0
         }
 
+    def validate(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        self._check_executable()
+
+        cmd_ls_remote = [HgClient._executable, '--noninteractive', 'identify']
+        cmd_ls_remote += [command.url]
+        result_ls_remote = self._run_command(
+            cmd_ls_remote,
+            retry=command.retry)
+        if result_ls_remote['returncode']:
+            result_ls_remote['output'] = \
+                "Could not contact remote repository '%s': %s" % \
+                (command.url, result_ls_remote['output'])
+            return result_ls_remote
+        cmd = result_ls_remote['cmd']
+        output = result_ls_remote['output']
+
+        return {
+            'cmd': cmd,
+            'cwd': self.path,
+            'output': output,
+            'returncode': 0
+        }
+
     def log(self, command):
         self._check_executable()
         if command.limit_tag:

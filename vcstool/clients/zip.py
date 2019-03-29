@@ -127,7 +127,7 @@ class ZipClient(VcsClientBase):
 
         # test url
         try:
-            response = test_url(command.url, retry=command.retry)
+            test_url(command.url, retry=command.retry)
         except URLError as e:
             return {
                 'cmd': '',

@@ -106,13 +106,14 @@ class TarClient(VcsClientBase):
 
         # test url
         try:
-            response = test_url(command.url, retry=command.retry)
+            test_url(command.url, retry=command.retry)
         except URLError as e:
             return {
                 'cmd': '',
                 'cwd': self.path,
                 'output':
-                    "Could not contact tarball url '%s': %s" % (command.url, e),
+                    "Could not contact tarball url '%s': %s" %
+                    (command.url, e),
                 'returncode': 1
             }
         return {

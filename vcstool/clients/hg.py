@@ -253,18 +253,36 @@ class HgClient(VcsClientBase):
 
         self._check_executable()
 
-        cmd_ls_remote = [HgClient._executable, '--noninteractive', 'identify']
-        cmd_ls_remote += [command.url]
-        result_ls_remote = self._run_command(
-            cmd_ls_remote,
+        cmd_id_repo = [
+            HgClient._executable, '--noninteractive', 'identify',
+            command.url]
+        result_id_repo = self._run_command(
+            cmd_id_repo,
             retry=command.retry)
-        if result_ls_remote['returncode']:
-            result_ls_remote['output'] = \
+        if result_id_repo['returncode']:
+            result_id_repo['output'] = \
                 "Could not contact remote repository '%s': %s" % \
-                (command.url, result_ls_remote['output'])
-            return result_ls_remote
-        cmd = result_ls_remote['cmd']
-        output = result_ls_remote['output']
+                (command.url, result_id_repo['output'])
+            return result_id_repo
+
+        if command.version:
+            cmd_id_ver = [
+                HgClient._executable, '--noninteractive', 'identify',
+                '-r', command.version, command.url]
+            result_id_ver = self._run_command(
+                cmd_id_ver,
+                retry=command.retry)
+            if result_id_ver['returncode']:
+                result_id_ver['output'] = \
+                    "Specified version not found on remote repository '%s':'%s' : %s" % \
+                    (command.url, command.version, result_id_ver['output'])
+                return result_id_ver
+
+            cmd = result_id_ver['cmd']
+            output = result_id_ver['output']
+        else:
+            cmd = result_id_repo['cmd']
+            output = result_id_repo['output']
 
         return {
             'cmd': cmd,

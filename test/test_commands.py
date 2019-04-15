@@ -6,6 +6,7 @@ import unittest
 
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
+REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -136,7 +137,7 @@ class TestCommands(unittest.TestCase):
 
     def test_validate(self):
         output = run_command(
-            'validate', ['--input', REPOS_FILE, '.'])
+            'validate', ['--input', REPOS2_FILE, '.'])
         expected = get_expected_output('validate')
         self.assertEqual(output, expected)
 

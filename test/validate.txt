@@ -1,9 +1,13 @@
 Validating format...
 Format validation succeeded!
 Validating endpoints...
-VALID immutable/hash (git) 
-VALID immutable/hash_tar (tar) 
-VALID immutable/hash_zip (zip) 
-VALID immutable/tag (git) 
-VALID vcstool (git) 
+VALID immutable/git_branch (git) 
+VALID immutable/git_hash (git) 
+VALID immutable/git_tag (git) 
+VALID immutable/hg_branch (hg) 
+VALID immutable/hg_hash (hg) 
+VALID immutable/hg_tag (hg) 
+VALID immutable/svn_ver (svn) 
+VALID immutable/tar_hash (tar) 
+VALID immutable/zip_hash (zip) 
 Endpoint validation succeeded!

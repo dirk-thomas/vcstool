@@ -274,7 +274,8 @@ class HgClient(VcsClientBase):
                 retry=command.retry)
             if result_id_ver['returncode']:
                 result_id_ver['output'] = \
-                    "Specified version not found on remote repository '%s':'%s' : %s" % \
+                    "Specified version not found on remote repository " + \
+                    "'%s':'%s' : %s" % \
                     (command.url, command.version, result_id_ver['output'])
                 return result_id_ver
 

@@ -220,18 +220,35 @@ class SvnClient(VcsClientBase):
 
         self._check_executable()
 
-        cmd_ls_remote = [SvnClient._executable, 'ls']
-        cmd_ls_remote += [command.url]
-        result_ls_remote = self._run_command(
-            cmd_ls_remote,
+        cmd_info_repo = [SvnClient._executable, 'info', command.url]
+        result_info_repo = self._run_command(
+            cmd_info_repo,
             retry=command.retry)
-        if result_ls_remote['returncode']:
-            result_ls_remote['output'] = \
+        if result_info_repo['returncode']:
+            result_info_repo['output'] = \
                 "Could not contact remote repository '%s': %s" % \
-                (command.url, result_ls_remote['output'])
-            return result_ls_remote
-        cmd = result_ls_remote['cmd']
-        output = result_ls_remote['output']
+                (command.url, result_info_repo['output'])
+            return result_info_repo
+
+        if command.version:
+            cmd_info_ver = [
+                SvnClient._executable, 'info',
+                command.url + "@" + command.version]
+            result_info_ver = self._run_command(
+                cmd_info_ver,
+                retry=command.retry)
+
+            if result_info_ver['returncode']:
+                result_info_ver['output'] = \
+                    "Specified version not found on remote repository" + \
+                    "'%s':'%s' : %s" % (command.url, result_info_ver['output'])
+                return result_info_ver
+
+            cmd = result_info_ver['cmd']
+            output = result_info_ver['output']
+        else:
+            cmd = result_info_repo['cmd']
+            output = result_info_repo['output']
 
         return {
             'cmd': cmd,

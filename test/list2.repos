@@ -1,0 +1,37 @@
+repositories:
+  immutable/git_branch:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: master
+  immutable/git_hash:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 377d5b3d03c212f015cc832fdb368f4534d0d583
+  immutable/git_tag:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 0.1.27
+  immutable/hg_branch:
+    type: hg
+    url: http://icedtea.classpath.org/hg/icedtea8
+    version: cacao
+  immutable/hg_hash:
+    type: hg
+    url: http://icedtea.classpath.org/hg/icedtea8
+    version: 97c468298911
+  immutable/hg_tag:
+    type: hg
+    url: http://icedtea.classpath.org/hg/icedtea8
+    version: icedtea-3.0.0
+  immutable/svn_ver:
+    type: svn
+    url: http://svn.red-bean.com/repos/test
+    version: 3
+  immutable/tar_hash:
+    type: tar
+    url: https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.tar.gz
+    version: vcstool-377d5b3d03c212f015cc832fdb368f4534d0d583
+  immutable/zip_hash:
+    type: zip
+    url: https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.zip
+    version: vcstool-377d5b3d03c212f015cc832fdb368f4534d0d583

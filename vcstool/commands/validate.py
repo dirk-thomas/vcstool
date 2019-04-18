@@ -84,13 +84,16 @@ def output_result(result, hide_empty=False):
         client = result['client']
         command = result['command']
         print(
-            (ansi('redf') if result['returncode'] else ansi('bluef')) +
-            ('INVALID ' if result['returncode'] else 'VALID ') +
+            (ansi('redf') if result['returncode'] != NotImplemented and
+                result['returncode'] else ansi('bluef')) +
+            ('INVALID ' if result['returncode'] != NotImplemented and
+                result['returncode'] else 'VALID ') +
             ansi('bluef') + ansi('boldon') + command.real_path +
             ansi('boldoff') + ' (' + client.__class__.type + ') ' +
             ansi('reset'),
             file=stdout)
-    if result['command'].debug and result['returncode']:
+    if (result['command'].debug and result['returncode']) or \
+            result['returncode'] == NotImplemented:
         if output:
             try:
                 print(output, file=stdout)
@@ -135,7 +138,8 @@ def main(args=None, stdout=None, stderr=None):
 
     output_results(results)
 
-    any_error = any(r['returncode'] for r in results)
+    any_error = any((r['returncode'] != NotImplemented and
+                     r['returncode']) for r in results)
 
     if any_error:
         print('An error was encountered while validating an endpoint.',

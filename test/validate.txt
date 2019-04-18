@@ -3,6 +3,7 @@ Format validation succeeded!
 Validating endpoints...
 VALID immutable/git_branch (git) 
 VALID immutable/git_hash (git) 
+Remote repository validated but requested version is not ref so unable to verify.
 VALID immutable/git_tag (git) 
 VALID immutable/hg_branch (hg) 
 VALID immutable/hg_hash (hg) 

@@ -418,8 +418,55 @@ class GitClient(VcsClientBase):
                 "Could not contact remote repository '%s': %s" % \
                 (command.url, result_ls_remote['output'])
             return result_ls_remote
-        cmd = result_ls_remote['cmd']
-        output = result_ls_remote['output']
+
+        if command.version:
+            hashes = []
+            refs = []
+            ref_found = False
+            output_lines = result_ls_remote['output'].splitlines()
+
+            for line in output_lines:
+                hash_and_ref = line.split()
+                hashes.append(hash_and_ref[0])
+
+                # ignore pull request refs
+                if hash_and_ref[1].find('refs/pull/') == -1:
+                    if hash_and_ref[1].find('refs/tags/') > -1:
+                        refs.append(hash_and_ref[1][10:])
+                    elif hash_and_ref[1].find('refs/heads/') > -1:
+                        refs.append(hash_and_ref[1][11:])
+                    else:
+                        refs.append(hash_and_ref[1])
+
+            # test for refs first
+            for _ref in refs:
+                if command.version == _ref:
+                    ref_found = True
+                    break
+
+            if not ref_found:
+                for _hash in hashes:
+                    if _hash.find(command.version) == 0:
+                        ref_found = True
+                        break
+
+            if not ref_found:
+                cmd = result_ls_remote['cmd']
+                output = 'Remote repository validated but requested '
+                output += 'version is not ref so unable to verify.'
+
+                return {
+                    'cmd': cmd,
+                    'cwd': self.path,
+                    'output': output,
+                    'returncode': NotImplemented
+                }
+            else:
+                cmd = result_ls_remote['cmd']
+                output = result_ls_remote['output']
+        else:
+            cmd = result_ls_remote['cmd']
+            output = result_ls_remote['output']
 
         return {
             'cmd': cmd,

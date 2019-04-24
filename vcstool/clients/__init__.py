@@ -36,6 +36,12 @@ try:
 except ImportError:
     pass
 
+try:
+    from .git-lfs import GitLfsClient
+    vcstool_clients.append(GitLfsClient)
+except ImportError:
+    pass
+
 _client_types = [c.type for c in vcstool_clients]
 if len(_client_types) != len(set(_client_types)):
     raise RuntimeError(

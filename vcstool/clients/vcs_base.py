@@ -73,6 +73,8 @@ class VcsClientBase(object):
 
 
 def run_command(cmd, cwd, env=None):
+    if not os.path.exists(cwd):
+        cwd = None
     result = {'cmd': ' '.join(cmd), 'cwd': cwd}
     try:
         proc = subprocess.Popen(

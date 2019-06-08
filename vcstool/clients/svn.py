@@ -226,7 +226,7 @@ class SvnClient(VcsClientBase):
             retry=command.retry)
         if result_info_repo['returncode']:
             result_info_repo['output'] = \
-                "Could not contact remote repository '%s': %s" % \
+                "Failed to contact remote repository '%s': %s" % \
                 (command.url, result_info_repo['output'])
             return result_info_repo
 
@@ -245,16 +245,18 @@ class SvnClient(VcsClientBase):
                 return result_info_ver
 
             cmd = result_info_ver['cmd']
-            output = result_info_ver['output']
+            output = "Found svn repository '%s' with revision '%s'" % \
+                (command.url, command.version)
         else:
             cmd = result_info_repo['cmd']
-            output = result_info_repo['output']
+            output = "Found svn repository '%s' with default branch" % \
+                command.url
 
         return {
             'cmd': cmd,
             'cwd': self.path,
             'output': output,
-            'returncode': 0
+            'returncode': None
         }
 
     def _check_executable(self):

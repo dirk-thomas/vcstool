@@ -133,12 +133,12 @@ class ZipClient(VcsClientBase):
                 'cmd': '',
                 'cwd': self.path,
                 'output':
-                    "Could not contact zip url '%s': %s" % (command.url, e),
+                    "Failed to contact zip url '%s': %s" % (command.url, e),
                 'returncode': 1
             }
         return {
-            'cmd': '',
+            'cmd': 'http HEAD',
             'cwd': self.path,
-            'output': "Contacted zip url '%s'" % command.url,
-            'returncode': 0
+            'output': "Zip url '%s' exists" % command.url,
+            'returncode': None
         }

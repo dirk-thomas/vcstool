@@ -112,13 +112,13 @@ class TarClient(VcsClientBase):
                 'cmd': '',
                 'cwd': self.path,
                 'output':
-                    "Could not contact tarball url '%s': %s" %
+                    "Failed to contact tarball url '%s': %s" %
                     (command.url, e),
                 'returncode': 1
             }
         return {
-            'cmd': '',
+            'cmd': 'http HEAD url',
             'cwd': self.path,
-            'output': "Contacted tarball url '%s'" % command.url,
-            'returncode': 0
+            'output': "Tarball url '%s' exists" % command.url,
+            'returncode': None
         }

@@ -1,0 +1,3 @@
+.........
+=== immutable/git_hash (git) ===
+Found git repository 'https://github.com/dirk-thomas/vcstool.git' but unable to verify non-branch / non-tag ref '377d5b3d03c212f015cc832fdb368f4534d0d583' without cloning the repo

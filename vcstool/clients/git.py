@@ -409,20 +409,21 @@ class GitClient(VcsClientBase):
         cmd_ls_remote = [GitClient._executable, 'ls-remote']
         cmd_ls_remote += ['-q', '--exit-code']
         cmd_ls_remote += [command.url]
+        env = os.environ.copy()
+        env['GIT_TERMINAL_PROMPT'] = '0'
         result_ls_remote = self._run_command(
             cmd_ls_remote,
             retry=command.retry,
-            env={'GIT_TERMINAL_PROMPT': '0'})
+            env=env)
         if result_ls_remote['returncode']:
             result_ls_remote['output'] = \
-                "Could not contact remote repository '%s': %s" % \
+                "Failed to contact remote repository '%s': %s" % \
                 (command.url, result_ls_remote['output'])
             return result_ls_remote
 
         if command.version:
             hashes = []
             refs = []
-            ref_found = False
             output_lines = result_ls_remote['output'].splitlines()
 
             for line in output_lines:
@@ -430,49 +431,49 @@ class GitClient(VcsClientBase):
                 hashes.append(hash_and_ref[0])
 
                 # ignore pull request refs
-                if hash_and_ref[1].find('refs/pull/') == -1:
-                    if hash_and_ref[1].find('refs/tags/') > -1:
+                if not hash_and_ref[1].startswith('refs/pull/'):
+                    if hash_and_ref[1].startswith('refs/tags/'):
                         refs.append(hash_and_ref[1][10:])
-                    elif hash_and_ref[1].find('refs/heads/') > -1:
+                    elif hash_and_ref[1].startswith('refs/heads/'):
                         refs.append(hash_and_ref[1][11:])
                     else:
                         refs.append(hash_and_ref[1])
 
             # test for refs first
-            for _ref in refs:
-                if command.version == _ref:
-                    ref_found = True
-                    break
+            ref_found = command.version in refs
 
             if not ref_found:
                 for _hash in hashes:
-                    if _hash.find(command.version) == 0:
+                    if _hash.startswith(command.version):
                         ref_found = True
                         break
 
             if not ref_found:
                 cmd = result_ls_remote['cmd']
-                output = 'Remote repository validated but requested '
-                output += 'version is not ref so unable to verify.'
+                output = "Found git repository '%s' but " % command.url + \
+                    'unable to verify non-branch / non-tag ref ' + \
+                    "'%s' without cloning the repo" % command.version
 
                 return {
                     'cmd': cmd,
                     'cwd': self.path,
                     'output': output,
-                    'returncode': NotImplemented
+                    'returncode': 0
                 }
             else:
                 cmd = result_ls_remote['cmd']
-                output = result_ls_remote['output']
+                output = "Found git repository '%s' with ref '%s'" % \
+                    (command.url, command.version)
         else:
             cmd = result_ls_remote['cmd']
-            output = result_ls_remote['output']
+            output = "Found git repository '%s' with default branch" % \
+                command.url
 
         return {
             'cmd': cmd,
             'cwd': self.path,
             'output': output,
-            'returncode': 0
+            'returncode': None
         }
 
     def _check_color(self, cmd):

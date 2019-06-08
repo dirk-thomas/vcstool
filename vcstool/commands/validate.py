@@ -7,6 +7,7 @@ from vcstool.clients import vcstool_clients
 from vcstool.commands.import_ import get_repositories
 from vcstool.executor import ansi
 from vcstool.executor import execute_jobs
+from vcstool.executor import output_results
 from vcstool.streams import set_streams
 
 from .command import add_common_arguments
@@ -23,7 +24,6 @@ class ValidateCommand(Command):
         self.url = url
         self.version = version
         self.retry = args.retry
-        self.real_path = args.real_path
 
 
 def get_parser():
@@ -55,8 +55,8 @@ def generate_jobs(repos, args):
             jobs.append(job)
             continue
 
-        client = clients[0](args.path)
-        args.real_path = path
+        client = clients[0](path)
+        args.path = None  # expected to be present
         command = ValidateCommand(
             args, repo['url'],
             str(repo['version']) if 'version' in repo else None)
@@ -65,61 +65,12 @@ def generate_jobs(repos, args):
     return jobs
 
 
-def output_result(result, hide_empty=False):
-    from vcstool.streams import stdout
-    output = result['output']
-    if hide_empty and result['returncode'] is None:
-        output = ''
-    if result['returncode'] == NotImplemented:
-        if output:
-            output = ansi('yellowf') + output + ansi('reset')
-    elif result['returncode']:
-        if not output:
-            output = 'Failed with return code %d' % result['returncode']
-        output = ansi('redf') + output + ansi('reset')
-    elif not result['cmd']:
-        if output:
-            output = ansi('yellowf') + output + ansi('reset')
-    if output or not hide_empty:
-        client = result['client']
-        command = result['command']
-        print(
-            (ansi('redf') if result['returncode'] != NotImplemented and
-                result['returncode'] else ansi('bluef')) +
-            ('INVALID ' if result['returncode'] != NotImplemented and
-                result['returncode'] else 'VALID ') +
-            ansi('bluef') + ansi('boldon') + command.real_path +
-            ansi('boldoff') + ' (' + client.__class__.type + ') ' +
-            ansi('reset'),
-            file=stdout)
-    if (result['command'].debug and result['returncode']) or \
-            result['returncode'] == NotImplemented:
-        if output:
-            try:
-                print(output, file=stdout)
-            except UnicodeEncodeError:
-                print(
-                    output.encode(sys.getdefaultencoding(), 'replace'),
-                    file=stdout)
-
-
-def output_results(results, output_handler=output_result, hide_empty=False):
-    # output results in alphabetic order
-    path_to_idx = {
-        result['command'].real_path: i for i, result in enumerate(results)}
-    idxs_in_order = [path_to_idx[path] for path in sorted(path_to_idx.keys())]
-    for i in idxs_in_order:
-        output_handler(results[i], hide_empty=hide_empty)
-
-
 def main(args=None, stdout=None, stderr=None):
     set_streams(stdout=stdout, stderr=stderr)
 
-    print('Validating format...')
-
     parser = get_parser()
     add_common_arguments(
-        parser, skip_hide_empty=True, skip_nested=True, single_path=True)
+        parser, skip_nested=True, path_nargs=False)
     args = parser.parse_args(args)
     try:
         repos = get_repositories(args.input)
@@ -127,27 +78,16 @@ def main(args=None, stdout=None, stderr=None):
         print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
         return 1
 
-    print('Format validation succeeded!')
-    print('Validating endpoints...')
-
     jobs = generate_jobs(repos, args)
 
     results = execute_jobs(
-        jobs, number_of_workers=args.workers,
+        jobs, show_progress=True, number_of_workers=args.workers,
         debug_jobs=args.debug)
 
-    output_results(results)
+    output_results(results, hide_empty=args.hide_empty)
 
-    any_error = any((r['returncode'] != NotImplemented and
-                     r['returncode']) for r in results)
-
-    if any_error:
-        print('An error was encountered while validating an endpoint.',
-              file=sys.stderr)
-        return 1
-    else:
-        print('Endpoint validation succeeded!')
-        return 0
+    any_error = any(r['returncode'] for r in results)
+    return 1 if any_error else 0
 
 
 if __name__ == '__main__':

@@ -261,7 +261,7 @@ class HgClient(VcsClientBase):
             retry=command.retry)
         if result_id_repo['returncode']:
             result_id_repo['output'] = \
-                "Could not contact remote repository '%s': %s" % \
+                "Failed to contact remote repository '%s': %s" % \
                 (command.url, result_id_repo['output'])
             return result_id_repo
 
@@ -280,16 +280,18 @@ class HgClient(VcsClientBase):
                 return result_id_ver
 
             cmd = result_id_ver['cmd']
-            output = result_id_ver['output']
+            output = "Found hg repository '%s' with changeset '%s'" % \
+                (command.url, command.version)
         else:
             cmd = result_id_repo['cmd']
-            output = result_id_repo['output']
+            output = "Found hg repository '%s' with default branch" % \
+                command.url
 
         return {
             'cmd': cmd,
             'cwd': self.path,
             'output': output,
-            'returncode': 0
+            'returncode': None
         }
 
     def _check_color(self, cmd):

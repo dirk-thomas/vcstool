@@ -93,6 +93,7 @@ Only for this command vcstool supports the pseudo clients ``tar`` and ``zip`` wh
 For those two types the ``version`` key is optional.
 If specified only entries from the archive which are in the subfolder specified by the version value are being extracted.
 
+
 Validate repositories file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -102,8 +103,6 @@ The data of a previously-exported file or hand-generated file are piped in::
   vcs validate < my.repos
 
 The ``validate`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
-
-If a file fails to validate, an error will be printed and the command will exit. If the file passes validation, the response "Validation succeeded!" will be printed.
 
 
 Advanced features

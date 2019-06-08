@@ -89,7 +89,7 @@ def main(args=None, stdout=None, stderr=None):
     set_streams(stdout=stdout, stderr=stderr)
 
     parser = get_parser()
-    add_common_arguments(parser, skip_hide_empty=True, single_path=True)
+    add_common_arguments(parser, skip_hide_empty=True, path_nargs='?')
     args = parser.parse_args(args)
 
     command = ExportCommand(args)

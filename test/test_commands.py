@@ -137,12 +137,17 @@ class TestCommands(unittest.TestCase):
 
     def test_validate(self):
         output = run_command(
-            'validate', ['--input', REPOS2_FILE])
+            'validate', ['--input', REPOS_FILE])
         expected = get_expected_output('validate')
         self.assertEqual(output, expected)
 
         output = run_command(
-            'validate', ['--hide-empty', '--input', REPOS2_FILE])
+            'validate', ['--input', REPOS2_FILE])
+        expected = get_expected_output('validate2')
+        self.assertEqual(output, expected)
+
+        output = run_command(
+            'validate', ['--hide-empty', '--input', REPOS_FILE])
         expected = get_expected_output('validate_hide')
         self.assertEqual(output, expected)
 

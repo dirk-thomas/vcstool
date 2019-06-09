@@ -1,0 +1,9 @@
+....
+=== hg/branch (hg) ===
+Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset 'cacao'
+=== hg/hash (hg) ===
+Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset '97c468298911'
+=== hg/tag (hg) ===
+Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset 'icedtea-3.0.0'
+=== svn/rev (svn) ===
+Found svn repository 'http://svn.red-bean.com/repos/test' with revision '3'

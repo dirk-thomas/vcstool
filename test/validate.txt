@@ -1,19 +1,11 @@
-.........
-=== immutable/git_branch (git) ===
-Found git repository 'https://github.com/dirk-thomas/vcstool.git' with ref 'master'
-=== immutable/git_hash (git) ===
+.....
+=== immutable/hash (git) ===
 Found git repository 'https://github.com/dirk-thomas/vcstool.git' but unable to verify non-branch / non-tag ref '377d5b3d03c212f015cc832fdb368f4534d0d583' without cloning the repo
-=== immutable/git_tag (git) ===
-Found git repository 'https://github.com/dirk-thomas/vcstool.git' with ref '0.1.27'
-=== immutable/hg_branch (hg) ===
-Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset 'cacao'
-=== immutable/hg_hash (hg) ===
-Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset '97c468298911'
-=== immutable/hg_tag (hg) ===
-Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset 'icedtea-3.0.0'
-=== immutable/svn_ver (svn) ===
-Found svn repository 'http://svn.red-bean.com/repos/test' with revision '3'
-=== immutable/tar_hash (tar) ===
+=== immutable/hash_tar (tar) ===
 Tarball url 'https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.tar.gz' exists
-=== immutable/zip_hash (zip) ===
+=== immutable/hash_zip (zip) ===
 Zip url 'https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.zip' exists
+=== immutable/tag (git) ===
+Found git repository 'https://github.com/dirk-thomas/vcstool.git' with ref '0.1.27'
+=== vcstool (git) ===
+Found git repository 'https://github.com/dirk-thomas/vcstool.git' with ref 'master'

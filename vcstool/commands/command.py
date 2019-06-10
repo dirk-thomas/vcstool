@@ -62,14 +62,15 @@ def add_common_arguments(
     group.add_argument(
         '--repos', action='store_true', default=False,
         help='List repositories which the command operates on')
-    if path_nargs is not False:
-        if path_help is None:
-            if path_nargs == '?':
-                path_help = 'Base path to look for repositories'
-            elif path_nargs == '*':
-                path_help = 'Base paths to look for repositories'
+    if path_nargs == '?':
+        path_help = path_help or 'Base path to look for repositories'
         group.add_argument(
             'path', nargs=path_nargs, type=existing_dir, default=os.curdir,
+            help=path_help)
+    elif path_nargs == '*':
+        path_help = path_help or 'Base paths to look for repositories'
+        group.add_argument(
+            'paths', nargs=path_nargs, type=existing_dir, default=[os.curdir],
             help=path_help)
 
 

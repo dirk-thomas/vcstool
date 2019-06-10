@@ -83,7 +83,7 @@ def existing_dir(path):
 
 
 def simple_main(parser, command_class, args=None):
-    add_common_arguments(parser)
+    add_common_arguments(parser, path_nargs='?')
     args = parser.parse_args(args)
 
     command = command_class(args)

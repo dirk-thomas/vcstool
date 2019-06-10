@@ -11,6 +11,7 @@ except ImportError:
 import zipfile
 
 from .vcs_base import load_url
+from .vcs_base import test_url
 from .vcs_base import VcsClientBase
 
 
@@ -113,4 +114,31 @@ class ZipClient(VcsClientBase):
             'output':
                 "Downloaded zipfile from '%s' and unpacked it" % command.url,
             'returncode': 0
+        }
+
+    def validate(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        # test url
+        try:
+            test_url(command.url, retry=command.retry)
+        except URLError as e:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output':
+                    "Failed to contact zip url '%s': %s" % (command.url, e),
+                'returncode': 1
+            }
+        return {
+            'cmd': 'http HEAD',
+            'cwd': self.path,
+            'output': "Zip url '%s' exists" % command.url,
+            'returncode': None
         }

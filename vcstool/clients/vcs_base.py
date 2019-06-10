@@ -3,11 +3,13 @@ import socket
 import subprocess
 import time
 try:
+    from urllib.request import Request
     from urllib.request import urlopen
     from urllib.error import HTTPError
     from urllib.error import URLError
 except ImportError:
     from urllib2 import HTTPError
+    from urllib2 import Request
     from urllib2 import URLError
     from urllib2 import urlopen
 
@@ -71,6 +73,8 @@ class VcsClientBase(object):
 
 
 def run_command(cmd, cwd, env=None):
+    if not os.path.exists(cwd):
+        cwd = None
     result = {'cmd': ' '.join(cmd), 'cwd': cwd}
     try:
         proc = subprocess.Popen(
@@ -104,3 +108,27 @@ def load_url(url, retry=2, retry_period=1, timeout=10):
                 timeout=timeout)
         raise URLError(str(e) + ' (%s)' % url)
     return fh.read()
+
+
+def test_url(url, retry=2, retry_period=1, timeout=10):
+    request = Request(url)
+    request.get_method = lambda: 'HEAD'
+
+    try:
+        response = urlopen(request)
+    except HTTPError as e:
+        if e.code == 503 and retry:
+            time.sleep(retry_period)
+            return test_url(
+                url, retry=retry - 1, retry_period=retry_period,
+                timeout=timeout)
+        e.msg += ' (%s)' % url
+        raise
+    except URLError as e:
+        if isinstance(e.reason, socket.timeout) and retry:
+            time.sleep(retry_period)
+            return test_url(
+                url, retry=retry - 1, retry_period=retry_period,
+                timeout=timeout)
+        raise URLError(str(e) + ' (%s)' % url)
+    return response

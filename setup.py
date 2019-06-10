@@ -57,6 +57,7 @@ Currently it supports git, hg, svn and bzr.',
             'vcs-remotes = vcstool.commands.remotes:main',
             'vcs-status = vcstool.commands.status:main',
             'vcs-svn = vcstool.commands.custom:svn_main',
+            'vcs-validate = vcstool.commands.validate:main',
         ]
     }
 )

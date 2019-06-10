@@ -8,6 +8,7 @@ from .pull import PullCommand
 from .push import PushCommand
 from .remotes import RemotesCommand
 from .status import StatusCommand
+from .validate import ValidateCommand
 
 vcstool_commands = []
 vcstool_commands.append(BranchCommand)
@@ -20,6 +21,7 @@ vcstool_commands.append(PullCommand)
 vcstool_commands.append(PushCommand)
 vcstool_commands.append(RemotesCommand)
 vcstool_commands.append(StatusCommand)
+vcstool_commands.append(ValidateCommand)
 
 _commands = [c.command for c in vcstool_commands]
 if len(_commands) != len(set(_commands)):

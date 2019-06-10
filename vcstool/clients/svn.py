@@ -209,6 +209,56 @@ class SvnClient(VcsClientBase):
             cmd += ['--quiet']
         return self._run_command(cmd)
 
+    def validate(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        self._check_executable()
+
+        cmd_info_repo = [SvnClient._executable, 'info', command.url]
+        result_info_repo = self._run_command(
+            cmd_info_repo,
+            retry=command.retry)
+        if result_info_repo['returncode']:
+            result_info_repo['output'] = \
+                "Failed to contact remote repository '%s': %s" % \
+                (command.url, result_info_repo['output'])
+            return result_info_repo
+
+        if command.version:
+            cmd_info_ver = [
+                SvnClient._executable, 'info',
+                command.url + "@" + command.version]
+            result_info_ver = self._run_command(
+                cmd_info_ver,
+                retry=command.retry)
+
+            if result_info_ver['returncode']:
+                result_info_ver['output'] = \
+                    "Specified version not found on remote repository" + \
+                    "'%s':'%s' : %s" % (command.url, result_info_ver['output'])
+                return result_info_ver
+
+            cmd = result_info_ver['cmd']
+            output = "Found svn repository '%s' with revision '%s'" % \
+                (command.url, command.version)
+        else:
+            cmd = result_info_repo['cmd']
+            output = "Found svn repository '%s' with default branch" % \
+                command.url
+
+        return {
+            'cmd': cmd,
+            'cwd': self.path,
+            'output': output,
+            'returncode': None
+        }
+
     def _check_executable(self):
         assert SvnClient._executable is not None, \
             "Could not find 'svn' executable"

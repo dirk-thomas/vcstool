@@ -6,6 +6,7 @@ import unittest
 
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
+REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -133,6 +134,22 @@ class TestCommands(unittest.TestCase):
             stderr=subprocess.STDOUT, cwd=cwd)
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
+
+    def test_validate(self):
+        output = run_command(
+            'validate', ['--input', REPOS_FILE])
+        expected = get_expected_output('validate')
+        self.assertEqual(output, expected)
+
+        output = run_command(
+            'validate', ['--input', REPOS2_FILE])
+        expected = get_expected_output('validate2')
+        self.assertEqual(output, expected)
+
+        output = run_command(
+            'validate', ['--hide-empty', '--input', REPOS_FILE])
+        expected = get_expected_output('validate_hide')
+        self.assertEqual(output, expected)
 
     def test_remote(self):
         output = run_command('remotes', args=['--repos'])

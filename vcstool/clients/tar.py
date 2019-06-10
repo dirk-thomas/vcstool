@@ -11,6 +11,7 @@ except ImportError:
     from urllib2 import URLError
 
 from .vcs_base import load_url
+from .vcs_base import test_url
 from .vcs_base import VcsClientBase
 
 
@@ -92,4 +93,32 @@ class TarClient(VcsClientBase):
             'output':
                 "Downloaded tarball from '%s' and unpacked it" % command.url,
             'returncode': 0
+        }
+
+    def validate(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        # test url
+        try:
+            test_url(command.url, retry=command.retry)
+        except URLError as e:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output':
+                    "Failed to contact tarball url '%s': %s" %
+                    (command.url, e),
+                'returncode': 1
+            }
+        return {
+            'cmd': 'http HEAD url',
+            'cwd': self.path,
+            'output': "Tarball url '%s' exists" % command.url,
+            'returncode': None
         }

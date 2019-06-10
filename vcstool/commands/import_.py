@@ -172,7 +172,7 @@ def main(args=None, stdout=None, stderr=None):
 
     parser = get_parser()
     add_common_arguments(
-        parser, skip_hide_empty=True, skip_nested=True, single_path=True,
+        parser, skip_hide_empty=True, skip_nested=True, path_nargs='?',
         path_help='Base path to clone repositories to')
     args = parser.parse_args(args)
     try:

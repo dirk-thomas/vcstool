@@ -1,0 +1,17 @@
+repositories:
+  hg/branch:
+    type: hg
+    url: http://icedtea.classpath.org/hg/icedtea8
+    version: cacao
+  hg/hash:
+    type: hg
+    url: http://icedtea.classpath.org/hg/icedtea8
+    version: 97c468298911
+  hg/tag:
+    type: hg
+    url: http://icedtea.classpath.org/hg/icedtea8
+    version: icedtea-3.0.0
+  svn/rev:
+    type: svn
+    url: http://svn.red-bean.com/repos/test
+    version: 3

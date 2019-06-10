@@ -242,6 +242,58 @@ class HgClient(VcsClientBase):
             cmd += ['--untracked-files=no']
         return self._run_command(cmd)
 
+    def validate(self, command):
+        if not command.url:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Repository data lacks the 'url' value",
+                'returncode': 1
+            }
+
+        self._check_executable()
+
+        cmd_id_repo = [
+            HgClient._executable, '--noninteractive', 'identify',
+            command.url]
+        result_id_repo = self._run_command(
+            cmd_id_repo,
+            retry=command.retry)
+        if result_id_repo['returncode']:
+            result_id_repo['output'] = \
+                "Failed to contact remote repository '%s': %s" % \
+                (command.url, result_id_repo['output'])
+            return result_id_repo
+
+        if command.version:
+            cmd_id_ver = [
+                HgClient._executable, '--noninteractive', 'identify',
+                '-r', command.version, command.url]
+            result_id_ver = self._run_command(
+                cmd_id_ver,
+                retry=command.retry)
+            if result_id_ver['returncode']:
+                result_id_ver['output'] = \
+                    "Specified version not found on remote repository " + \
+                    "'%s':'%s' : %s" % \
+                    (command.url, command.version, result_id_ver['output'])
+                return result_id_ver
+
+            cmd = result_id_ver['cmd']
+            output = "Found hg repository '%s' with changeset '%s'" % \
+                (command.url, command.version)
+        else:
+            cmd = result_id_repo['cmd']
+            output = "Found hg repository '%s' with default branch" % \
+                command.url
+
+        return {
+            'cmd': cmd,
+            'cwd': self.path,
+            'output': output,
+            'returncode': None
+        }
+
     def _check_color(self, cmd):
         if not USE_COLOR:
             return

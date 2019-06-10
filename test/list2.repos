@@ -13,5 +13,5 @@ repositories:
     version: icedtea-3.0.0
   svn/rev:
     type: svn
-    url: http://svn.red-bean.com/repos/test
+    url: https://github.com/dirk-thomas/vcstool
     version: 3

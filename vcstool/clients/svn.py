@@ -233,14 +233,14 @@ class SvnClient(VcsClientBase):
         if command.version:
             cmd_info_ver = [
                 SvnClient._executable, 'info',
-                command.url + "@" + command.version]
+                command.url + '@' + command.version]
             result_info_ver = self._run_command(
                 cmd_info_ver,
                 retry=command.retry)
 
             if result_info_ver['returncode']:
                 result_info_ver['output'] = \
-                    "Specified version not found on remote repository" + \
+                    'Specified version not found on remote repository' + \
                     "'%s':'%s' : %s" % (command.url, result_info_ver['output'])
                 return result_info_ver
 

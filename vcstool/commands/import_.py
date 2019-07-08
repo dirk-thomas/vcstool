@@ -27,6 +27,7 @@ class ImportCommand(Command):
         self.version = version
         self.force = args.force
         self.retry = args.retry
+        self.ignore_head = args.ignore_head
         self.recursive = recursive
 
 
@@ -46,6 +47,11 @@ def get_parser():
     group.add_argument(
         '--retry', type=int, metavar='N', default=2,
         help='Retry commands requiring network access N times on failure')
+    group.add_argument(
+        '--ignore-head', action='store_true', default=False,
+        help='When no version field is specified, the head branch will '
+             'automatically be checked out for git repos. Use this flag to '
+             'disable that behavior.')
     return parser
 
 

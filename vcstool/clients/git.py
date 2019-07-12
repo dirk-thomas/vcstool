@@ -216,7 +216,7 @@ class GitClient(VcsClientBase):
         if GitClient.is_repository(self.path):
             if command.version:
                 checkout_version = command.version
-            elif not command.ignore_head:
+            elif not command.skip_existing:
                 # determine remote HEAD branch
                 cmd_remote = [GitClient._executable, 'remote', 'show', remote]
                 # override locale in order to parse output

@@ -27,7 +27,7 @@ class ImportCommand(Command):
         self.version = version
         self.force = args.force
         self.retry = args.retry
-        self.ignore_head = args.ignore_head
+        self.skip_existing = args.skip_existing
         self.recursive = recursive
 
 
@@ -48,10 +48,12 @@ def get_parser():
         '--retry', type=int, metavar='N', default=2,
         help='Retry commands requiring network access N times on failure')
     group.add_argument(
-        '--ignore-head', action='store_true', default=False,
-        help='When no version field is specified, the head branch will '
-             'automatically be checked out for git repos. Use this flag to '
-             'disable that behavior.')
+        '--skip-existing', action='store_true', default=False,
+        help='When a working copy of a repo already exists, leave its branch '
+             'alone. If the destination directory already exists, is '
+             'non-empty, and not related to the source url, this will still '
+             'exit with an error.')
+
     return parser
 
 

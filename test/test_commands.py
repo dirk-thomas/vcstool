@@ -233,7 +233,7 @@ def compare_with_hashes(output, expected):
     # same version of git or one used a different version.
     return output == expected \
         or output == expected.replace(b'... ', b' ') \
-        or output.replace(b'...', b' ') == expected
+        or output.replace(b'... ', b' ') == expected
 
 
 def _get_git_version():

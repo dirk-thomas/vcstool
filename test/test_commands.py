@@ -7,6 +7,7 @@ import unittest
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
+REPOS_NO_VERSION_FILE = os.path.join(os.path.dirname(__file__), 'list_no_version.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -134,6 +135,26 @@ class TestCommands(unittest.TestCase):
             stderr=subprocess.STDOUT, cwd=cwd)
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
+
+    def test_no_version(self):
+        output_skip_existing = run_command(
+            'import', ['--skip-existing', '--input', REPOS_NO_VERSION_FILE, '.'])
+        expected = get_expected_output('no_version_skip_existing')
+        assert output_skip_existing == expected \
+            or output_skip_existing == expected.replace(b'... ', b' ')
+
+        output_default = run_command(
+            'import', ['--input', REPOS_NO_VERSION_FILE, '.'])
+        expected = get_expected_output('no_version_default')
+        assert output_default == expected \
+            or output_default == expected.replace(b'... ', b' ')
+
+        # Return the workspace to its original state
+        output_reset = run_command(
+            'import', ['--input', REPOS_FILE, '.'])
+        expected = get_expected_output('reset_import')
+        assert output_reset == expected \
+            or output_reset == expected.replace(b'... ', b' ')
 
     def test_validate(self):
         output = run_command(

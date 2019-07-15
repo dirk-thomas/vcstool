@@ -24,8 +24,7 @@ class TestCommands(unittest.TestCase):
                 'import', ['--input', REPOS_FILE, '.'])
             expected = get_expected_output('import')
             # newer git versions don't append three dots after the commit hash
-            assert output == expected or \
-                output == expected.replace(b'... ', b' ')
+            assert compare_with_hashes(output, expected)
         except Exception:
             cls.tearDownClass()
             raise
@@ -133,28 +132,39 @@ class TestCommands(unittest.TestCase):
         subprocess.check_output(
             ['git', 'remote', 'remove', 'foo'],
             stderr=subprocess.STDOUT, cwd=cwd)
-        # newer git versions don't append three dots after the commit hash
-        assert output == expected or output == expected.replace(b'... ', b' ')
+
+        assert compare_with_hashes(output, expected)
 
     def test_no_version(self):
         output_skip_existing = run_command(
             'import', ['--skip-existing', '--input', REPOS_NO_VERSION_FILE, '.'])
         expected = get_expected_output('no_version_skip_existing')
-        assert output_skip_existing == expected \
-            or output_skip_existing == expected.replace(b'... ', b' ')
+        self.assertEqual(output_skip_existing, expected)
 
         output_default = run_command(
             'import', ['--input', REPOS_NO_VERSION_FILE, '.'])
         expected = get_expected_output('no_version_default')
-        assert output_default == expected \
-            or output_default == expected.replace(b'... ', b' ')
+        assert compare_with_hashes(output_default, expected)
 
-        # Return the workspace to its original state
-        output_reset = run_command(
-            'import', ['--input', REPOS_FILE, '.'])
-        expected = get_expected_output('reset_import')
-        assert output_reset == expected \
-            or output_reset == expected.replace(b'... ', b' ')
+        # Remove the remote source repository so that the vcs import fails
+        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
+        subprocess.run(
+            ['git', 'remote', 'set-url', 'origin', 'http://foo.com/bar.git'],
+            stderr=subprocess.STDOUT, cwd=cwd)
+
+        try:
+            run_command(
+                'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
+            # The run_command function should raise an exception when the
+            # process returns a non-zero return code, so the next line should
+            # never get executed.
+            assert False
+        except:
+            pass
+
+        # Return the workspace to its original state in case other sub-tests
+        # depend on it.
+        run_command('import', ['--force', '--input', REPOS_FILE, '.'])
 
     def test_validate(self):
         output = run_command(
@@ -215,6 +225,15 @@ def get_expected_output(name):
         # use hyphenation for older git versions
         content = content.replace(b'up to date', b'up-to-date')
     return content
+
+
+def compare_with_hashes(output, expected):
+    # Newer git versions don't append three dots after the commit hash.
+    # This function will compare results as equal whether both used the
+    # same version of git or one used a different version.
+    return output == expected \
+        or output == expected.replace(b'... ', b' ') \
+        or output.replace(b'...', b' ') == expected
 
 
 def _get_git_version():

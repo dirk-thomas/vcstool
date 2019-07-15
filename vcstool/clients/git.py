@@ -146,6 +146,34 @@ class GitClient(VcsClientBase):
                 if ref not in refs:
                     continue
 
+                # check if there is exactly one tag pointing to that ref
+                cmd_tags = [
+                    GitClient._executable, 'tag', '--points-at', ref]
+                result_tags = self._run_command(cmd_tags)
+                if result_tags['returncode']:
+                    result_tags['output'] = \
+                        "Could not determine tags for ref '%s': " % \
+                        ref + result_tags['output']
+                    return result_tags
+                tags = result_tags['output'].splitlines()
+                tag_or_ref = ref
+                if len(tags) == 1:
+                    tag = tags[0]
+                    # double check that the tag is part of the remote
+                    # and references the same hash
+                    cmd_ls_remote = [
+                        GitClient._executable, 'ls-remote', remote,
+                        'refs/tags/' + tag]
+                    result_ls_remote = self._run_command(cmd_ls_remote)
+                    if result_ls_remote['returncode']:
+                        result_ls_remote['output'] = \
+                            "Could not check remote tags for '%s': " % \
+                            remote + result_ls_remote['output']
+                        return result_ls_remote
+                    matches = result_ls_remote['output'].splitlines()
+                    if len(matches) == 1 and matches[0].split()[0] == ref:
+                        tag_or_ref = tag
+
                 # determine url of remote
                 result_url = self._get_remote_url(remote)
                 if result_url['returncode']:
@@ -153,11 +181,13 @@ class GitClient(VcsClientBase):
                 url = result_url['output']
                 # the result is the remote url and the hash
                 return {
-                    'cmd': ' && '.join([result_ref['cmd'], result_url['cmd']]),
+                    'cmd': ' && '.join([
+                        result_ref['cmd'], result_tags['cmd'],
+                        result_url['cmd']]),
                     'cwd': self.path,
-                    'output': '\n'.join([url, ref]),
+                    'output': '\n'.join([url, tag_or_ref]),
                     'returncode': 0,
-                    'export_data': {'url': url, 'version': ref}
+                    'export_data': {'url': url, 'version': tag_or_ref}
                 }
 
             return {

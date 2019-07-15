@@ -7,7 +7,8 @@ import unittest
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
-REPOS_NO_VERSION_FILE = os.path.join(os.path.dirname(__file__), 'list_no_version.repos')
+REPOS_NO_VERSION_FILE = os.path.join(
+    os.path.dirname(__file__), 'list_no_version.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -137,7 +138,8 @@ class TestCommands(unittest.TestCase):
 
     def test_no_version(self):
         output_skip_existing = run_command(
-            'import', ['--skip-existing', '--input', REPOS_NO_VERSION_FILE, '.'])
+            'import',
+            ['--skip-existing', '--input', REPOS_NO_VERSION_FILE, '.'])
         expected = get_expected_output('no_version_skip_existing')
         self.assertEqual(output_skip_existing, expected)
 
@@ -148,7 +150,7 @@ class TestCommands(unittest.TestCase):
 
         # Remove the remote source repository so that the vcs import fails
         cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
-        subprocess.run(
+        subprocess.check_output(
             ['git', 'remote', 'set-url', 'origin', 'http://foo.com/bar.git'],
             stderr=subprocess.STDOUT, cwd=cwd)
 
@@ -159,7 +161,7 @@ class TestCommands(unittest.TestCase):
             # process returns a non-zero return code, so the next line should
             # never get executed.
             assert False
-        except:
+        except BaseException:
             pass
 
         # Return the workspace to its original state in case other sub-tests

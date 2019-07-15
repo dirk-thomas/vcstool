@@ -41,11 +41,9 @@ def output_export_data(result, hide_empty=False):
     if result['returncode']:
         return
 
-    path = get_path_of_result(result)
-
     try:
         lines = []
-        lines.append('  %s:' % path)
+        lines.append('  %s:' % result['path'])
         lines.append('    type: ' + result['client'].__class__.type)
         export_data = result['export_data']
         lines.append('    url: ' + export_data['url'])
@@ -72,17 +70,13 @@ def output_error_information(result, hide_empty=False):
     else:
         color = 'red'
 
-    path = get_path_of_result(result)
-    line = '%s: %s' % (path, result['output'])
+    line = '%s: %s' % (result['path'], result['output'])
     print(ansi('%sf' % color) + line + ansi('reset'), file=sys.stderr)
 
 
-def get_path_of_result(result):
+def get_relative_path_of_result(result):
     client = result['client']
-    path = os.path.relpath(client.path, result['command'].paths[0])
-    if path == '.':
-        path = os.path.basename(os.path.abspath(client.path))
-    return path
+    return os.path.relpath(client.path, result['command'].paths[0])
 
 
 def main(args=None, stdout=None, stderr=None):
@@ -98,6 +92,20 @@ def main(args=None, stdout=None, stderr=None):
         output_repositories(clients)
     jobs = generate_jobs(clients, command)
     results = execute_jobs(jobs, number_of_workers=args.workers)
+
+    # check if at least one repo was found in the client directory
+    basename = None
+    for result in results:
+        result['path'] = get_relative_path_of_result(result)
+        if result['path'] == '.':
+            basename = os.path.basename(os.path.abspath(result['client'].path))
+    # in that case prefix all relative paths with the client directory basename
+    if basename is not None:
+        for result in results:
+            if result['path'] == '.':
+                result['path'] = basename
+            else:
+                result['path'] = os.path.join(basename, result['path'])
 
     print('repositories:')
     output_results(results, output_handler=output_export_data)

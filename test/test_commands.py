@@ -134,7 +134,6 @@ class TestCommands(unittest.TestCase):
         subprocess.check_output(
             ['git', 'remote', 'remove', 'foo'],
             stderr=subprocess.STDOUT, cwd=cwd)
-
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
 

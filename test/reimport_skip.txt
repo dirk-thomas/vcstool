@@ -14,6 +14,3 @@ HEAD is now at bf9ca56... 0.1.27
 Already on 'master'
 Your branch is up to date with 'origin/master'.
 === ./without_version (git) ===
-
-Switched to branch 'master'
-Your branch is up to date with 'origin/master'.

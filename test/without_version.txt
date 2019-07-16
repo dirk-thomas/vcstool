@@ -1,5 +1,0 @@
-=== ./immutable/tag (git) ===
-
-Previous HEAD position was bf9ca56 0.1.27
-Switched to branch 'master'
-Your branch is up to date with 'origin/master'.

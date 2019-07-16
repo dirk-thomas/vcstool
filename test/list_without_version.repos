@@ -4,6 +4,6 @@
 # it alone when --skip-existing is provided.
 
 repositories:
-  immutable/tag:
+  without_version:
     type: git
     url: https://github.com/dirk-thomas/vcstool.git

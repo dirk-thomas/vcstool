@@ -1,4 +1,4 @@
-...
+....
 === ./immutable/hash (git) ===
 HEAD detached at 377d5b3
 nothing to commit, working tree clean
@@ -6,6 +6,11 @@ nothing to commit, working tree clean
 HEAD detached at 0.1.27
 nothing to commit, working tree clean
 === ./vcstool (git) ===
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+=== ./without_version (git) ===
 On branch master
 Your branch is up to date with 'origin/master'.
 

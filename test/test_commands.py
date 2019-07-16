@@ -7,8 +7,6 @@ import unittest
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
-REPOS_WITHOUT_VERSION_FILE = os.path.join(
-    os.path.dirname(__file__), 'list_without_version.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -124,39 +122,23 @@ class TestCommands(unittest.TestCase):
         assert stdout_stderr.getvalue() == expected
 
     def test_reimport(self):
-        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
+        cwd_vcstool = os.path.join(TEST_WORKSPACE, 'vcstool')
         subprocess.check_output(
             ['git', 'remote', 'add', 'foo', 'http://foo.com/bar.git'],
-            stderr=subprocess.STDOUT, cwd=cwd)
-        output = run_command(
-            'import', ['--input', REPOS_FILE, '.'])
-        expected = get_expected_output('reimport')
+            stderr=subprocess.STDOUT, cwd=cwd_vcstool)
+        cwd_without_version = os.path.join(TEST_WORKSPACE, 'without_version')
         subprocess.check_output(
-            ['git', 'remote', 'remove', 'foo'],
-            stderr=subprocess.STDOUT, cwd=cwd)
+            ['git', 'checkout', '-b', 'foo'],
+            stderr=subprocess.STDOUT, cwd=cwd_without_version)
+        output = run_command(
+            'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
+        expected = get_expected_output('reimport_skip')
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
 
-    def test_import_without_version(self):
-        output_skip_existing = run_command(
-            'import',
-            ['--skip-existing', '--input', REPOS_WITHOUT_VERSION_FILE, '.'])
-        expected = get_expected_output('without_version_skip_existing')
-        self.assertEqual(output_skip_existing, expected)
-
-        output_without_version = run_command(
-            'import', ['--input', REPOS_WITHOUT_VERSION_FILE, '.'])
-        expected = get_expected_output('without_version')
-        # newer git versions don't append three dots after the commit hash
-        assert output_without_version == expected or \
-            output_without_version == expected.replace(b'... ', b' ')
-
-        # Remove the remote source repository so that the vcs import fails
-        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
         subprocess.check_output(
             ['git', 'remote', 'set-url', 'origin', 'http://foo.com/bar.git'],
-            stderr=subprocess.STDOUT, cwd=cwd)
-
+            stderr=subprocess.STDOUT, cwd=cwd_without_version)
         try:
             run_command(
                 'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
@@ -167,9 +149,15 @@ class TestCommands(unittest.TestCase):
         except BaseException:
             pass
 
-        # Return the workspace to its original state in case other sub-tests
-        # depend on it.
-        run_command('import', ['--force', '--input', REPOS_FILE, '.'])
+        output = run_command(
+            'import', ['--force', '--input', REPOS_FILE, '.'])
+        expected = get_expected_output('reimport_force')
+        # newer git versions don't append three dots after the commit hash
+        assert output == expected or output == expected.replace(b'... ', b' ')
+
+        subprocess.check_output(
+            ['git', 'remote', 'remove', 'foo'],
+            stderr=subprocess.STDOUT, cwd=cwd_vcstool)
 
     def test_validate(self):
         output = run_command(

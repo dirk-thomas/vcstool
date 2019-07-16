@@ -7,8 +7,8 @@ import unittest
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
-REPOS_NO_VERSION_FILE = os.path.join(
-    os.path.dirname(__file__), 'list_no_version.repos')
+REPOS_WITHOUT_VERSION_FILE = os.path.join(
+    os.path.dirname(__file__), 'list_without_version.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -137,19 +137,19 @@ class TestCommands(unittest.TestCase):
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
 
-    def test_no_version(self):
+    def test_import_without_version(self):
         output_skip_existing = run_command(
             'import',
-            ['--skip-existing', '--input', REPOS_NO_VERSION_FILE, '.'])
-        expected = get_expected_output('no_version_skip_existing')
+            ['--skip-existing', '--input', REPOS_WITHOUT_VERSION_FILE, '.'])
+        expected = get_expected_output('without_version_skip_existing')
         self.assertEqual(output_skip_existing, expected)
 
-        output_default = run_command(
-            'import', ['--input', REPOS_NO_VERSION_FILE, '.'])
-        expected = get_expected_output('no_version_default')
+        output_without_version = run_command(
+            'import', ['--input', REPOS_WITHOUT_VERSION_FILE, '.'])
+        expected = get_expected_output('without_version')
         # newer git versions don't append three dots after the commit hash
-        assert output_default == expected or \
-            output_default == expected.replace(b'... ', b' ')
+        assert output_without_version == expected or \
+            output_without_version == expected.replace(b'... ', b' ')
 
         # Remove the remote source repository so that the vcs import fails
         cwd = os.path.join(TEST_WORKSPACE, 'vcstool')

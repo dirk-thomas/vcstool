@@ -49,10 +49,7 @@ def get_parser():
         help='Retry commands requiring network access N times on failure')
     group.add_argument(
         '--skip-existing', action='store_true', default=False,
-        help='When a working copy of a repo already exists, leave its branch '
-             'alone. If the destination directory already exists, is '
-             'non-empty, and not related to the source url, this will still '
-             'exit with an error.')
+        help="Don't change custom checkouts in repos referencing the same URL")
 
     return parser
 

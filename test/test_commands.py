@@ -25,7 +25,8 @@ class TestCommands(unittest.TestCase):
                 'import', ['--input', REPOS_FILE, '.'])
             expected = get_expected_output('import')
             # newer git versions don't append three dots after the commit hash
-            assert compare_with_hashes(output, expected)
+            assert output == expected or \
+                output == expected.replace(b'... ', b' ')
         except Exception:
             cls.tearDownClass()
             raise
@@ -134,7 +135,8 @@ class TestCommands(unittest.TestCase):
             ['git', 'remote', 'remove', 'foo'],
             stderr=subprocess.STDOUT, cwd=cwd)
 
-        assert compare_with_hashes(output, expected)
+        # newer git versions don't append three dots after the commit hash
+        assert output == expected or output == expected.replace(b'... ', b' ')
 
     def test_no_version(self):
         output_skip_existing = run_command(
@@ -146,7 +148,9 @@ class TestCommands(unittest.TestCase):
         output_default = run_command(
             'import', ['--input', REPOS_NO_VERSION_FILE, '.'])
         expected = get_expected_output('no_version_default')
-        assert compare_with_hashes(output_default, expected)
+        # newer git versions don't append three dots after the commit hash
+        assert output_default == expected or \
+            output_default == expected.replace(b'... ', b' ')
 
         # Remove the remote source repository so that the vcs import fails
         cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
@@ -227,15 +231,6 @@ def get_expected_output(name):
         # use hyphenation for older git versions
         content = content.replace(b'up to date', b'up-to-date')
     return content
-
-
-def compare_with_hashes(output, expected):
-    # Newer git versions don't append three dots after the commit hash.
-    # This function will compare results as equal whether both used the
-    # same version of git or one used a different version.
-    return output == expected \
-        or output == expected.replace(b'... ', b' ') \
-        or output.replace(b'... ', b' ') == expected
 
 
 def _get_git_version():

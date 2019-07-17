@@ -27,6 +27,7 @@ class ImportCommand(Command):
         self.version = version
         self.force = args.force
         self.retry = args.retry
+        self.skip_existing = args.skip_existing
         self.recursive = recursive
 
 
@@ -46,6 +47,10 @@ def get_parser():
     group.add_argument(
         '--retry', type=int, metavar='N', default=2,
         help='Retry commands requiring network access N times on failure')
+    group.add_argument(
+        '--skip-existing', action='store_true', default=False,
+        help="Don't change custom checkouts in repos referencing the same URL")
+
     return parser
 
 

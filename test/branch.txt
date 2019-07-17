@@ -1,7 +1,9 @@
-...
+....
 === ./immutable/hash (git) ===
 (HEAD detached at 377d5b3)
 === ./immutable/tag (git) ===
 (HEAD detached at 0.1.27)
 === ./vcstool (git) ===
+master
+=== ./without_version (git) ===
 master

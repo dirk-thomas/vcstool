@@ -122,18 +122,42 @@ class TestCommands(unittest.TestCase):
         assert stdout_stderr.getvalue() == expected
 
     def test_reimport(self):
-        cwd = os.path.join(TEST_WORKSPACE, 'vcstool')
+        cwd_vcstool = os.path.join(TEST_WORKSPACE, 'vcstool')
         subprocess.check_output(
             ['git', 'remote', 'add', 'foo', 'http://foo.com/bar.git'],
-            stderr=subprocess.STDOUT, cwd=cwd)
-        output = run_command(
-            'import', ['--input', REPOS_FILE, '.'])
-        expected = get_expected_output('reimport')
+            stderr=subprocess.STDOUT, cwd=cwd_vcstool)
+        cwd_without_version = os.path.join(TEST_WORKSPACE, 'without_version')
         subprocess.check_output(
-            ['git', 'remote', 'remove', 'foo'],
-            stderr=subprocess.STDOUT, cwd=cwd)
+            ['git', 'checkout', '-b', 'foo'],
+            stderr=subprocess.STDOUT, cwd=cwd_without_version)
+        output = run_command(
+            'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
+        expected = get_expected_output('reimport_skip')
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
+
+        subprocess.check_output(
+            ['git', 'remote', 'set-url', 'origin', 'http://foo.com/bar.git'],
+            stderr=subprocess.STDOUT, cwd=cwd_without_version)
+        try:
+            run_command(
+                'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
+            # The run_command function should raise an exception when the
+            # process returns a non-zero return code, so the next line should
+            # never get executed.
+            assert False
+        except BaseException:
+            pass
+
+        output = run_command(
+            'import', ['--force', '--input', REPOS_FILE, '.'])
+        expected = get_expected_output('reimport_force')
+        # newer git versions don't append three dots after the commit hash
+        assert output == expected or output == expected.replace(b'... ', b' ')
+
+        subprocess.check_output(
+            ['git', 'remote', 'remove', 'foo'],
+            stderr=subprocess.STDOUT, cwd=cwd_vcstool)
 
     def test_validate(self):
         output = run_command(

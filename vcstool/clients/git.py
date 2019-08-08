@@ -238,6 +238,12 @@ class GitClient(VcsClientBase):
                     shutil.rmtree(self.path)
                 except OSError:
                     os.remove(self.path)
+        elif command.force and os.path.exists(self.path):
+            # Not empty, not a git repository
+            try:
+                shutil.rmtree(self.path)
+            except OSError:
+                os.remove(self.path)
 
         not_exist = self._create_path()
         if not_exist:

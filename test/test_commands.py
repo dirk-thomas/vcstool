@@ -159,6 +159,21 @@ class TestCommands(unittest.TestCase):
             ['git', 'remote', 'remove', 'foo'],
             stderr=subprocess.STDOUT, cwd=cwd_vcstool)
 
+    def test_import_force_non_empty(self):
+        workdir = os.path.join(TEST_WORKSPACE, 'force-non-empty')
+        os.makedirs(os.path.join(workdir, 'vcstool', 'not-a-git-repo'))
+        try:
+            output = run_command(
+                'import', ['--force', '--input', REPOS_FILE, '.'],
+                subfolder='force-non-empty')
+            expected = get_expected_output('import')
+            # newer git versions don't append ... after the commit hash
+            assert (
+                output == expected or
+                output == expected.replace(b'... ', b' '))
+        finally:
+            shutil.rmtree(workdir)
+
     def test_validate(self):
         output = run_command(
             'validate', ['--input', REPOS_FILE])

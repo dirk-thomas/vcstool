@@ -40,7 +40,7 @@ def get_parser():
     group.add_argument(
         '--force', action='store_true', default=False,
         help="Delete existing directories if they don't contain the"
-            " repository being imported")
+             " repository being imported")
     group.add_argument(
         '--recursive', action='store_true', default=False,
         help='Recurse into submodules')

@@ -161,7 +161,7 @@ class TestCommands(unittest.TestCase):
 
     def test_import_force_non_empty(self):
         workdir = os.path.join(TEST_WORKSPACE, 'force-non-empty')
-        os.makedirs(os.path.join(workdir, './vcstool/not-a-git-repo'))
+        os.makedirs(os.path.join(workdir, 'vcstool', 'not-a-git-repo'))
         try:
             output = run_command(
                 'import', ['--force', '--input', REPOS_FILE, '.'],

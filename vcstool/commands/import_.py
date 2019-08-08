@@ -39,8 +39,7 @@ def get_parser():
         '--input', type=argparse.FileType('r'), default=sys.stdin)
     group.add_argument(
         '--force', action='store_true', default=False,
-        help='Potentially overwrite existing folders if they contain '
-             'different repositories')
+        help='Potentially overwrite or delete any content in existing folders')
     group.add_argument(
         '--recursive', action='store_true', default=False,
         help='Recurse into submodules')

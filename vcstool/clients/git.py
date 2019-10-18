@@ -250,9 +250,11 @@ class GitClient(VcsClientBase):
             return not_exist
 
         if GitClient.is_repository(self.path):
-            if command.version:
+            if command.skip_existing:
+                checkout_version = None
+            elif command.version:
                 checkout_version = command.version
-            elif not command.skip_existing:
+            else:
                 # determine remote HEAD branch
                 cmd_remote = [GitClient._executable, 'remote', 'show', remote]
                 # override locale in order to parse output
@@ -275,8 +277,6 @@ class GitClient(VcsClientBase):
                         'Could not determine remote HEAD branch of ' \
                         "repository '%s': %s" % (url, result_remote['output'])
                     return result_remote
-            else:
-                checkout_version = None
 
             # fetch updates for existing repo
             cmd_fetch = [GitClient._executable, 'fetch', remote]

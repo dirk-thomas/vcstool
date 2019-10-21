@@ -159,6 +159,32 @@ class TestCommands(unittest.TestCase):
             ['git', 'remote', 'remove', 'foo'],
             stderr=subprocess.STDOUT, cwd=cwd_vcstool)
 
+    def test_reimport_failed(self):
+        cwd_tag = os.path.join(TEST_WORKSPACE, 'immutable', 'tag')
+        subprocess.check_output(
+            ['git', 'remote', 'add', 'foo', 'http://foo.com/bar.git'],
+            stderr=subprocess.STDOUT, cwd=cwd_tag)
+        subprocess.check_output(
+            ['git', 'remote', 'rm', 'origin'],
+            stderr=subprocess.STDOUT, cwd=cwd_tag)
+        try:
+            run_command(
+                'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
+            # The run_command function should raise an exception when the
+            # process returns a non-zero return code, so the next line should
+            # never get executed.
+            assert False
+        except BaseException:
+            pass
+        finally:
+            subprocess.check_output(
+                ['git', 'remote', 'rm', 'foo'],
+                stderr=subprocess.STDOUT, cwd=cwd_tag)
+            subprocess.check_output(
+                ['git', 'remote', 'add', 'origin',
+                 'https://github.com/dirk-thomas/vcstool.git'],
+                stderr=subprocess.STDOUT, cwd=cwd_tag)
+
     def test_import_force_non_empty(self):
         workdir = os.path.join(TEST_WORKSPACE, 'force-non-empty')
         os.makedirs(os.path.join(workdir, 'vcstool', 'not-a-git-repo'))

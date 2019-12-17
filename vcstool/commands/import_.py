@@ -5,6 +5,8 @@ import os
 import sys
 
 from vcstool.clients import vcstool_clients
+from vcstool.clients.vcs_base import run_command
+from vcstool.clients.vcs_base import which
 from vcstool.executor import ansi
 from vcstool.executor import execute_jobs
 from vcstool.executor import output_repositories
@@ -191,8 +193,41 @@ def main(args=None, stdout=None, stderr=None):
     if args.repos:
         output_repositories([job['client'] for job in jobs])
 
+    workers = args.workers
+    # for ssh URLs check if the host is known to prevent ssh asking for
+    # confirmation when using more than one worker
+    if workers > 1:
+        ssh_keygen = None
+        checked_hosts = set()
+        for job in list(jobs):
+            url = job['command'].url
+            # only check the host from a ssh URL
+            if not url.startswith('git@') or ':' not in url:
+                continue
+            host = url[4:].split(':', 1)[0]
+
+            # only check each host name once
+            if host in checked_hosts:
+                continue
+            checked_hosts.add(host)
+
+            # get ssh-keygen path once
+            if ssh_keygen is None:
+                ssh_keygen = which('ssh-keygen') or False
+            if not ssh_keygen:
+                continue
+
+            result = run_command([ssh_keygen, '-F', host], '')
+            if result['returncode']:
+                print(
+                    'At least one hostname (%s) is unknown, switching to a '
+                    'single worker to allow interactively answering the ssh '
+                    'question to confirm the fingerprint' % host)
+                workers = 1
+                break
+
     results = execute_jobs(
-        jobs, show_progress=True, number_of_workers=args.workers,
+        jobs, show_progress=True, number_of_workers=workers,
         debug_jobs=args.debug)
     output_results(results)
 

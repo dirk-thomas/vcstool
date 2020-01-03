@@ -23,16 +23,21 @@ class ExportCommand(Command):
 
     def __init__(self, args):
         super(ExportCommand, self).__init__(args)
-        self.exact = args.exact
+        self.exact = args.exact or args.exact_with_tags
+        self.with_tags = args.exact_with_tags
 
 
 def get_parser():
     parser = argparse.ArgumentParser(
         description='Export the list of repositories', prog='vcs export')
     group = parser.add_argument_group('"export" command parameters')
-    group.add_argument(
+    group_exact = group.add_mutually_exclusive_group()
+    group_exact.add_argument(
         '--exact', action='store_true', default=False,
         help='Export exact commit hash instead of branch names')
+    group_exact.add_argument(
+        '--exact-with-tags', action='store_true', default=False,
+        help='Export tag name or commit hash instead of branch names.')
     return parser
 
 

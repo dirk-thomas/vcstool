@@ -146,12 +146,7 @@ class GitClient(VcsClientBase):
                 if ref not in refs:
                     continue
 
-                # determine url of remote
-                result_url = self._get_remote_url(remote)
-                if result_url['returncode']:
-                    return result_url
-                url = result_url['output']
-
+                cmds = [result_ref['cmd']]
                 if command.with_tags:
                     # check if there is exactly one tag pointing to that ref
                     cmd_tags = [
@@ -162,8 +157,8 @@ class GitClient(VcsClientBase):
                             "Could not determine tags for ref '%s': " % \
                             ref + result_tags['output']
                         return result_tags
+                    cmds.append(result_tags['cmd'])
                     tags = result_tags['output'].splitlines()
-                    tag_or_ref = ref
                     if len(tags) == 1:
                         tag = tags[0]
                         # double check that the tag is part of the remote
@@ -179,26 +174,23 @@ class GitClient(VcsClientBase):
                             return result_ls_remote
                         matches = result_ls_remote['output'].splitlines()
                         if len(matches) == 1 and matches[0].split()[0] == ref:
-                            tag_or_ref = tag
+                            ref = tag
 
-                    # the result is the remote url and the hash
-                    return {
-                        'cmd': ' && '.join([
-                            result_ref['cmd'], result_tags['cmd'],
-                            result_url['cmd']]),
-                        'cwd': self.path,
-                        'output': '\n'.join([url, tag_or_ref]),
-                        'returncode': 0,
-                        'export_data': {'url': url, 'version': tag_or_ref}
-                    }
-                else:
-                    return {
-                        'cmd': ' && '.join([ result_ref['cmd'], result_url['cmd']]),
-                        'cwd': self.path,
-                        'output': '\n'.join([url, ref]),
-                        'returncode': 0,
-                        'export_data': {'url': url, 'version': ref}
-                    }
+                # determine url of remote
+                result_url = self._get_remote_url(remote)
+                if result_url['returncode']:
+                    return result_url
+                url = result_url['output']
+                cmds.append(result_url['cmd'])
+
+                # the result is the remote url and the hash/tag
+                return {
+                    'cmd': ' && '.join(cmds),
+                    'cwd': self.path,
+                    'output': '\n'.join([url, ref]),
+                    'returncode': 0,
+                    'export_data': {'url': url, 'version': ref}
+                }
 
             return {
                 'cmd': ' && '.join([result_ref['cmd'], result_remotes['cmd']]),

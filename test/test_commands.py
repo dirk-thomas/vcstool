@@ -65,8 +65,11 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(output, expected)
 
     def test_export(self):
-        output = run_command('export', args=['--exact'], subfolder='immutable')
-        expected = get_expected_output('export_exact')
+        output = run_command(
+            'export',
+            args=['--exact-with-tags'],
+            subfolder='immutable')
+        expected = get_expected_output('export_exact_with_tags')
         self.assertEqual(output, expected)
 
     def test_log(self):

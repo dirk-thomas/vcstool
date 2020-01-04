@@ -34,10 +34,11 @@ def get_parser():
     group_exact = group.add_mutually_exclusive_group()
     group_exact.add_argument(
         '--exact', action='store_true', default=False,
-        help='Export exact commit hash instead of branch names')
+        help='Export commit hashes instead of branch names')
     group_exact.add_argument(
         '--exact-with-tags', action='store_true', default=False,
-        help='Export tag name or commit hash instead of branch names.')
+        help='Export unique tag names or commit hashes instead of branch '
+             'names')
     return parser
 
 

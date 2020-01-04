@@ -166,7 +166,7 @@ class HgClient(VcsClientBase):
             if result_checkout['returncode']:
                 result_checkout['output'] = \
                     "Could not checkout '%s': %s" % \
-                    (command.version, result_clone['output'])
+                    (command.version, result_checkout['output'])
                 return result_checkout
             cmd += ' && ' + ' '.join(cmd_checkout)
             output = '\n'.join([output, result_checkout['output']])

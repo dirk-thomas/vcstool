@@ -64,12 +64,20 @@ class TestCommands(unittest.TestCase):
 
         self.assertEqual(output, expected)
 
-    def test_export(self):
+    def test_export_exact_with_tags(self):
         output = run_command(
             'export',
             args=['--exact-with-tags'],
             subfolder='immutable')
         expected = get_expected_output('export_exact_with_tags')
+        self.assertEqual(output, expected)
+
+    def test_export_exact(self):
+        output = run_command(
+            'export',
+            args=['--exact'],
+            subfolder='immutable')
+        expected = get_expected_output('export_exact')
         self.assertEqual(output, expected)
 
     def test_log(self):

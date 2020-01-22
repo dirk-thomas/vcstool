@@ -114,6 +114,19 @@ Show log since last tag
 The ``vcs log`` command supports the argument ``--limit-untagged`` which will output the log for all commits since the last tag.
 
 
+Parallelization and stdin
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default ``vcs`` parallelizes the work across multiple repositories based on the number of CPU cores.
+In the case that the invoked commands require input from ``stdin`` that parallelization is a problem.
+In order to be able to provide input to each command separately these commands must run sequentially.
+When needing to e.g. interactively provide credentials all commands should be executed sequentially by passing:
+
+  --workers 1
+
+In the case repositories are using SSH ``git@`` URLs but the host is not known yet ``vcs import`` automatically falls back to a single worker.
+
+
 Run arbitrary comands
 ~~~~~~~~~~~~~~~~~~~~~
 

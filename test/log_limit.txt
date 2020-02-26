@@ -2,27 +2,21 @@
 === ./hash (git) ===
 commit 377d5b3d03c212f015cc832fdb368f4534d0d583
 Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
-Date:   Wed May 31 09:56:38 2017 -0700
 
     update changelog
 
 commit f01ce3845fa0783bef9f97545e518e0f02cd509a
 Merge: 14f9968 e7770d3
 Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
-Date:   Wed May 31 09:55:04 2017 -0700
 
     Merge pull request #44 from dirk-thomas/fix_loop_exit
-    
-    fix exit condition in loop
 === ./tag (git) ===
 commit bf9ca56de693a02b93ed423bcef589259d75eb0f
 Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
-Date:   Wed May 31 09:57:59 2017 -0700
 
     0.1.27
 
 commit 377d5b3d03c212f015cc832fdb368f4534d0d583
 Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
-Date:   Wed May 31 09:56:38 2017 -0700
 
     update changelog

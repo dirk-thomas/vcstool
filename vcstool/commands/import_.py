@@ -200,6 +200,8 @@ def main(args=None, stdout=None, stderr=None):
         ssh_keygen = None
         checked_hosts = set()
         for job in list(jobs):
+            if job['command'] is None:
+                continue
             url = job['command'].url
             # only check the host from a ssh URL
             if not url.startswith('git@') or ':' not in url:

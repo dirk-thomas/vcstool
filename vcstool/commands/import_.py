@@ -3,6 +3,7 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+import urllib.request
 
 from vcstool.clients import vcstool_clients
 from vcstool.clients.vcs_base import run_command
@@ -33,12 +34,20 @@ class ImportCommand(Command):
         self.recursive = recursive
 
 
+def file_or_url_type(x):
+    try:
+        return urllib.request.urlopen(x)
+    except ValueError:
+        return argparse.FileType('r')(x)
+
+
 def get_parser():
     parser = argparse.ArgumentParser(
         description='Import the list of repositories', prog='vcs import')
     group = parser.add_argument_group('"import" command parameters')
     group.add_argument(
-        '--input', type=argparse.FileType('r'), default=sys.stdin)
+        '--input', type=file_or_url_type, default='-',
+        help="Where to read YAML from.", metavar='FILE_OR_URL')
     group.add_argument(
         '--force', action='store_true', default=False,
         help="Delete existing directories if they don't contain the "

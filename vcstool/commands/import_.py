@@ -3,7 +3,6 @@ from __future__ import print_function
 import argparse
 import os
 import sys
-import urllib.request
 
 from vcstool.clients import vcstool_clients
 from vcstool.clients.vcs_base import run_command
@@ -14,6 +13,11 @@ from vcstool.executor import output_repositories
 from vcstool.executor import output_results
 from vcstool.streams import set_streams
 import yaml
+
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 
 from .command import add_common_arguments
 from .command import Command
@@ -36,7 +40,7 @@ class ImportCommand(Command):
 
 def file_or_url_type(x):
     try:
-        return urllib.request.urlopen(x)
+        return urlopen(x)
     except ValueError:
         return argparse.FileType('r')(x)
 

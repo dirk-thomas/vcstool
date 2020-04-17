@@ -14,6 +14,11 @@ from vcstool.executor import output_results
 from vcstool.streams import set_streams
 import yaml
 
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
+
 from .command import add_common_arguments
 from .command import Command
 
@@ -36,12 +41,20 @@ class ImportCommand(Command):
         self.shallow = shallow
 
 
+def file_or_url_type(x):
+    try:
+        return urlopen(x)
+    except ValueError:
+        return argparse.FileType('r')(x)
+
+
 def get_parser():
     parser = argparse.ArgumentParser(
         description='Import the list of repositories', prog='vcs import')
     group = parser.add_argument_group('"import" command parameters')
     group.add_argument(
-        '--input', type=argparse.FileType('r'), default=sys.stdin)
+        '--input', type=file_or_url_type, default='-',
+        help="Where to read YAML from.", metavar='FILE_OR_URL')
     group.add_argument(
         '--force', action='store_true', default=False,
         help="Delete existing directories if they don't contain the "

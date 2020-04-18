@@ -65,7 +65,7 @@ def get_repositories(yaml_file):
     try:
         repositories = root['repositories']
         return get_repos_in_vcstool_format(repositories)
-    except AttributeError as e:
+    except KeyError as e:
         raise RuntimeError('Input data is not valid format: %s' % e)
     except TypeError as e:
         # try rosinstall file format
@@ -90,7 +90,7 @@ def get_repos_in_vcstool_format(repositories):
             repo['url'] = attributes['url']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
-        except AttributeError as e:
+        except KeyError as e:
             print(
                 ansi('yellowf') + (
                     "Repository '%s' does not provide the necessary "
@@ -110,7 +110,7 @@ def get_repos_in_rosinstall_format(root):
         attributes = list(item.values())[0]
         try:
             path = attributes['local-name']
-        except AttributeError as e:
+        except KeyError as e:
             print(
                 ansi('yellowf') + (
                     'Repository #%d does not provide the necessary '
@@ -121,7 +121,7 @@ def get_repos_in_rosinstall_format(root):
             repo['url'] = attributes['uri']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
-        except AttributeError as e:
+        except KeyError as e:
             print(
                 ansi('yellowf') + (
                     "Repository '%s' does not provide the necessary "

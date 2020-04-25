@@ -128,6 +128,7 @@ class VcsClientBase(object):
                             "Could not remove directory '%s': %s" % (path, e),
                         'returncode': 1
                     }
+        return None
 
 
 def run_command(cmd, cwd, env=None):

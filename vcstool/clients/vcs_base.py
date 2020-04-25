@@ -1,3 +1,4 @@
+import errno
 import os
 import socket
 import stat
@@ -88,7 +89,7 @@ class VcsClientBase(object):
         try:
             remove_file(self.path)
         except OSError as e:
-            if e.errno != 1:
+            if e.errno not in (errno.EISDIR, errno.ENOENT):
                 return {
                     'cmd': 'remove_file(%s)' % self.path,
                     'cwd': self.path,

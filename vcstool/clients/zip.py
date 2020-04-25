@@ -1,5 +1,4 @@
 import os
-import shutil
 try:
     from cStringIO import StringIO as BytesIO
 except ImportError:
@@ -36,17 +35,9 @@ class ZipClient(VcsClientBase):
             }
 
         # clear destination
-        if os.path.exists(self.path):
-            for filename in os.listdir(self.path):
-                path = os.path.join(self.path, filename)
-                try:
-                    shutil.rmtree(path)
-                except OSError:
-                    os.remove(path)
-        else:
-            not_exist = self._create_path()
-            if not_exist:
-                return not_exist
+        fail = self._create_or_truncate_path()
+        if fail:
+            return fail
 
         # download zipfile
         try:

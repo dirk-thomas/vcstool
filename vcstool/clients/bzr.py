@@ -1,6 +1,5 @@
 import copy
 import os
-import shutil
 
 from .vcs_base import VcsClientBase
 from .vcs_base import which
@@ -63,14 +62,17 @@ class BzrClient(VcsClientBase):
                             'repository',
                         'returncode': 1
                     }
-                try:
-                    shutil.rmtree(self.path)
-                except OSError:
-                    os.remove(self.path)
-
-        not_exist = self._create_path()
-        if not_exist:
-            return not_exist
+                fail = self._create_or_truncate_path()
+                if fail:
+                    return fail
+        elif command.force:
+            fail = self._create_or_truncate_path()
+            if fail:
+                return fail
+        else:
+            not_exist = self._create_path()
+            if not_exist:
+                return not_exist
 
         if BzrClient.is_repository(self.path):
             # pull updates for existing repo

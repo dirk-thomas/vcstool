@@ -1,7 +1,9 @@
 import os
 import socket
+import stat
 import subprocess
 import time
+
 try:
     from urllib.request import Request
     from urllib.request import urlopen
@@ -70,6 +72,62 @@ class VcsClientBase(object):
                     'returncode': 1
                 }
         return None
+
+    def _create_or_truncate_path(self):
+        def remove_file(f):
+            try:
+                os.remove(f)
+            except WindowsError as e:
+                if e.errno != 5:
+                    raise
+                # on Windows you need to clear the readonly bit first
+                os.chmod(f, stat.S_IWRITE)
+                os.remove(f)
+
+        # If path is a symlink or a file, delete it.
+        try:
+            remove_file(self.path)
+        except OSError as e:
+            if e.errno != 1:
+                return {
+                    'cmd': 'remove_file(%s)' % self.path,
+                    'cwd': self.path,
+                    'output':
+                        "Could not remove file '%s': %s" % (self.path, e),
+                    'returncode': 1
+                }
+
+        # Create the target directory if it does not exist
+        failure = self._create_path()
+        if failure is not None:
+            return failure
+
+        # And clear out anything already in it
+        for root, dirs, files in os.walk(self.path, topdown=False):
+            for name in files:
+                path = os.path.join(root, name)
+                try:
+                    remove_file(path)
+                except OSError as e:
+                    return {
+                        'cmd': 'remove_file(%s)' % path,
+                        'cwd': self.path,
+                        'output':
+                            "Could not remove file '%s': %s" % (path, e),
+                        'returncode': 1
+                    }
+            for name in dirs:
+                path = os.path.join(root, name)
+                try:
+                    os.rmdir(path)
+                except OSError as e:
+                    return {
+                        'cmd': 'os.rmdir(%s)' % path,
+                        'cwd': self.path,
+                        'output':
+                            "Could not remove directory '%s': %s" % (path, e),
+                        'returncode': 1
+                    }
 
 
 def run_command(cmd, cwd, env=None):

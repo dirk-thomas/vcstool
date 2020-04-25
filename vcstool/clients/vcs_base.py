@@ -79,11 +79,12 @@ class VcsClientBase(object):
             try:
                 os.remove(f)
             except OSError as e:
-                if getattr(e, 'winerror') != 5:
+                if getattr(e, 'winerror', None) == 5:
+                    # on Windows you need to clear the readonly bit first
+                    os.chmod(f, stat.S_IWRITE)
+                    os.remove(f)
+                else:
                     raise
-                # on Windows you need to clear the readonly bit first
-                os.chmod(f, stat.S_IWRITE)
-                os.remove(f)
 
         # If path is a symlink or a file, delete it.
         try:

@@ -77,8 +77,8 @@ class VcsClientBase(object):
         def remove_file(f):
             try:
                 os.remove(f)
-            except WindowsError as e:
-                if e.errno != 5:
+            except OSError as e:
+                if getattr(e, 'winerror') != 5:
                     raise
                 # on Windows you need to clear the readonly bit first
                 os.chmod(f, stat.S_IWRITE)

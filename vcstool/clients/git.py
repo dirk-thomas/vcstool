@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from vcstool.executor import USE_COLOR
 

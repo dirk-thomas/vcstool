@@ -255,9 +255,27 @@ def run_command(command, args=None, subfolder=None):
     cwd = TEST_WORKSPACE
     if subfolder:
         cwd = os.path.join(cwd, subfolder)
-    return subprocess.check_output(
+    output = subprocess.check_output(
         [sys.executable, script] + (args or []),
         stderr=subprocess.STDOUT, cwd=cwd, env=env)
+    # replace message from older git versions
+    # the following seems to have changed between git 2.17.1 and 2.25.1
+    output = output.replace(
+        b"Note: checking out '", b"Note: switching to '")
+    output = output.replace(
+        b'by performing another checkout.',
+        b'by switching back to a branch.')
+    output = output.replace(
+        b'using -b with the checkout command again.',
+        b'using -c with the switch command.')
+    output = output.replace(
+        b'git checkout -b <new-branch-name>',
+        b'git switch -c <new-branch-name>\n\n'
+        b'Or undo this operation with:\n\n'
+        b'  git switch -\n\n'
+        b'Turn off this advice by setting config variable '
+        b'advice.detachedHead to false')
+    return output
 
 
 def get_expected_output(name):

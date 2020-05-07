@@ -297,7 +297,7 @@ def _get_git_version():
     prefix = b'git version '
     assert output.startswith(prefix)
     output = output[len(prefix):].rstrip()
-    return [int(x) for x in output.split(b'.')]
+    return [int(x) for x in output.split(b'.') if x != b'windows']
 
 
 if __name__ == '__main__':

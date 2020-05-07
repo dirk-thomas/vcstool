@@ -241,7 +241,8 @@ class SvnClient(VcsClientBase):
             if result_info_ver['returncode']:
                 result_info_ver['output'] = \
                     'Specified version not found on remote repository' + \
-                    "'%s':'%s' : %s" % (command.url, result_info_ver['output'])
+                    "'%s@%s' : %s" % \
+                    (command.url, command.version, result_info_ver['output'])
                 return result_info_ver
 
             cmd = result_info_ver['cmd']

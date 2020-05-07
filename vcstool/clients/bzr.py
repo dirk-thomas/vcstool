@@ -1,9 +1,9 @@
 import copy
 import os
-import shutil
 
 from .vcs_base import VcsClientBase
 from .vcs_base import which
+from ..util import rmtree
 
 
 class BzrClient(VcsClientBase):
@@ -64,7 +64,7 @@ class BzrClient(VcsClientBase):
                         'returncode': 1
                     }
                 try:
-                    shutil.rmtree(self.path)
+                    rmtree(self.path)
                 except OSError:
                     os.remove(self.path)
 

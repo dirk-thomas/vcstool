@@ -1,5 +1,4 @@
 import os
-import shutil
 try:
     from cStringIO import StringIO as BytesIO
 except ImportError:
@@ -13,6 +12,7 @@ import zipfile
 from .vcs_base import load_url
 from .vcs_base import test_url
 from .vcs_base import VcsClientBase
+from ..util import rmtree
 
 
 class ZipClient(VcsClientBase):
@@ -40,7 +40,7 @@ class ZipClient(VcsClientBase):
             for filename in os.listdir(self.path):
                 path = os.path.join(self.path, filename)
                 try:
-                    shutil.rmtree(path)
+                    rmtree(path)
                 except OSError:
                     os.remove(path)
         else:

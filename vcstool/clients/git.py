@@ -1,10 +1,10 @@
 import os
-import shutil
 
 from vcstool.executor import USE_COLOR
 
 from .vcs_base import VcsClientBase
 from .vcs_base import which
+from ..util import rmtree
 
 
 class GitClient(VcsClientBase):
@@ -237,13 +237,13 @@ class GitClient(VcsClientBase):
                         'returncode': 1
                     }
                 try:
-                    shutil.rmtree(self.path)
+                    rmtree(self.path)
                 except OSError:
                     os.remove(self.path)
         elif command.force and os.path.exists(self.path):
             # Not empty, not a git repository
             try:
-                shutil.rmtree(self.path)
+                rmtree(self.path)
             except OSError:
                 os.remove(self.path)
 

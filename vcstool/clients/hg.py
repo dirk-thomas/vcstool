@@ -1,11 +1,11 @@
 import os
-import shutil
 from threading import Lock
 
 from vcstool.executor import USE_COLOR
 
 from .vcs_base import VcsClientBase
 from .vcs_base import which
+from ..util import rmtree
 
 
 class HgClient(VcsClientBase):
@@ -127,7 +127,7 @@ class HgClient(VcsClientBase):
                         'returncode': 1
                     }
                 try:
-                    shutil.rmtree(self.path)
+                    rmtree(self.path)
                 except OSError:
                     os.remove(self.path)
 

@@ -1,9 +1,11 @@
 import os
-import shutil
 import subprocess
 import sys
 import unittest
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+from vcstool.util import rmtree  # noqa: E402
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
@@ -31,7 +33,7 @@ class TestCommands(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(TEST_WORKSPACE)
+        rmtree(TEST_WORKSPACE)
 
     def test_branch(self):
         output = run_command('branch')
@@ -209,7 +211,7 @@ class TestCommands(unittest.TestCase):
                 output == expected or
                 output == expected.replace(b'... ', b' '))
         finally:
-            shutil.rmtree(workdir)
+            rmtree(workdir)
 
     def test_validate(self):
         output = run_command(
@@ -295,7 +297,7 @@ def _get_git_version():
     prefix = b'git version '
     assert output.startswith(prefix)
     output = output[len(prefix):].rstrip()
-    return [int(x) for x in output.split(b'.')]
+    return [int(x) for x in output.split(b'.') if x != b'windows']
 
 
 if __name__ == '__main__':

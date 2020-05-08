@@ -51,7 +51,8 @@ def get_parser():
         help='Retry commands requiring network access N times on failure')
     group.add_argument(
         '--skip-existing', action='store_true', default=False,
-        help="Don't change custom checkouts in repos referencing the same URL")
+        help="Don't overwrite existing directories or change custom checkouts "
+             'in repos referencing the same URL')
 
     return parser
 

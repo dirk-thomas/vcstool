@@ -288,6 +288,14 @@ class GitClient(VcsClientBase):
             cmd = result_fetch['cmd']
             output = result_fetch['output']
 
+        elif command.skip_existing:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': 'Skipped existing directory',
+                'returncode': 0
+            }
+
         else:
             cmd_clone = [GitClient._executable, 'clone', command.url, '.']
             result_clone = self._run_command(cmd_clone, retry=command.retry)

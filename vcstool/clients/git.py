@@ -227,6 +227,14 @@ class GitClient(VcsClientBase):
                 if url == command.url:
                     break
             else:
+                if command.skip_existing:
+                    return {
+                        'cmd': '',
+                        'cwd': self.path,
+                        'output':
+                            'Skipped existing repository with different URL',
+                        'returncode': 0
+                    }
                 if not command.force:
                     return {
                         'cmd': '',
@@ -240,6 +248,15 @@ class GitClient(VcsClientBase):
                     shutil.rmtree(self.path)
                 except OSError:
                     os.remove(self.path)
+
+        elif command.skip_existing and os.path.exists(self.path):
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': 'Skipped existing directory',
+                'returncode': 0
+            }
+
         elif command.force and os.path.exists(self.path):
             # Not empty, not a git repository
             try:
@@ -287,14 +304,6 @@ class GitClient(VcsClientBase):
                 return result_fetch
             cmd = result_fetch['cmd']
             output = result_fetch['output']
-
-        elif command.skip_existing and os.path.exists(self.path):
-            return {
-                'cmd': '',
-                'cwd': self.path,
-                'output': 'Skipped existing directory',
-                'returncode': 0
-            }
 
         else:
             cmd_clone = [GitClient._executable, 'clone', command.url, '.']

@@ -288,7 +288,7 @@ class GitClient(VcsClientBase):
             cmd = result_fetch['cmd']
             output = result_fetch['output']
 
-        elif command.skip_existing:
+        elif command.skip_existing and os.path.exists(self.path):
             return {
                 'cmd': '',
                 'cwd': self.path,

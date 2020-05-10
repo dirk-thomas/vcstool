@@ -277,6 +277,9 @@ def run_command(command, args=None, subfolder=None):
         b'  git switch -\n\n'
         b'Turn off this advice by setting config variable '
         b'advice.detachedHead to false')
+    # replace GitHub SSH clone URL
+    output = output.replace(
+        b'git@github.com:', b'https://github.com/')
     return output
 
 

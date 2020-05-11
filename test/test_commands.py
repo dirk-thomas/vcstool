@@ -92,7 +92,11 @@ class TestCommands(unittest.TestCase):
         with self.assertRaises(subprocess.CalledProcessError) as e:
             run_command('pull', args=['--workers', '1'])
         expected = get_expected_output('pull')
-        self.assertEqual(e.exception.output, expected)
+        # replace message from older git versions
+        output = e.exception.output.replace(
+            b'anch. Please specify which\nbranch you want to merge with. See',
+            b'anch.\nPlease specify which branch you want to merge with.\nSee')
+        self.assertEqual(output, expected)
 
     def test_pull_api(self):
         try:
@@ -131,8 +135,12 @@ class TestCommands(unittest.TestCase):
             os.chdir(cwd_bck)
 
         assert rc == 1
+        # replace message from older git versions
+        output = stdout_stderr.getvalue().replace(
+            'anch. Please specify which\nbranch you want to merge with. See',
+            'anch.\nPlease specify which branch you want to merge with.\nSee')
         expected = get_expected_output('pull').decode()
-        assert stdout_stderr.getvalue() == expected
+        assert output == expected
 
     def test_reimport(self):
         cwd_vcstool = os.path.join(TEST_WORKSPACE, 'vcstool')
@@ -261,6 +269,20 @@ def run_command(command, args=None, subfolder=None):
         [sys.executable, script] + (args or []),
         stderr=subprocess.STDOUT, cwd=cwd, env=env)
     # replace message from older git versions
+    output = output.replace(
+        b'git checkout -b new_branch_name',
+        b'git checkout -b <new-branch-name>')
+    output = output.replace(
+        b'(detached from ', b'(HEAD detached at ')
+    output = output.replace(
+        b"ady on 'master'\n=",
+        b"ady on 'master'\nYour branch is up-to-date with 'origin/master'.\n=")
+    output = output.replace(
+        b'# HEAD detached at ',
+        b'HEAD detached at ')
+    output = output.replace(
+        b'# On branch master',
+        b"On branch master\nYour branch is up-to-date with 'origin/master'.\n")
     # the following seems to have changed between git 2.17.1 and 2.25.1
     output = output.replace(
         b"Note: checking out '", b"Note: switching to '")

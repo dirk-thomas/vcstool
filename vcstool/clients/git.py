@@ -320,7 +320,7 @@ class GitClient(VcsClientBase):
 
         if checkout_version:
             cmd_checkout = [
-                GitClient._executable, 'checkout', checkout_version]
+                GitClient._executable, 'checkout', checkout_version, '--']
             result_checkout = self._run_command(cmd_checkout)
             if result_checkout['returncode']:
                 result_checkout['output'] = \

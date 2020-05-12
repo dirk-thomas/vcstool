@@ -37,11 +37,25 @@ def get_style_guide(argv=None):
     # this is a fork of flake8.api.legacy.get_style_guide
     # to allow passing command line argument
     application = Application()
-    application.parse_preliminary_options_and_args([])
-    application.make_config_finder()
-    application.find_plugins()
-    application.register_plugin_options()
-    application.parse_configuration_and_cli(argv)
+    if hasattr(application, 'parse_preliminary_options'):
+        prelim_opts, remaining_args = application.parse_preliminary_options(
+            argv)
+        from flake8 import configure_logging
+        configure_logging(prelim_opts.verbose, prelim_opts.output_file)
+        from flake8.options import config
+        config_finder = config.ConfigFileFinder(
+            application.program, prelim_opts.append_config,
+            config_file=prelim_opts.config,
+            ignore_config_files=prelim_opts.isolated)
+        application.find_plugins(config_finder)
+        application.register_plugin_options()
+        application.parse_configuration_and_cli(config_finder, remaining_args)
+    else:
+        application.parse_preliminary_options_and_args([])
+        application.make_config_finder()
+        application.find_plugins()
+        application.register_plugin_options()
+        application.parse_configuration_and_cli(argv)
     application.make_formatter()
     application.make_guide()
     application.make_file_checker_manager()

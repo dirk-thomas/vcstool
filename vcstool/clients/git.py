@@ -28,7 +28,7 @@ class GitClient(VcsClientBase):
         if not command.all and not result['returncode']:
             # only show current branch
             lines = result['output'].splitlines()
-            lines = [l[2:] for l in lines if l.startswith('* ')]
+            lines = [line[2:] for line in lines if line.startswith('* ')]
             result['output'] = '\n'.join(lines)
 
         return result

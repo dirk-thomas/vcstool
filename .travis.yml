@@ -12,7 +12,7 @@ matrix:
 install:
   # newer versions of PyYAML dropped support for Python 3.4
   - if [ $TRAVIS_PYTHON_VERSION == "3.4" ]; then pip install PyYAML==5.2; fi
-  - pip install coverage flake8 flake8-docstrings flake8-import-order pytest PyYAML
+  - pip install appdirs coverage flake8 flake8-docstrings flake8-import-order pytest PyYAML mock
 script:
   - PYTHONPATH=`pwd` pytest -s -v test
 notifications:

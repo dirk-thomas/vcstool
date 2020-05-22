@@ -69,7 +69,7 @@ class TestBase(unittest.TestCase):
             self, authenticated_urlopen_mock, urlopen_mock):
         for code in (401, 404):
             urlopen_mock.side_effect = [
-                HTTPError(None, code, None, None, None)]
+                HTTPError(None, code, 'test', None, None)]
             urlopen_read_mock = urlopen_mock.return_value.read
 
             vcs_base.load_url('example.com', timeout=123)

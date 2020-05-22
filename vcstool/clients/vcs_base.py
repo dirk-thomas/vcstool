@@ -110,21 +110,21 @@ def run_command(cmd, cwd, env=None):
 
 
 def load_url(url, retry=2, retry_period=1, timeout=10):
+    fh = None
     try:
         fh = urlopen(url, timeout=timeout)
     except HTTPError as e:
+        e.msg += ' (%s)' % url
         if e.code in (401, 404):
             # Try again, but with authentication
             fh = _authenticated_urlopen(url, timeout=timeout)
-            if fh is not None:
-                return fh.read()
         elif e.code == 503 and retry:
             time.sleep(retry_period)
             return load_url(
                 url, retry=retry - 1, retry_period=retry_period,
                 timeout=timeout)
-        e.msg += ' (%s)' % url
-        raise
+        if fh is None:
+            raise
     except URLError as e:
         if isinstance(e.reason, socket.timeout) and retry:
             time.sleep(retry_period)

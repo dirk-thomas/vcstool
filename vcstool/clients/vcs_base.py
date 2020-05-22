@@ -1,5 +1,4 @@
 import errno
-import functools
 import glob
 import logging
 import netrc
@@ -151,7 +150,6 @@ def test_url(url, retry=2, retry_period=1, timeout=10):
 
 def _urlopen_retry(retry, retry_period):
     def _retry_decorator(f):
-        @functools.wraps(f)
         def _retryable_function(*args, **kwargs):
             local_retry = retry + 1
 

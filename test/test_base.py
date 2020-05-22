@@ -311,7 +311,7 @@ class TestBase(unittest.TestCase):
             HTTPError(None, 503, 'test3', None, None),
         ]
 
-        with self.assertRaisesRegex(HTTPError, 'test3'):
+        with self.assertRaisesRegexp(HTTPError, 'test3'):
             vcs_base.load_url('example.com')
 
         self.assertEqual(len(urlopen_mock.mock_calls), 3)
@@ -342,7 +342,7 @@ class TestBase(unittest.TestCase):
 
         url = 'https://%s/foo/bar' % machine
 
-        with self.assertRaisesRegex(HTTPError, 'test4'):
+        with self.assertRaisesRegexp(HTTPError, 'test4'):
             vcs_base.load_url(url)
 
         self.assertEqual(len(urlopen_mock.mock_calls), 4)

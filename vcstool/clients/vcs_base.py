@@ -153,21 +153,21 @@ def _urlopen_retry(retry, retry_period):
     def _retry_decorator(f):
         @functools.wraps(f)
         def _retryable_function(*args, **kwargs):
-            nonlocal retry
-            retry += 1
+            local_retry = retry + 1
 
             while True:
                 try:
-                    retry -= 1
+                    local_retry -= 1
                     return f(*args, **kwargs)
                 except HTTPError as e:
-                    if e.code != 503 or retry <= 0:
+                    if e.code != 503 or local_retry <= 0:
                         raise
                 except URLError as e:
-                    if not isinstance(e.reason, socket.timeout) or retry <= 0:
+                    if (not isinstance(e.reason, socket.timeout) or
+                            local_retry <= 0):
                         raise
 
-                if retry > 0:
+                if local_retry > 0:
                     time.sleep(retry_period)
                 else:
                     break

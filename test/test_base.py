@@ -311,8 +311,10 @@ class TestBase(unittest.TestCase):
             HTTPError(None, 503, 'test3', None, None),
         ]
 
-        with self.assertRaisesRegexp(HTTPError, 'test3'):
+        with self.assertRaises(HTTPError) as e:
             vcs_base.load_url('example.com')
+
+        self.assertTrue('test3' in str(e.exception))
 
         self.assertEqual(len(urlopen_mock.mock_calls), 3)
         urlopen_mock.assert_has_calls([
@@ -342,8 +344,10 @@ class TestBase(unittest.TestCase):
 
         url = 'https://%s/foo/bar' % machine
 
-        with self.assertRaisesRegexp(HTTPError, 'test4'):
+        with self.assertRaises(HTTPError) as e:
             vcs_base.load_url(url)
+
+        self.assertTrue('test4' in str(e.exception))
 
         self.assertEqual(len(urlopen_mock.mock_calls), 4)
 

@@ -1,4 +1,5 @@
 import errno
+import functools
 import glob
 import logging
 import netrc
@@ -112,26 +113,17 @@ def run_command(cmd, cwd, env=None):
 def load_url(url, retry=2, retry_period=1, timeout=10):
     fh = None
     try:
-        fh = urlopen(url, timeout=timeout)
+        fh = _retryable_urlopen(url, timeout=timeout)
     except HTTPError as e:
-        e.msg += ' (%s)' % url
         if e.code in (401, 404):
             # Try again, but with authentication
             fh = _authenticated_urlopen(url, timeout=timeout)
-        elif e.code == 503 and retry:
-            time.sleep(retry_period)
-            return load_url(
-                url, retry=retry - 1, retry_period=retry_period,
-                timeout=timeout)
         if fh is None:
+            e.msg += ' (%s)' % url
             raise
     except URLError as e:
-        if isinstance(e.reason, socket.timeout) and retry:
-            time.sleep(retry_period)
-            return load_url(
-                url, retry=retry - 1, retry_period=retry_period,
-                timeout=timeout)
         raise URLError(str(e) + ' (%s)' % url)
+
     return fh.read()
 
 
@@ -140,33 +132,52 @@ def test_url(url, retry=2, retry_period=1, timeout=10):
     request.get_method = lambda: 'HEAD'
 
     try:
-        response = urlopen(request)
+        response = _retryable_urlopen(request)
     except HTTPError as e:
-        if e.code == 503 and retry:
-            time.sleep(retry_period)
-            return test_url(
-                url, retry=retry - 1, retry_period=retry_period,
-                timeout=timeout)
         e.msg += ' (%s)' % url
         raise
     except URLError as e:
-        if isinstance(e.reason, socket.timeout) and retry:
-            time.sleep(retry_period)
-            return test_url(
-                url, retry=retry - 1, retry_period=retry_period,
-                timeout=timeout)
         raise URLError(str(e) + ' (%s)' % url)
     return response
 
 
-def _authenticated_urlopen(uri, timeout=None):
+def _urlopen_retry(f):
+    @functools.wraps(f)
+    def _retryable_function(url, retry=2, retry_period=1, timeout=10):
+        retry += 1
+
+        while True:
+            try:
+                retry -= 1
+                return f(url, timeout=timeout)
+            except HTTPError as e:
+                if e.code != 503 or retry <= 0:
+                    raise
+            except URLError as e:
+                if not isinstance(e.reason, socket.timeout) or retry <= 0:
+                    raise
+
+            if retry > 0:
+                time.sleep(retry_period)
+            else:
+                break
+
+    return _retryable_function
+
+
+@_urlopen_retry
+def _retryable_urlopen(url, timeout=10):
+    return urlopen(url, timeout=timeout)
+
+
+@_urlopen_retry
+def _authenticated_urlopen(uri, timeout=10):
     machine = urlparse(uri).netloc
     if not machine:
         return None
 
     credentials = _credentials_for_machine(machine)
     if credentials is None:
-        logger.warning('No credentials found for "%s"' % machine)
         return None
 
     (username, account, password) = credentials

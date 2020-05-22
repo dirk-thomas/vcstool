@@ -213,7 +213,7 @@ class TestBase(unittest.TestCase):
 
         build_opener_mock.assert_called_once_with(
             _HTTPBasicAuthHandlerMatcher(self))
-        open_mock.assert_called_once_with(url, timeout=None)
+        open_mock.assert_called_once_with(url, timeout=10)
 
     @mock.patch('vcstool.clients.vcs_base.urlopen', autospec=True)
     @mock.patch('vcstool.clients.vcs_base.build_opener', autospec=True)
@@ -243,7 +243,71 @@ class TestBase(unittest.TestCase):
                 return True
 
         urlopen_mock.assert_called_once_with(
-            _RequestMatcher(self), timeout=None)
+            _RequestMatcher(self), timeout=10)
+
+    @mock.patch('vcstool.clients.vcs_base.urlopen', autospec=True)
+    def test_load_url_retries(self, urlopen_mock):
+        urlopen_read_mock = urlopen_mock.return_value.read
+        urlopen_mock.side_effect = [
+            HTTPError(None, 503, 'test1', None, None),
+            HTTPError(None, 503, 'test2', None, None),
+            HTTPError(None, 503, 'test3', None, None),
+        ]
+
+        with self.assertRaisesRegex(HTTPError, 'test3'):
+            vcs_base.load_url('example.com')
+
+        self.assertEqual(len(urlopen_mock.mock_calls), 3)
+        urlopen_mock.assert_has_calls([
+            mock.call('example.com', timeout=10),
+            mock.call('example.com', timeout=10),
+            mock.call('example.com', timeout=10),
+        ])
+        self.assertFalse(urlopen_read_mock.mock_calls)
+
+    @mock.patch('vcstool.clients.vcs_base.urlopen', autospec=True)
+    def test_load_url_retries_authenticated(self, urlopen_mock):
+        urlopen_read_mock = urlopen_mock.return_value.read
+        urlopen_mock.side_effect = [
+            HTTPError(None, 401, 'test1', None, None),
+            HTTPError(None, 503, 'test2', None, None),
+            HTTPError(None, 503, 'test3', None, None),
+            HTTPError(None, 503, 'test4', None, None),
+        ]
+
+        machine = 'example.com'
+        _create_netrc_file(
+            os.path.join(self.default_auth_dir, '.netrc'),
+            textwrap.dedent('''\
+                machine %s
+                password password
+                ''' % machine))
+
+        url = 'https://%s/foo/bar' % machine
+
+        with self.assertRaisesRegex(HTTPError, 'test4'):
+            vcs_base.load_url(url)
+
+        self.assertEqual(len(urlopen_mock.mock_calls), 4)
+
+        class _RequestMatcher(object):
+            def __init__(self, test):
+                self.test = test
+
+            def __eq__(self, other):
+                self.test.assertEqual(other.get_full_url(), url)
+                self.test.assertEqual(
+                    other.get_header('Private-token'), 'password')
+                return True
+
+        urlopen_mock.assert_has_calls([
+            mock.call(url, timeout=10),
+            mock.call(_RequestMatcher(self), timeout=10),
+            mock.call(_RequestMatcher(self), timeout=10),
+            mock.call(_RequestMatcher(self), timeout=10),
+        ])
+        self.assertFalse(urlopen_read_mock.mock_calls)
+
 
 
 def _create_netrc_file(path, contents):

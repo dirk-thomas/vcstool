@@ -113,11 +113,12 @@ def run_command(cmd, cwd, env=None):
 def load_url(url, retry=2, retry_period=1, timeout=10):
     fh = None
     try:
-        fh = _retryable_urlopen(url, timeout=timeout)
+        fh = _urlopen_retry(retry, retry_period)(urlopen)(url, timeout=timeout)
     except HTTPError as e:
         if e.code in (401, 404):
             # Try again, but with authentication
-            fh = _authenticated_urlopen(url, timeout=timeout)
+            fh = _authenticated_urlopen(
+                url, retry=retry, retry_period=retry_period, timeout=timeout)
         if fh is None:
             e.msg += ' (%s)' % url
             raise
@@ -132,47 +133,56 @@ def test_url(url, retry=2, retry_period=1, timeout=10):
     request.get_method = lambda: 'HEAD'
 
     try:
-        response = _retryable_urlopen(request)
+        response = _urlopen_retry(retry, retry_period)(urlopen)(
+            request, timeout=timeout)
     except HTTPError as e:
-        e.msg += ' (%s)' % url
-        raise
+        if e.code in (401, 404):
+            # Try again, but with authentication
+            response = _authenticated_urlopen(
+                request, retry=retry, retry_period=retry_period,
+                timeout=timeout)
+        if response is None:
+            e.msg += ' (%s)' % url
+            raise
     except URLError as e:
         raise URLError(str(e) + ' (%s)' % url)
     return response
 
 
-def _urlopen_retry(f):
-    @functools.wraps(f)
-    def _retryable_function(url, retry=2, retry_period=1, timeout=10):
-        retry += 1
+def _urlopen_retry(retry, retry_period):
+    def _retry_decorator(f):
+        @functools.wraps(f)
+        def _retryable_function(*args, **kwargs):
+            nonlocal retry
+            retry += 1
 
-        while True:
-            try:
-                retry -= 1
-                return f(url, timeout=timeout)
-            except HTTPError as e:
-                if e.code != 503 or retry <= 0:
-                    raise
-            except URLError as e:
-                if not isinstance(e.reason, socket.timeout) or retry <= 0:
-                    raise
+            while True:
+                try:
+                    retry -= 1
+                    return f(*args, **kwargs)
+                except HTTPError as e:
+                    if e.code != 503 or retry <= 0:
+                        raise
+                except URLError as e:
+                    if not isinstance(e.reason, socket.timeout) or retry <= 0:
+                        raise
 
-            if retry > 0:
-                time.sleep(retry_period)
-            else:
-                break
+                if retry > 0:
+                    time.sleep(retry_period)
+                else:
+                    break
 
-    return _retryable_function
-
-
-@_urlopen_retry
-def _retryable_urlopen(url, timeout=10):
-    return urlopen(url, timeout=timeout)
+        return _retryable_function
+    return _retry_decorator
 
 
-@_urlopen_retry
-def _authenticated_urlopen(uri, timeout=10):
-    machine = urlparse(uri).netloc
+def _authenticated_urlopen(uri, retry=2, retry_period=1, timeout=10):
+    if isinstance(uri, str):
+        request = Request(uri)
+    else:
+        request = uri
+
+    machine = urlparse(request.full_url).netloc
     if not machine:
         return None
 
@@ -188,13 +198,14 @@ def _authenticated_urlopen(uri, timeout=10):
         password_manager.add_password(None, machine, username, password)
         auth_handler = HTTPBasicAuthHandler(password_manager)
         opener = build_opener(auth_handler)
-        return opener.open(uri, timeout=timeout)
+        return _urlopen_retry(retry, retry_period)(opener.open)(
+            request, timeout=timeout)
 
     # If we have only a password, use token auth
     elif password:
-        request = Request(uri)
         request.add_header('PRIVATE-TOKEN', password)
-        return urlopen(request, timeout=timeout)
+        return _urlopen_retry(retry, retry_period)(urlopen)(
+            request, timeout=timeout)
 
     return None
 

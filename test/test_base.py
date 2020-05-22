@@ -78,7 +78,56 @@ class TestBase(unittest.TestCase):
             self.assertFalse(urlopen_read_mock.mock_calls)
 
             authenticated_urlopen_mock.assert_called_once_with(
-                'example.com', timeout=123)
+                'example.com', retry=2, retry_period=1, timeout=123)
+
+            authenticated_urlopen_mock.reset_mock()
+            urlopen_mock.reset_mock()
+
+    @mock.patch('vcstool.clients.vcs_base.urlopen', autospec=True)
+    @mock.patch(
+        'vcstool.clients.vcs_base._authenticated_urlopen', autospec=True)
+    def test_test_url_calls_urlopen(
+            self, authenticated_urlopen_mock, urlopen_mock):
+        url = 'http://example.com'
+        vcs_base.test_url(url, timeout=123)
+
+        class _RequestMatcher(object):
+            def __init__(self, test):
+                self.test = test
+
+            def __eq__(self, other):
+                self.test.assertEqual(other.get_full_url(), url)
+                return True
+
+        urlopen_mock.assert_called_once_with(
+            _RequestMatcher(self), timeout=123)
+        self.assertFalse(authenticated_urlopen_mock.mock_calls)
+
+    @mock.patch('vcstool.clients.vcs_base.urlopen', autospec=True)
+    @mock.patch(
+        'vcstool.clients.vcs_base._authenticated_urlopen', autospec=True)
+    def test_test_url_calls_authenticated_urlopen(
+            self, authenticated_urlopen_mock, urlopen_mock):
+        for code in (401, 404):
+            urlopen_mock.side_effect = [
+                HTTPError(None, code, 'test', None, None)]
+
+            url = 'http://example.com'
+            vcs_base.test_url(url, timeout=123)
+
+            class _RequestMatcher(object):
+                def __init__(self, test):
+                    self.test = test
+
+                def __eq__(self, other):
+                    self.test.assertEqual(other.get_full_url(), url)
+                    return True
+
+            urlopen_mock.assert_called_once_with(
+                _RequestMatcher(self), timeout=123)
+
+            authenticated_urlopen_mock.assert_called_once_with(
+                _RequestMatcher(self), retry=2, retry_period=1, timeout=123)
 
             authenticated_urlopen_mock.reset_mock()
             urlopen_mock.reset_mock()
@@ -211,9 +260,17 @@ class TestBase(unittest.TestCase):
                     ('username', 'password'))
                 return True
 
+        class _RequestMatcher(object):
+            def __init__(self, test):
+                self.test = test
+
+            def __eq__(self, other):
+                self.test.assertEqual(other.get_full_url(), url)
+                return True
+
         build_opener_mock.assert_called_once_with(
             _HTTPBasicAuthHandlerMatcher(self))
-        open_mock.assert_called_once_with(url, timeout=10)
+        open_mock.assert_called_once_with(_RequestMatcher(self), timeout=10)
 
     @mock.patch('vcstool.clients.vcs_base.urlopen', autospec=True)
     @mock.patch('vcstool.clients.vcs_base.build_opener', autospec=True)
@@ -307,7 +364,6 @@ class TestBase(unittest.TestCase):
             mock.call(_RequestMatcher(self), timeout=10),
         ])
         self.assertFalse(urlopen_read_mock.mock_calls)
-
 
 
 def _create_netrc_file(path, contents):

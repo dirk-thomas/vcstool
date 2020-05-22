@@ -182,7 +182,7 @@ def _authenticated_urlopen(uri, retry=2, retry_period=1, timeout=10):
     else:
         request = uri
 
-    machine = urlparse(request.full_url).netloc
+    machine = urlparse(request.get_full_url()).netloc
     if not machine:
         return None
 

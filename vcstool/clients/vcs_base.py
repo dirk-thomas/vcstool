@@ -222,9 +222,15 @@ def _credentials_for_machine(machine):
     if credentials:
         return credentials
 
-    # Finally, check the system-wide auth directory for vcstool
-    return _credentials_for_machine_in_dir(
-        appdirs.site_config_dir(_APPDIRS_PROJECT_NAME), machine)
+    # Finally, check the system-wide auth directories for vcstool, in order
+    auth_path = appdirs.site_config_dir(_APPDIRS_PROJECT_NAME, multipath=True)
+    for site_config_dir in auth_path.split(':'):
+        credentials = _credentials_for_machine_in_dir(
+            site_config_dir, machine)
+        if credentials:
+            return credentials
+
+    return None
 
 
 def _credentials_for_machine_in_dir(directory, machine):

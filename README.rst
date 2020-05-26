@@ -138,6 +138,44 @@ The set of repositories to operate on can optionally be restricted by the type:
 If the command should work on multiple repositories make sure to pass only generic arguments which work for all of these repository types.
 
 
+Access repositories that require authentication
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Vcstool supports authenticated access to repositories by parsing files with a netrc-like format.
+It will first look for login information in the `~/.netrc` file, used by ftp, git, and similar programs if it exists.
+If it doesn't exist (or doesn't contain login infomation for the URL in question), it moves to vcstool-specific locations.
+In these locations vcstool will look for credentials in either an `auth.conf` file, or `.conf` files inside an `auth.conf.d` directory.
+These locations are (in order of precedence):
+
+1. User config directory.
+  - On Linux, abides by XDG spec: `~/.config/vcstool/`
+  - On macOS: `~/Library/Application Support/vcstool/`
+  - On Windows: `C:\\Users\\<username>\\AppData\\Local\\vcstool\\vcstool\\`
+2. Site config directory.
+  - On Linux: `vcstool/` subdirectory in any directory within `$XDG_CONFIG_DIRS`, or `/etc/xdg/vcstool/` if unset
+  - On macOS: `/Library/Application Support/vcstool/`
+  - On Windows: `C:\\ProgramData\\vcstool\\vcstool\\`
+
+The netrc-like format consists of a few different tokens separated by whitespace (spaces, tabs, or newlines):
+
+- `machine <name>`: Credentials are retrieved by matching the repository URL to this token
+- `login <name>`: Login username
+- `password <string>`: Login password
+
+For example, to access private github repositories::
+
+  machine github.com
+  login mylogin
+  password myaccesstoken
+
+Accessing private gitlab repositories looks similar, although no `login` is required::
+
+  machine gitlab.com
+  password myaccesstoken
+
+A word of caution: these files are not encrypted.
+Ensure that their permissions do not exceed that which is required.
+
 How to install vcstool?
 =======================
 

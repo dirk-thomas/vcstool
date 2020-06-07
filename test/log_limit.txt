@@ -1,6 +1,6 @@
 ..
 === ./hash (git) ===
-commit 377d5b3d03c212f015cc832fdb368f4534d0d583
+commit 377d5b3d03c212f015cc832fdb368f4534d0d583 (HEAD)
 Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
 
     update changelog
@@ -11,7 +11,7 @@ Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
 
     Merge pull request #44 from dirk-thomas/fix_loop_exit
 === ./tag (git) ===
-commit bf9ca56de693a02b93ed423bcef589259d75eb0f
+commit bf9ca56de693a02b93ed423bcef589259d75eb0f (HEAD, tag: 0.1.27)
 Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
 
     0.1.27

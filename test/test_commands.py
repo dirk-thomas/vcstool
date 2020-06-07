@@ -96,6 +96,23 @@ class TestCommands(unittest.TestCase):
         output = e.exception.output.replace(
             b'anch. Please specify which\nbranch you want to merge with. See',
             b'anch.\nPlease specify which branch you want to merge with.\nSee')
+        # newer git versions warn on pull with default config
+        if _get_git_version() >= [2, 27, 0]:
+            pull_warning = b"""
+warning: Pulling without specifying how to reconcile divergent branches is
+discouraged. You can squelch this message by running one of the following
+commands sometime before your next pull:
+
+  git config pull.rebase false  # merge (the default strategy)
+  git config pull.rebase true   # rebase
+  git config pull.ff only       # fast-forward only
+
+You can replace "git config" with "git config --global" to set a default
+preference for all repositories. You can also pass --rebase, --no-rebase,
+or --ff-only on the command line to override the configured default per
+invocation.
+"""
+            output = output.replace(pull_warning, b'')
         self.assertEqual(output, expected)
 
     def test_pull_api(self):
@@ -139,6 +156,23 @@ class TestCommands(unittest.TestCase):
         output = stdout_stderr.getvalue().replace(
             'anch. Please specify which\nbranch you want to merge with. See',
             'anch.\nPlease specify which branch you want to merge with.\nSee')
+        # newer git versions warn on pull with default config
+        if _get_git_version() >= [2, 27, 0]:
+            pull_warning = """
+warning: Pulling without specifying how to reconcile divergent branches is
+discouraged. You can squelch this message by running one of the following
+commands sometime before your next pull:
+
+  git config pull.rebase false  # merge (the default strategy)
+  git config pull.rebase true   # rebase
+  git config pull.ff only       # fast-forward only
+
+You can replace "git config" with "git config --global" to set a default
+preference for all repositories. You can also pass --rebase, --no-rebase,
+or --ff-only on the command line to override the configured default per
+invocation.
+"""
+            output = output.replace(pull_warning, '')
         expected = get_expected_output('pull').decode()
         assert output == expected
 

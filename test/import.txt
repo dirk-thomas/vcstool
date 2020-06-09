@@ -45,7 +45,5 @@ Turn off this advice by setting config variable advice.detachedHead to false
 HEAD is now at bf9ca56... 0.1.27
 === ./vcstool (git) ===
 Cloning into '.'...
-Already on 'master'
-Your branch is up to date with 'origin/master'.
 === ./without_version (git) ===
 Cloning into '.'...

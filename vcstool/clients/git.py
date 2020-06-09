@@ -306,7 +306,20 @@ class GitClient(VcsClientBase):
             output = result_fetch['output']
 
         else:
+            version_type = None
+            if command.version:
+                result_version_type = self._check_version_type(
+                    command.url, command.version)
+                if result_version_type['returncode']:
+                    return result_version_type
+                version_type = result_version_type['version_type']
+
             cmd_clone = [GitClient._executable, 'clone', command.url, '.']
+            if version_type == 'branch':
+                cmd_clone += ['-b', command.version]
+                checkout_version = None
+            else:
+                checkout_version = command.version
             result_clone = self._run_command(cmd_clone, retry=command.retry)
             if result_clone['returncode']:
                 result_clone['output'] = \
@@ -315,8 +328,6 @@ class GitClient(VcsClientBase):
                 return result_clone
             cmd = result_clone['cmd']
             output = result_clone['output']
-
-            checkout_version = command.version
 
         if checkout_version:
             cmd_checkout = [

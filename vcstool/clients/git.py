@@ -371,6 +371,40 @@ class GitClient(VcsClientBase):
             'returncode': 0 if remote_urls else 1
         }
 
+    def _check_version_type(self, url, version):
+        cmd = [GitClient._executable, 'ls-remote', url, version]
+        result = self._run_command(cmd)
+        if result['returncode']:
+            result['output'] = 'Could not determine ref type of version: ' + \
+                result['output']
+            return result
+        if not result['output']:
+            result['version_type'] = 'hash'
+            return result
+
+        refs = {}
+        for line in result['output'].splitlines():
+            hash_, ref = line.split(None, 1)
+            refs[ref] = hash_
+
+        tag_ref = 'refs/tags/' + version
+        branch_ref = 'refs/heads/' + version
+        if tag_ref in refs and branch_ref in refs:
+            if refs[tag_ref] != refs[branch_ref]:
+                result['returncode'] = 1
+                result['output'] = 'The version ref is a branch as well as ' \
+                    'tag but with different hashes'
+                return result
+        if tag_ref in refs:
+            result['version_type'] = 'tag'
+        elif branch_ref in refs:
+            result['version_type'] = 'branch'
+        else:
+            result['returncode'] = 1
+            result['output'] = 'Could not determine ref type of version: ' + \
+                result['output']
+        return result
+
     def log(self, command):
         self._check_executable()
         if command.limit_tag:

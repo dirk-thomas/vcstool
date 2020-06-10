@@ -299,11 +299,50 @@ class GitClient(VcsClientBase):
 
             # fetch updates for existing repo
             cmd_fetch = [GitClient._executable, 'fetch', remote]
+            if command.shallow:
+                result_version_type = self._check_version_type(
+                    command.url, checkout_version)
+                if result_version_type['returncode']:
+                    return result_version_type
+                version_type = result_version_type['version_type']
+                if version_type == 'branch':
+                    cmd_fetch.append(
+                        'refs/heads/%s:refs/remotes/%s/%s' %
+                        (checkout_version, remote, checkout_version))
+                elif version_type == 'hash':
+                    cmd_fetch.append(checkout_version)
+                elif version_type == 'tag':
+                    cmd_fetch.append(
+                        '+refs/tags/%s:refs/tags/%s' %
+                        (checkout_version, checkout_version))
+                else:
+                    assert False
+                cmd_fetch += ['--depth', '1']
             result_fetch = self._run_command(cmd_fetch, retry=command.retry)
             if result_fetch['returncode']:
                 return result_fetch
             cmd = result_fetch['cmd']
             output = result_fetch['output']
+
+            # ensure that a tracking branch exists which can be checked out
+            if command.shallow and version_type == 'branch':
+                cmd_show_ref = [
+                    GitClient._executable, 'show-ref',
+                    'refs/heads/%s' % checkout_version]
+                result_show_ref = self._run_command(cmd_show_ref)
+                if result_show_ref['returncode']:
+                    # creating tracking branch
+                    cmd_branch = [
+                        GitClient._executable, 'branch', checkout_version,
+                        '%s/%s' % (remote, checkout_version)]
+                    result_branch = self._run_command(cmd_branch)
+                    if result_branch['returncode']:
+                        result_branch['output'] = \
+                            "Could not create branch '%s': %s" % \
+                            (checkout_version, result_branch['output'])
+                        return result_branch
+                    cmd += ' && ' + ' '.join(cmd_branch)
+                    output = '\n'.join([output, result_branch['output']])
 
         else:
             version_type = None

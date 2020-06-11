@@ -32,8 +32,8 @@ except ImportError:
 
 import appdirs
 
-_AUTHENTICATION_CONFIGURATION_FILE = "auth.conf"
-_AUTHENTICATION_CONFIGURATION_PARTS_DIR = "auth.conf.d"
+_AUTHENTICATION_CONFIGURATION_FILE = 'auth.conf'
+_AUTHENTICATION_CONFIGURATION_PARTS_DIR = 'auth.conf.d'
 _APPDIRS_PROJECT_NAME = 'vcstool'
 
 logger = logging.getLogger(__name__)

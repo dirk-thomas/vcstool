@@ -28,8 +28,8 @@ class TestBase(unittest.TestCase):
         self.system_auth_dir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.system_auth_dir)
 
-        self._previous_home = os.getenv("HOME")
-        os.environ["HOME"] = self.default_auth_dir
+        self._previous_home = os.getenv('HOME')
+        os.environ['HOME'] = self.default_auth_dir
 
         patcher = mock.patch(
             'vcstool.clients.vcs_base.appdirs.user_config_dir',
@@ -45,9 +45,9 @@ class TestBase(unittest.TestCase):
 
     def tearDown(self):
         if self._previous_home:
-            os.environ["HOME"] = self._previous_home
+            os.environ['HOME'] = self._previous_home
         else:
-            del os.environ["HOME"]
+            del os.environ['HOME']
 
     @mock.patch('vcstool.clients.vcs_base.urlopen', autospec=True)
     @mock.patch(

@@ -1,0 +1,14 @@
+extends: list_extends2.repos
+repositories:
+  immutable/hash_tar:
+    type: tar
+    url: https://github.com/dirk-thomas/vcstool/archive/afb4946c6a96aef37ad7770382b321beff0e0f26.tar.gz
+    version: vcstool-afb4946c6a96aef37ad7770382b321beff0e0f26
+  vcstool-custom:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 0.2.10
+  vcstool-old:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 0.1.2

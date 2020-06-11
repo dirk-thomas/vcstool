@@ -79,12 +79,61 @@ def file_or_url_type(value):
         value, headers={'User-Agent': 'vcstool/' + vcstool_version})
 
 
-def get_repositories(yaml_file):
+def load_yaml_file(yaml_file):
     try:
-        root = yaml.safe_load(yaml_file)
+        return yaml.safe_load(yaml_file)
     except yaml.YAMLError as e:
         raise RuntimeError('Input data is not valid yaml format: %s' % e)
 
+
+def get_repositories(yaml_file):
+    root = load_yaml_file(yaml_file)
+    repos = get_repositories_from_root(root)
+    if 'extends' not in root or not repos:
+        return repos
+    repos_list = [repos]
+    # If the initial file is passed through --input, consider the extended
+    # file path as being relative to it. Otherwise, if the initial file is
+    # passed through stdin, use curdir as the base path.
+    file_path = os.path.abspath(yaml_file.name) \
+        if yaml_file.name != '<stdin>' else None
+    base_rel_path = os.path.dirname(file_path) \
+        if file_path else os.path.abspath(os.path.curdir)
+    file_paths = [file_path] if file_path else []
+    while 'extends' in root:
+        extended_file_path = os.path.join(base_rel_path, root['extends'])
+        if any(
+            os.path.samefile(extended_file_path, path)
+            for path in file_paths
+        ):
+            raise RuntimeError(
+                'Infinite loop in repos extensions: %s' % file_paths)
+        base_rel_path = os.path.dirname(extended_file_path)
+        file_paths.append(extended_file_path)
+        try:
+            with open(extended_file_path, 'r') as extended_file:
+                root = load_yaml_file(extended_file)
+        except IOError:
+            raise RuntimeError(
+                'Could not find extended file: %s' % extended_file_path)
+        repos_list.append(get_repositories_from_root(root))
+    repos_list.reverse()
+    return merge_repositories(repos_list)
+
+
+def merge_repositories(repositories):
+    base_repos = repositories[0]
+    # merge second set of repos into first, then third one into that, etc.
+    for extension_repos in repositories[1:]:
+        for path, attributes in extension_repos.items():
+            if path in base_repos:
+                base_repos[path].update(attributes)
+            else:
+                base_repos[path] = attributes
+    return base_repos
+
+
+def get_repositories_from_root(root):
     try:
         repositories = root['repositories']
         return get_repos_in_vcstool_format(repositories)

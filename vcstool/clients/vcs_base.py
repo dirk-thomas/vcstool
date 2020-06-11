@@ -161,8 +161,10 @@ def _urlopen_retry(retry, retry_period):
                     if e.code != 503 or local_retry <= 0:
                         raise
                 except URLError as e:
-                    if (not isinstance(e.reason, socket.timeout) or
-                            local_retry <= 0):
+                    if (
+                        not isinstance(e.reason, socket.timeout) or
+                        local_retry <= 0
+                    ):
                         raise
 
                 if local_retry > 0:

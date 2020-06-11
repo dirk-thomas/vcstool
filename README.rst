@@ -162,13 +162,13 @@ The netrc-like format consists of a few different tokens separated by whitespace
 - `login <name>`: Login username
 - `password <string>`: Login password
 
-For example, to access private github repositories::
+For example, to access private GitHub repositories::
 
   machine github.com
   login mylogin
   password myaccesstoken
 
-Accessing private gitlab repositories looks similar, although no `login` is required::
+Accessing private GitLab repositories looks similar, although no `login` is required::
 
   machine gitlab.com
   password myaccesstoken

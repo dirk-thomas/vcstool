@@ -1,6 +1,9 @@
 ......
 === ./immutable/hash (git) ===
-Cloning into '.'...
+Initialized empty Git repository in ./immutable/hash/.git/
+
+From https://github.com/dirk-thomas/vcstool
+ * branch            377d5b3d03c212f015cc832fdb368f4534d0d583 -> FETCH_HEAD
 Note: switching to '377d5b3d03c212f015cc832fdb368f4534d0d583'.
 
 You are in 'detached HEAD' state. You can look around, make experimental
@@ -24,7 +27,10 @@ Downloaded tarball from 'https://github.com/dirk-thomas/vcstool/archive/377d5b3d
 === ./immutable/hash_zip (zip) ===
 Downloaded zipfile from 'https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.zip' and unpacked it
 === ./immutable/tag (git) ===
-Cloning into '.'...
+Initialized empty Git repository in ./immutable/tag/.git/
+
+From https://github.com/dirk-thomas/vcstool
+ * [new tag]         0.1.27     -> 0.1.27
 Note: switching to '0.1.27'.
 
 You are in 'detached HEAD' state. You can look around, make experimental

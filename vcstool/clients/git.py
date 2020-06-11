@@ -299,24 +299,114 @@ class GitClient(VcsClientBase):
 
             # fetch updates for existing repo
             cmd_fetch = [GitClient._executable, 'fetch', remote]
+            if command.shallow:
+                result_version_type = self._check_version_type(
+                    command.url, checkout_version)
+                if result_version_type['returncode']:
+                    return result_version_type
+                version_type = result_version_type['version_type']
+                if version_type == 'branch':
+                    cmd_fetch.append(
+                        'refs/heads/%s:refs/remotes/%s/%s' %
+                        (checkout_version, remote, checkout_version))
+                elif version_type == 'hash':
+                    cmd_fetch.append(checkout_version)
+                elif version_type == 'tag':
+                    cmd_fetch.append(
+                        '+refs/tags/%s:refs/tags/%s' %
+                        (checkout_version, checkout_version))
+                else:
+                    assert False
+                cmd_fetch += ['--depth', '1']
             result_fetch = self._run_command(cmd_fetch, retry=command.retry)
             if result_fetch['returncode']:
                 return result_fetch
             cmd = result_fetch['cmd']
             output = result_fetch['output']
 
-        else:
-            cmd_clone = [GitClient._executable, 'clone', command.url, '.']
-            result_clone = self._run_command(cmd_clone, retry=command.retry)
-            if result_clone['returncode']:
-                result_clone['output'] = \
-                    "Could not clone repository '%s': %s" % \
-                    (command.url, result_clone['output'])
-                return result_clone
-            cmd = result_clone['cmd']
-            output = result_clone['output']
+            # ensure that a tracking branch exists which can be checked out
+            if command.shallow and version_type == 'branch':
+                cmd_show_ref = [
+                    GitClient._executable, 'show-ref',
+                    'refs/heads/%s' % checkout_version]
+                result_show_ref = self._run_command(cmd_show_ref)
+                if result_show_ref['returncode']:
+                    # creating tracking branch
+                    cmd_branch = [
+                        GitClient._executable, 'branch', checkout_version,
+                        '%s/%s' % (remote, checkout_version)]
+                    result_branch = self._run_command(cmd_branch)
+                    if result_branch['returncode']:
+                        result_branch['output'] = \
+                            "Could not create branch '%s': %s" % \
+                            (checkout_version, result_branch['output'])
+                        return result_branch
+                    cmd += ' && ' + ' '.join(cmd_branch)
+                    output = '\n'.join([output, result_branch['output']])
 
-            checkout_version = command.version
+        else:
+            version_type = None
+            if command.version:
+                result_version_type = self._check_version_type(
+                    command.url, command.version)
+                if result_version_type['returncode']:
+                    return result_version_type
+                version_type = result_version_type['version_type']
+
+            if not command.shallow or version_type in (None, 'branch'):
+                cmd_clone = [GitClient._executable, 'clone', command.url, '.']
+                if version_type == 'branch':
+                    cmd_clone += ['-b', command.version]
+                    checkout_version = None
+                else:
+                    checkout_version = command.version
+                if command.shallow:
+                    cmd_clone += ['--depth', '1']
+                result_clone = self._run_command(
+                    cmd_clone, retry=command.retry)
+                if result_clone['returncode']:
+                    result_clone['output'] = \
+                        "Could not clone repository '%s': %s" % \
+                        (command.url, result_clone['output'])
+                    return result_clone
+                cmd = result_clone['cmd']
+                output = result_clone['output']
+            else:
+                # getting a hash or tag with a depth of 1 can't use 'clone'
+                cmd_init = [GitClient._executable, 'init']
+                result_init = self._run_command(cmd_init)
+                if result_init['returncode']:
+                    return result_init
+                cmd = result_init['cmd']
+                output = result_init['output']
+
+                cmd_remote_add = [
+                    GitClient._executable, 'remote', 'add', 'origin',
+                    command.url]
+                result_remote_add = self._run_command(cmd_remote_add)
+                if result_remote_add['returncode']:
+                    return result_remote_add
+                cmd += ' && ' + ' '.join(cmd_remote_add)
+                output = '\n'.join([output, result_remote_add['output']])
+
+                cmd_fetch = [GitClient._executable, 'fetch', 'origin']
+                if version_type == 'hash':
+                    cmd_fetch.append(command.version)
+                elif version_type == 'tag':
+                    cmd_fetch.append(
+                        'refs/tags/%s:refs/tags/%s' %
+                        (command.version, command.version))
+                else:
+                    assert False
+                cmd_fetch += ['--depth', '1']
+                result_fetch = self._run_command(
+                    cmd_fetch, retry=command.retry)
+                if result_fetch['returncode']:
+                    return result_fetch
+                cmd += ' && ' + ' '.join(cmd_fetch)
+                output = '\n'.join([output, result_fetch['output']])
+
+                checkout_version = command.version
 
         if checkout_version:
             cmd_checkout = [
@@ -370,6 +460,40 @@ class GitClient(VcsClientBase):
                        'Could not determine any of the remote urls'),
             'returncode': 0 if remote_urls else 1
         }
+
+    def _check_version_type(self, url, version):
+        cmd = [GitClient._executable, 'ls-remote', url, version]
+        result = self._run_command(cmd)
+        if result['returncode']:
+            result['output'] = 'Could not determine ref type of version: ' + \
+                result['output']
+            return result
+        if not result['output']:
+            result['version_type'] = 'hash'
+            return result
+
+        refs = {}
+        for line in result['output'].splitlines():
+            hash_, ref = line.split(None, 1)
+            refs[ref] = hash_
+
+        tag_ref = 'refs/tags/' + version
+        branch_ref = 'refs/heads/' + version
+        if tag_ref in refs and branch_ref in refs:
+            if refs[tag_ref] != refs[branch_ref]:
+                result['returncode'] = 1
+                result['output'] = 'The version ref is a branch as well as ' \
+                    'tag but with different hashes'
+                return result
+        if tag_ref in refs:
+            result['version_type'] = 'tag'
+        elif branch_ref in refs:
+            result['version_type'] = 'branch'
+        else:
+            result['returncode'] = 1
+            result['output'] = 'Could not determine ref type of version: ' + \
+                result['output']
+        return result
 
     def log(self, command):
         self._check_executable()

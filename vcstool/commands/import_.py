@@ -23,7 +23,9 @@ class ImportCommand(Command):
     command = 'import'
     help = 'Import the list of repositories'
 
-    def __init__(self, args, url, version=None, recursive=False):
+    def __init__(
+        self, args, url, version=None, recursive=False, shallow=False
+    ):
         super(ImportCommand, self).__init__(args)
         self.url = url
         self.version = version
@@ -31,6 +33,7 @@ class ImportCommand(Command):
         self.retry = args.retry
         self.skip_existing = args.skip_existing
         self.recursive = recursive
+        self.shallow = shallow
 
 
 def get_parser():
@@ -43,6 +46,9 @@ def get_parser():
         '--force', action='store_true', default=False,
         help="Delete existing directories if they don't contain the "
              'repository being imported')
+    group.add_argument(
+        '--shallow', action='store_true', default=False,
+        help='Create a shallow clone without a history')
     group.add_argument(
         '--recursive', action='store_true', default=False,
         help='Recurse into submodules')
@@ -155,7 +161,7 @@ def generate_jobs(repos, args):
         command = ImportCommand(
             args, repo['url'],
             str(repo['version']) if 'version' in repo else None,
-            recursive=args.recursive)
+            recursive=args.recursive, shallow=args.shallow)
         job = {'client': client, 'command': command}
         jobs.append(job)
     return jobs

@@ -255,6 +255,31 @@ invocation.
         finally:
             rmtree(workdir)
 
+    def test_import_shallow(self):
+        workdir = os.path.join(TEST_WORKSPACE, 'import-shallow')
+        os.makedirs(workdir)
+        try:
+            output = run_command(
+                'import', ['--shallow', '--input', REPOS_FILE, '.'],
+                subfolder='import-shallow')
+            # the actual output contains absolute paths
+            output = output.replace(
+                b'repository in ' + workdir.encode() + b'/',
+                b'repository in ./')
+            expected = get_expected_output('import_shallow')
+            # newer git versions don't append ... after the commit hash
+            assert (
+                output == expected or
+                output == expected.replace(b'... ', b' '))
+
+            # check that repository history has only one commit
+            output = subprocess.check_output(
+                ['git', 'log', '--format=oneline'],
+                stderr=subprocess.STDOUT, cwd=os.path.join(workdir, 'vcstool'))
+            assert len(output.splitlines()) == 1
+        finally:
+            rmtree(workdir)
+
     def test_validate(self):
         output = run_command(
             'validate', ['--input', REPOS_FILE])

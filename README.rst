@@ -141,7 +141,8 @@ If the command should work on multiple repositories make sure to pass only gener
 Access repositories that require authentication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Vcstool supports authenticated access to repositories by parsing files with a netrc-like format.
+The various version control systems supported by vcstool support authenticated access on their own (e.g. SSH public keys, .netrc files, etc.).
+For .tar or .zip repositories, vcstool supports authenticated access by parsing files with a netrc-like format.
 It will first look for login information in the `~/.netrc` file, used by ftp, git, and similar programs if it exists.
 If it doesn't exist (or doesn't contain login infomation for the URL in question), it moves to vcstool-specific locations.
 In these locations vcstool will look for credentials in either an `auth.conf` file, or `.conf` files inside an `auth.conf.d` directory.

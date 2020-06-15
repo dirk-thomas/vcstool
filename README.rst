@@ -46,6 +46,7 @@ Vcstool can export and import all the information required to reproduce the vers
 Vcstool uses a simple `YAML <http://www.yaml.org/>`_ format to encode this information.
 This format includes a root key ``repositories`` under which each local repository is described by a dictionary keyed by its relative path.
 Each of these dictionaries contains keys ``type``, ``url``, and ``version``.
+If the ``version`` key is omitted the default branch is being used.
 
 This results in something similar to the following for a set of two repositories (`vcstool <https://github.com/dirk-thomas/vcstool>`_ cloned via Git and `rosinstall <http://github.com/vcstools/rosinstall>`_ checked out via Subversion):
 

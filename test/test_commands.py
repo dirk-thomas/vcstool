@@ -194,15 +194,8 @@ invocation.
         subprocess.check_output(
             ['git', 'remote', 'set-url', 'origin', 'http://foo.com/bar.git'],
             stderr=subprocess.STDOUT, cwd=cwd_without_version)
-        try:
-            run_command(
-                'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
-            # The run_command function should raise an exception when the
-            # process returns a non-zero return code, so the next line should
-            # never get executed.
-            assert False
-        except BaseException:
-            pass
+        run_command(
+            'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
 
         output = run_command(
             'import', ['--force', '--input', REPOS_FILE, '.'])
@@ -225,12 +218,6 @@ invocation.
         try:
             run_command(
                 'import', ['--skip-existing', '--input', REPOS_FILE, '.'])
-            # The run_command function should raise an exception when the
-            # process returns a non-zero return code, so the next line should
-            # never get executed.
-            assert False
-        except BaseException:
-            pass
         finally:
             subprocess.check_output(
                 ['git', 'remote', 'rm', 'foo'],

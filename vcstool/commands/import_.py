@@ -58,7 +58,7 @@ def get_parser():
     group.add_argument(
         '--skip-existing', action='store_true', default=False,
         help="Don't overwrite existing directories or change custom checkouts "
-             'in repos using the same URL (but fetch repos with same URL')
+             'in repos using the same URL (but fetch repos with same URL)')
 
     return parser
 

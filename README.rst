@@ -9,7 +9,7 @@ Note:
 
   * ``vcstool`` doesn't use any state beside the repository working copies available in the filesystem.
   * The file format of ``vcstool export`` uses the relative paths of the repositories as keys in YAML which avoids collisions by design.
-  * ``vcstool`` has significantly less lines of code than ``vcstools`` including the command line tools built on top.
+  * ``vcstool`` has significantly fewer lines of code than ``vcstools`` including the command line tools built on top.
 
 
 How does it work?
@@ -28,7 +28,7 @@ Vcstool supports `Git <http://git-scm.com>`_, `Mercurial <http://git-scm.comhttp
 How to use vcstool?
 -------------------
 
-The script ``vcs`` can be used similar to the VCS clients ``git``, ``hg`` etc.
+The script ``vcs`` can be used similarly to the VCS clients ``git``, ``hg`` etc.
 The ``help`` command provides a list of available commands with an additional description::
 
   vcs help
@@ -82,14 +82,14 @@ If it exists in multiple the remotes ``origin`` and ``upstream`` are considered 
 Import set of repositories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``vcs import`` command clones all repositories which are passed in via stdin in YAML format.
+The ``vcs import`` command clones all repositories which are passed in via ``stdin`` in YAML format.
 Usually the data of a previously exported file is piped in::
 
   vcs import < my.repos
 
 The ``import`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
 
-Only for this command vcstool supports the pseudo clients ``tar`` and ``zip`` which fetch a tarball / zipfile from an URL and unpack its content.
+Only for this command vcstool supports the pseudo clients ``tar`` and ``zip`` which fetch a tarball / zipfile from a URL and unpack its content.
 For those two types the ``version`` key is optional.
 If specified only entries from the archive which are in the subfolder specified by the version value are being extracted.
 
@@ -97,7 +97,7 @@ If specified only entries from the archive which are in the subfolder specified 
 Validate repositories file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``vcs validate`` command takes a YAML file which is passed in via stdin and validates its contents and format.
+The ``vcs validate`` command takes a YAML file which is passed in via ``stdin`` and validates its contents and format.
 The data of a previously-exported file or hand-generated file are piped in::
 
   vcs validate < my.repos
@@ -127,8 +127,8 @@ When needing to e.g. interactively provide credentials all commands should be ex
 In the case repositories are using SSH ``git@`` URLs but the host is not known yet ``vcs import`` automatically falls back to a single worker.
 
 
-Run arbitrary comands
-~~~~~~~~~~~~~~~~~~~~~
+Run arbitrary commands
+~~~~~~~~~~~~~~~~~~~~~~
 
 The ``vcs custom`` command enables to pass arbitrary user-specified arguments to the vcs invocation.
 The set of repositories to operate on can optionally be restricted by the type:
@@ -149,7 +149,7 @@ On Ubuntu this is done using *apt-get*::
   sudo apt-get update
   sudo apt-get install python3-vcstool
 
-On other Systems, use the `PyPI <http://pypi.python.org>`_ package::
+On other systems, use the `PyPI <http://pypi.python.org>`_ package::
 
   sudo pip install vcstool
 

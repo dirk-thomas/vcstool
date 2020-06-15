@@ -177,10 +177,10 @@ def _urlopen_retry(retry, retry_period):
 
 
 def _authenticated_urlopen(uri, retry=2, retry_period=1, timeout=10):
-    if isinstance(uri, str):
-        request = Request(uri)
-    else:
+    if isinstance(uri, Request):
         request = uri
+    else:
+        request = Request(uri)
 
     machine = urlparse(request.get_full_url()).netloc
     if not machine:

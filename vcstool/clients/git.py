@@ -474,7 +474,12 @@ class GitClient(VcsClientBase):
 
         refs = {}
         for line in result['output'].splitlines():
-            hash_, ref = line.split(None, 1)
+            if line.startswith('#'):
+                continue
+            try:
+                hash_, ref = line.split(None, 1)
+            except ValueError:
+                continue
             refs[ref] = hash_
 
         tag_ref = 'refs/tags/' + version

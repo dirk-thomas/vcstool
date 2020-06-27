@@ -15,9 +15,9 @@ from vcstool.streams import set_streams
 import yaml
 
 try:
-    from urllib.request import urlopen
+    import urllib.request as request
 except ImportError:
-    from urllib2 import urlopen
+    import urllib2 as request
 
 from .command import add_common_arguments
 from .command import Command
@@ -42,10 +42,18 @@ class ImportCommand(Command):
 
 
 def file_or_url_type(x):
-    try:
-        return urlopen(x)
-    except ValueError:
-        return argparse.FileType('r')(x)
+    if x.startswith(('http://', 'https://')):
+        try:
+            # use another user agent to avoid getting a 403
+            return request.Request(
+                x,
+                headers={
+                    'User-Agent': 'Wget/1.20.3 (linux-gnu)',
+                },
+            )
+        except ValueError:
+            pass
+    return argparse.FileType('r')(x)
 
 
 def get_parser():
@@ -54,7 +62,7 @@ def get_parser():
     group = parser.add_argument_group('"import" command parameters')
     group.add_argument(
         '--input', type=file_or_url_type, default='-',
-        help="Where to read YAML from.", metavar='FILE_OR_URL')
+        help='Where to read YAML from', metavar='FILE_OR_URL')
     group.add_argument(
         '--force', action='store_true', default=False,
         help="Delete existing directories if they don't contain the "
@@ -203,8 +211,11 @@ def main(args=None, stdout=None, stderr=None):
         path_help='Base path to clone repositories to')
     args = parser.parse_args(args)
     try:
-        repos = get_repositories(args.input)
-    except RuntimeError as e:
+        input_ = args.input
+        if isinstance(input_, request.Request):
+            input_ = request.urlopen(input_)
+        repos = get_repositories(input_)
+    except Exception as e:
         print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
         return 1
     jobs = generate_jobs(repos, args)

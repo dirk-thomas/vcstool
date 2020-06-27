@@ -8,6 +8,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from vcstool.util import rmtree  # noqa: E402
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
+REPOS_FILE_URL = \
+    'https://raw.githubusercontent.com/dirk-thomas/vcstool/master/test/list.repos'  # noqa: E501
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
@@ -264,6 +266,25 @@ invocation.
                 ['git', 'log', '--format=oneline'],
                 stderr=subprocess.STDOUT, cwd=os.path.join(workdir, 'vcstool'))
             assert len(output.splitlines()) == 1
+        finally:
+            rmtree(workdir)
+
+    def test_import_url(self):
+        workdir = os.path.join(TEST_WORKSPACE, 'import-url')
+        os.makedirs(workdir)
+        try:
+            output = run_command(
+                'import', ['--input', REPOS_FILE_URL, '.'],
+                subfolder='import-url')
+            # the actual output contains absolute paths
+            output = output.replace(
+                b'repository in ' + workdir.encode() + b'/',
+                b'repository in ./')
+            expected = get_expected_output('import')
+            # newer git versions don't append ... after the commit hash
+            assert (
+                output == expected or
+                output == expected.replace(b'... ', b' '))
         finally:
             rmtree(workdir)
 

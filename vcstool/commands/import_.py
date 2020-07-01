@@ -44,7 +44,8 @@ class ImportCommand(Command):
 def file_or_url_type(x):
     if x.startswith(('http://', 'https://')):
         try:
-            # use another user agent to avoid getting a 403
+            # use another user agent to avoid getting a 403 (forbidden) error,
+            # since some websites blacklist or block unrecognized user agents
             return request.Request(
                 x,
                 headers={

@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 
+from vcstool import __version__ as vcstool_version
 from vcstool.clients import vcstool_clients
 from vcstool.clients.vcs_base import run_command
 from vcstool.clients.vcs_base import which
@@ -13,6 +14,11 @@ from vcstool.executor import output_repositories
 from vcstool.executor import output_results
 from vcstool.streams import set_streams
 import yaml
+
+try:
+    import urllib.request as request
+except ImportError:
+    import urllib2 as request
 
 from .command import add_common_arguments
 from .command import Command
@@ -41,7 +47,8 @@ def get_parser():
         description='Import the list of repositories', prog='vcs import')
     group = parser.add_argument_group('"import" command parameters')
     group.add_argument(
-        '--input', type=argparse.FileType('r'), default=sys.stdin)
+        '--input', type=file_or_url_type, default=sys.stdin,
+        help='Where to read YAML from', metavar='FILE_OR_URL')
     group.add_argument(
         '--force', action='store_true', default=False,
         help="Delete existing directories if they don't contain the "
@@ -61,6 +68,15 @@ def get_parser():
              'in repos using the same URL (but fetch repos with same URL)')
 
     return parser
+
+
+def file_or_url_type(value):
+    if os.path.exists(value) or '://' not in value:
+        return argparse.FileType('r')(value)
+    # use another user agent to avoid getting a 403 (forbidden) error,
+    # since some websites blacklist or block unrecognized user agents
+    return request.Request(
+        value, headers={'User-Agent': 'vcstool/' + vcstool_version})
 
 
 def get_repositories(yaml_file):
@@ -190,8 +206,11 @@ def main(args=None, stdout=None, stderr=None):
         path_help='Base path to clone repositories to')
     args = parser.parse_args(args)
     try:
-        repos = get_repositories(args.input)
-    except RuntimeError as e:
+        input_ = args.input
+        if isinstance(input_, request.Request):
+            input_ = request.urlopen(input_)
+        repos = get_repositories(input_)
+    except (RuntimeError, request.URLError) as e:
         print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
         return 1
     jobs = generate_jobs(repos, args)

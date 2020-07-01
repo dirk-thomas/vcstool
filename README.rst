@@ -89,6 +89,7 @@ Usually the data of a previously exported file is piped in::
   vcs import < my.repos
 
 The ``import`` command also supports input in the `rosinstall file format <http://www.ros.org/doc/independent/api/rosinstall/html/rosinstall_file_format.html>`_.
+Beside passing a file path the command also supports passing a URL.
 
 Only for this command vcstool supports the pseudo clients ``tar`` and ``zip`` which fetch a tarball / zipfile from a URL and unpack its content.
 For those two types the ``version`` key is optional.

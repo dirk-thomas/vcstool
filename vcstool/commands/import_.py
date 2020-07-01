@@ -42,19 +42,16 @@ class ImportCommand(Command):
 
 
 def file_or_url_type(x):
-    if x.startswith(('http://', 'https://')):
-        try:
-            # use another user agent to avoid getting a 403 (forbidden) error,
-            # since some websites blacklist or block unrecognized user agents
-            return request.Request(
-                x,
-                headers={
-                    'User-Agent': 'Wget/1.20.3 (linux-gnu)',
-                },
-            )
-        except ValueError:
-            pass
-    return argparse.FileType('r')(x)
+    if os.path.exists(x) or '://' not in x:
+        return argparse.FileType('r')(x)
+    # use another user agent to avoid getting a 403 (forbidden) error,
+    # since some websites blacklist or block unrecognized user agents
+    return request.Request(
+        x,
+        headers={
+            'User-Agent': 'Wget/1.20.3 (linux-gnu)',
+        },
+    )
 
 
 def get_parser():

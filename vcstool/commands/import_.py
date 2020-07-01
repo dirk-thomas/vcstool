@@ -47,7 +47,7 @@ def get_parser():
         description='Import the list of repositories', prog='vcs import')
     group = parser.add_argument_group('"import" command parameters')
     group.add_argument(
-        '--input', type=file_or_url_type, default='-',
+        '--input', type=file_or_url_type, default=sys.stdin,
         help='Where to read YAML from', metavar='FILE_OR_URL')
     group.add_argument(
         '--force', action='store_true', default=False,

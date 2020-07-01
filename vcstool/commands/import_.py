@@ -42,19 +42,6 @@ class ImportCommand(Command):
         self.shallow = shallow
 
 
-def file_or_url_type(x):
-    if os.path.exists(x) or '://' not in x:
-        return argparse.FileType('r')(x)
-    # use another user agent to avoid getting a 403 (forbidden) error,
-    # since some websites blacklist or block unrecognized user agents
-    return request.Request(
-        x,
-        headers={
-            'User-Agent': 'vcstool/' + vcstool_version,
-        },
-    )
-
-
 def get_parser():
     parser = argparse.ArgumentParser(
         description='Import the list of repositories', prog='vcs import')
@@ -81,6 +68,15 @@ def get_parser():
              'in repos using the same URL (but fetch repos with same URL)')
 
     return parser
+
+
+def file_or_url_type(value):
+    if os.path.exists(value) or '://' not in value:
+        return argparse.FileType('r')(value)
+    # use another user agent to avoid getting a 403 (forbidden) error,
+    # since some websites blacklist or block unrecognized user agents
+    return request.Request(
+        value, headers={'User-Agent': 'vcstool/' + vcstool_version})
 
 
 def get_repositories(yaml_file):

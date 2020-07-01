@@ -172,8 +172,9 @@ class GitClient(VcsClientBase):
                                 "Could not check remote tags for '%s': " % \
                                 remote + result_ls_remote['output']
                             return result_ls_remote
-                        matches = result_ls_remote['output'].splitlines()
-                        if len(matches) == 1 and matches[0].split()[0] == ref:
+                        matches = self._get_hash_ref_tuples(
+                            result_ls_remote['output'])
+                        if len(matches) == 1 and matches[0][0] == ref:
                             ref = tag
 
                 # determine url of remote
@@ -473,13 +474,7 @@ class GitClient(VcsClientBase):
             return result
 
         refs = {}
-        for line in result['output'].splitlines():
-            if line.startswith('#'):
-                continue
-            try:
-                hash_, ref = line.split(None, 1)
-            except ValueError:
-                continue
+        for hash_, ref in self._get_hash_ref_tuples(result['output']):
             refs[ref] = hash_
 
         tag_ref = 'refs/tags/' + version
@@ -610,10 +605,10 @@ class GitClient(VcsClientBase):
         if command.version:
             hashes = []
             refs = []
-            output_lines = result_ls_remote['output'].splitlines()
 
-            for line in output_lines:
-                hash_and_ref = line.split()
+            for hash_and_ref in self._get_hash_ref_tuples(
+                result_ls_remote['output']
+            ):
                 hashes.append(hash_and_ref[0])
 
                 # ignore pull request refs
@@ -678,6 +673,18 @@ class GitClient(VcsClientBase):
     def _check_executable(self):
         assert GitClient._executable is not None, \
             "Could not find 'git' executable"
+
+    def _get_hash_ref_tuples(self, ls_remote_output):
+        tuples = []
+        for line in ls_remote_output.splitlines():
+            if line.startswith('#'):
+                continue
+            try:
+                hash_, ref = line.split(None, 1)
+            except ValueError:
+                continue
+            tuples.append((hash_, ref))
+        return tuples
 
 
 if not GitClient._executable:

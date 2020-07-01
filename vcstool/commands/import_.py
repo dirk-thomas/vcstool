@@ -216,7 +216,7 @@ def main(args=None, stdout=None, stderr=None):
         if isinstance(input_, request.Request):
             input_ = request.urlopen(input_)
         repos = get_repositories(input_)
-    except Exception as e:
+    except (RuntimeError, request.URLError) as e:
         print(ansi('redf') + str(e) + ansi('reset'), file=sys.stderr)
         return 1
     jobs = generate_jobs(repos, args)

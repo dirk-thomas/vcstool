@@ -31,7 +31,7 @@ def get_parser():
         description='Validate a repositories file', prog='vcs validate')
     group = parser.add_argument_group('"validate" command parameters')
     group.add_argument(
-        '--input', type=argparse.FileType('r'), default=sys.stdin)
+        '--input', type=argparse.FileType('r'), default='-')
     group.add_argument(
         '--retry', type=int, metavar='N', default=2,
         help='Retry commands requiring network access N times on failure')

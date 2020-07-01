@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 
+from vcstool import __version__ as vcstool_version
 from vcstool.clients import vcstool_clients
 from vcstool.clients.vcs_base import run_command
 from vcstool.clients.vcs_base import which
@@ -49,7 +50,7 @@ def file_or_url_type(x):
     return request.Request(
         x,
         headers={
-            'User-Agent': 'Wget/1.20.3 (linux-gnu)',
+            'User-Agent': 'vcstool/' + vcstool_version,
         },
     )
 

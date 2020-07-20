@@ -490,9 +490,7 @@ class GitClient(VcsClientBase):
         elif branch_ref in refs:
             result['version_type'] = 'branch'
         else:
-            result['returncode'] = 1
-            result['output'] = 'Could not determine ref type of version: ' + \
-                result['output']
+            result['version_type'] = 'hash'
         return result
 
     def log(self, command):

@@ -152,7 +152,7 @@ invocation.
         finally:
             os.chdir(cwd_bck)
 
-        assert rc == 1
+        assert rc == 0
         # replace message from older git versions
         output = stdout_stderr.getvalue().replace(
             'anch. Please specify which\nbranch you want to merge with. See',

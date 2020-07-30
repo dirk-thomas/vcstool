@@ -1,4 +1,4 @@
-EE..
+....
 === ./immutable/hash (git) ===
 You are not currently on a branch.
 Please specify which branch you want to merge with.

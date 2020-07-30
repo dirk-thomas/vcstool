@@ -91,11 +91,10 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(output, expected)
 
     def test_pull(self):
-        with self.assertRaises(subprocess.CalledProcessError) as e:
-            run_command('pull', args=['--workers', '1'])
+        output = run_command('pull', args=['--workers', '1'])
         expected = get_expected_output('pull')
         # replace message from older git versions
-        output = e.exception.output.replace(
+        output = output.replace(
             b'anch. Please specify which\nbranch you want to merge with. See',
             b'anch.\nPlease specify which branch you want to merge with.\nSee')
         # newer git versions warn on pull with default config

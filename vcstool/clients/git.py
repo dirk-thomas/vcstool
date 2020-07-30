@@ -534,7 +534,29 @@ class GitClient(VcsClientBase):
         self._check_executable()
         cmd = [GitClient._executable, 'pull']
         self._check_color(cmd)
-        return self._run_command(cmd)
+        result = self._run_command(cmd)
+
+        if result['returncode']:
+            # check for detached HEAD
+            cmd_rev_parse = [
+                GitClient._executable, 'rev-parse', '--abbrev-ref', 'HEAD']
+            result_rev_parse = self._run_command(cmd_rev_parse)
+            if result_rev_parse['returncode']:
+                result_rev_parse['output'] = 'Could not determine ref: ' + \
+                    result_rev_parse['output']
+                return result_rev_parse
+            detached = result_rev_parse['output'] == 'HEAD'
+
+            if detached:
+                # warn but not fail about the inability to pull a detached head
+                return {
+                    'cmd': '',
+                    'cwd': self.path,
+                    'output': result['output'],
+                    'returncode': 0,
+                }
+
+        return result
 
     def push(self, _command):
         self._check_executable()

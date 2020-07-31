@@ -5,6 +5,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+from vcstool.clients.git import GitClient  # noqa: E402
 from vcstool.util import rmtree  # noqa: E402
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
@@ -98,7 +99,7 @@ class TestCommands(unittest.TestCase):
             b'anch. Please specify which\nbranch you want to merge with. See',
             b'anch.\nPlease specify which branch you want to merge with.\nSee')
         # newer git versions warn on pull with default config
-        if _get_git_version() >= [2, 27, 0]:
+        if GitClient.get_git_version() >= [2, 27, 0]:
             pull_warning = b"""
 warning: Pulling without specifying how to reconcile divergent branches is
 discouraged. You can squelch this message by running one of the following
@@ -158,7 +159,7 @@ invocation.
             'anch. Please specify which\nbranch you want to merge with. See',
             'anch.\nPlease specify which branch you want to merge with.\nSee')
         # newer git versions warn on pull with default config
-        if _get_git_version() >= [2, 27, 0]:
+        if GitClient.get_git_version() >= [2, 27, 0]:
             pull_warning = """
 warning: Pulling without specifying how to reconcile divergent branches is
 discouraged. You can squelch this message by running one of the following
@@ -377,18 +378,10 @@ def get_expected_output(name):
         content = h.read()
     # change in git version 2.15.0
     # https://github.com/git/git/commit/7560f547e6
-    if _get_git_version() < [2, 15, 0]:
+    if GitClient.get_git_version() < [2, 15, 0]:
         # use hyphenation for older git versions
         content = content.replace(b'up to date', b'up-to-date')
     return content
-
-
-def _get_git_version():
-    output = subprocess.check_output(['git', '--version'])
-    prefix = b'git version '
-    assert output.startswith(prefix)
-    output = output[len(prefix):].rstrip()
-    return [int(x) for x in output.split(b'.') if x != b'windows']
 
 
 if __name__ == '__main__':

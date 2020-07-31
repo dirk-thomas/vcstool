@@ -112,6 +112,8 @@ def execute_jobs(
                 stdout.write('s')
             elif result['returncode']:
                 stdout.write('E')
+            elif not result['cmd'] and result['output']:
+                stdout.write('?')
             else:
                 stdout.write('.')
             if debug_jobs:

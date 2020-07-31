@@ -427,7 +427,7 @@ class GitClient(VcsClientBase):
                 GitClient._executable, 'checkout', checkout_version, '--']
             result_checkout = self._run_command(cmd_checkout)
             if result_checkout['returncode']:
-                if self.get_git_version() < (1, 8, 4, 3):
+                if self.get_git_version() < [1, 8, 4, 3]:
                     cmd_checkout.pop()
                     result_checkout = self._run_command(cmd_checkout)
             if result_checkout['returncode']:

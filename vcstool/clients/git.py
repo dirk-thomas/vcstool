@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from vcstool.executor import USE_COLOR
 
@@ -11,7 +12,19 @@ class GitClient(VcsClientBase):
 
     type = 'git'
     _executable = None
+    _git_version = None
     _config_color_is_auto = None
+
+    @classmethod
+    def get_git_version(cls):
+        if cls._git_version is None:
+            output = subprocess.check_output(['git', '--version'])
+            prefix = b'git version '
+            assert output.startswith(prefix)
+            output = output[len(prefix):].rstrip()
+            cls._git_version = [
+                int(x) for x in output.split(b'.') if x != b'windows']
+        return cls._git_version
 
     @staticmethod
     def is_repository(path):
@@ -413,6 +426,10 @@ class GitClient(VcsClientBase):
             cmd_checkout = [
                 GitClient._executable, 'checkout', checkout_version, '--']
             result_checkout = self._run_command(cmd_checkout)
+            if result_checkout['returncode']:
+                if self.get_git_version() < (1, 8, 4, 3):
+                    cmd_checkout.pop()
+                    result_checkout = self._run_command(cmd_checkout)
             if result_checkout['returncode']:
                 result_checkout['output'] = \
                     "Could not checkout ref '%s': %s" % \

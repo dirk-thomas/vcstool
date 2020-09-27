@@ -332,19 +332,35 @@ class GitClient(VcsClientBase):
                 else:
                     assert False
                 cmd_fetch += ['--depth', '1']
+            else:
+                version_type = None
             result_fetch = self._run_command(cmd_fetch, retry=command.retry)
             if result_fetch['returncode']:
                 return result_fetch
             cmd = result_fetch['cmd']
             output = result_fetch['output']
 
+            if not command.shallow and checkout_version is not None:
+                if checkout_version.startswith('heads/'):
+                    version_name = checkout_version[6:]
+                    version_type = 'branch'
+                elif checkout_version.startswith('tags/'):
+                    version_name = checkout_version[5:]
+                    version_type = 'tag'
+                else:
+                    version_type = None
             # ensure that a tracking branch exists which can be checked out
-            if command.shallow and version_type == 'branch':
+            if version_type == 'branch':
                 cmd_show_ref = [
                     GitClient._executable, 'show-ref',
                     'refs/heads/%s' % version_name]
                 result_show_ref = self._run_command(cmd_show_ref)
                 if result_show_ref['returncode']:
+                    if not command.shallow:
+                        result_show_ref['output'] = \
+                            "Could not find branch '%s': %s" % \
+                            (version_name, result_show_ref['output'])
+                        return result_show_ref
                     # creating tracking branch
                     cmd_branch = [
                         GitClient._executable, 'branch', version_name,
@@ -357,6 +373,7 @@ class GitClient(VcsClientBase):
                         return result_branch
                     cmd += ' && ' + ' '.join(cmd_branch)
                     output = '\n'.join([output, result_branch['output']])
+                checkout_version = version_name
 
         else:
             version_type = None

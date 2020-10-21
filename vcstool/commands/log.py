@@ -30,10 +30,10 @@ def get_parser():
     ex_group = group.add_mutually_exclusive_group()
     ex_group.add_argument(
         '--limit-tag', metavar='TAG',
-        help='Limit number of log to the specified tag')
+        help='Limit number of log from the head to the specified tag')
     ex_group.add_argument(
         '--limit-untagged', action='store_true', default=False,
-        help='Limit number of log to the last tagged commit')
+        help='Limit number of log from the head to the last tagged commit')
     group.add_argument(
         '--verbose', action='store_true', default=False,
         help='Show the full commit message')

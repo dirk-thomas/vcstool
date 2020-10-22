@@ -1,3 +1,7 @@
+import errno
+import glob
+import logging
+import netrc
 import os
 import socket
 import subprocess
@@ -5,6 +9,10 @@ import time
 try:
     from urllib.request import Request
     from urllib.request import urlopen
+    from urllib.request import HTTPPasswordMgrWithDefaultRealm
+    from urllib.request import HTTPBasicAuthHandler
+    from urllib.request import build_opener
+    from urllib.parse import urlparse
     from urllib.error import HTTPError
     from urllib.error import URLError
 except ImportError:
@@ -12,11 +20,23 @@ except ImportError:
     from urllib2 import Request
     from urllib2 import URLError
     from urllib2 import urlopen
+    from urllib2 import HTTPPasswordMgrWithDefaultRealm
+    from urllib2 import HTTPBasicAuthHandler
+    from urllib2 import build_opener
+    from urlparse import urlparse
 
 try:
     from shutil import which  # noqa
 except ImportError:
     from vcstool.compat.shutil import which  # noqa
+
+import appdirs
+
+_AUTHENTICATION_CONFIGURATION_FILE = 'auth.conf'
+_AUTHENTICATION_CONFIGURATION_PARTS_DIR = 'auth.conf.d'
+_APPDIRS_PROJECT_NAME = 'vcstool'
+
+logger = logging.getLogger(__name__)
 
 
 class VcsClientBase(object):
@@ -90,23 +110,20 @@ def run_command(cmd, cwd, env=None):
 
 
 def load_url(url, retry=2, retry_period=1, timeout=10):
+    fh = None
     try:
-        fh = urlopen(url, timeout=timeout)
+        fh = _urlopen_retry(retry, retry_period)(urlopen)(url, timeout=timeout)
     except HTTPError as e:
-        if e.code == 503 and retry:
-            time.sleep(retry_period)
-            return load_url(
-                url, retry=retry - 1, retry_period=retry_period,
-                timeout=timeout)
-        e.msg += ' (%s)' % url
-        raise
+        if e.code in (401, 404):
+            # Try again, but with authentication
+            fh = _authenticated_urlopen(
+                url, retry=retry, retry_period=retry_period, timeout=timeout)
+        if fh is None:
+            e.msg += ' (%s)' % url
+            raise
     except URLError as e:
-        if isinstance(e.reason, socket.timeout) and retry:
-            time.sleep(retry_period)
-            return load_url(
-                url, retry=retry - 1, retry_period=retry_period,
-                timeout=timeout)
         raise URLError(str(e) + ' (%s)' % url)
+
     return fh.read()
 
 
@@ -115,20 +132,147 @@ def test_url(url, retry=2, retry_period=1, timeout=10):
     request.get_method = lambda: 'HEAD'
 
     try:
-        response = urlopen(request)
+        response = _urlopen_retry(retry, retry_period)(urlopen)(
+            request, timeout=timeout)
     except HTTPError as e:
-        if e.code == 503 and retry:
-            time.sleep(retry_period)
-            return test_url(
-                url, retry=retry - 1, retry_period=retry_period,
+        if e.code in (401, 404):
+            # Try again, but with authentication
+            response = _authenticated_urlopen(
+                request, retry=retry, retry_period=retry_period,
                 timeout=timeout)
-        e.msg += ' (%s)' % url
-        raise
+        if response is None:
+            e.msg += ' (%s)' % url
+            raise
     except URLError as e:
-        if isinstance(e.reason, socket.timeout) and retry:
-            time.sleep(retry_period)
-            return test_url(
-                url, retry=retry - 1, retry_period=retry_period,
-                timeout=timeout)
         raise URLError(str(e) + ' (%s)' % url)
     return response
+
+
+def _urlopen_retry(retry, retry_period):
+    def _retry_decorator(f):
+        def _retryable_function(*args, **kwargs):
+            local_retry = retry + 1
+
+            while True:
+                try:
+                    local_retry -= 1
+                    return f(*args, **kwargs)
+                except HTTPError as e:
+                    if e.code != 503 or local_retry <= 0:
+                        raise
+                except URLError as e:
+                    if (
+                        not isinstance(e.reason, socket.timeout) or
+                        local_retry <= 0
+                    ):
+                        raise
+
+                if local_retry > 0:
+                    time.sleep(retry_period)
+                else:
+                    break
+
+        return _retryable_function
+    return _retry_decorator
+
+
+def _authenticated_urlopen(uri, retry=2, retry_period=1, timeout=10):
+    if isinstance(uri, Request):
+        request = uri
+    else:
+        request = Request(uri)
+
+    machine = urlparse(request.get_full_url()).netloc
+    if not machine:
+        return None
+
+    credentials = _credentials_for_machine(machine)
+    if credentials is None:
+        return None
+
+    (username, account, password) = credentials
+
+    # If we have both a username and a password, use basic auth
+    if username and password:
+        password_manager = HTTPPasswordMgrWithDefaultRealm()
+        password_manager.add_password(None, machine, username, password)
+        auth_handler = HTTPBasicAuthHandler(password_manager)
+        opener = build_opener(auth_handler)
+        return _urlopen_retry(retry, retry_period)(opener.open)(
+            request, timeout=timeout)
+
+    # If we have only a password, use token auth
+    elif password:
+        request.add_header('PRIVATE-TOKEN', password)
+        return _urlopen_retry(retry, retry_period)(urlopen)(
+            request, timeout=timeout)
+
+    return None
+
+
+def _credentials_for_machine(machine):
+    # First check the default .netrc file, if any-- it takes precedence over
+    # everything else
+    credentials = _credentials_for_machine_in_file(None, machine)
+    if credentials:
+        return credentials
+
+    # If that file either didn't exist or didn't match for the machine,
+    # check the user auth directory for vcstool
+    credentials = _credentials_for_machine_in_dir(
+        appdirs.user_config_dir(_APPDIRS_PROJECT_NAME), machine)
+    if credentials:
+        return credentials
+
+    # Finally, check the system-wide auth directories for vcstool, in order
+    auth_path = appdirs.site_config_dir(_APPDIRS_PROJECT_NAME, multipath=True)
+    for site_config_dir in auth_path.split(':'):
+        credentials = _credentials_for_machine_in_dir(
+            site_config_dir, machine)
+        if credentials:
+            return credentials
+
+    return None
+
+
+def _credentials_for_machine_in_dir(directory, machine):
+    # The idea here is similar to how Debian handles authenticated apt repos:
+    # https://manpages.debian.org/testing/apt/apt_auth.conf.5.en.html
+
+    # Check the auth.conf file first
+    auth_file_path = os.path.join(
+        directory, _AUTHENTICATION_CONFIGURATION_FILE)
+    credentials = _credentials_for_machine_in_file(auth_file_path, machine)
+    if credentials:
+        return credentials
+
+    # If that file either didn't exist or didn't match for the machine, check
+    # the .conf files in the configuration parts dir
+    configuration_parts_dir = os.path.join(
+        directory, _AUTHENTICATION_CONFIGURATION_PARTS_DIR)
+    auth_files = glob.glob(os.path.join(configuration_parts_dir, '*.conf'))
+    for auth_file in sorted(auth_files):
+        auth_file_path = os.path.join(configuration_parts_dir, auth_file)
+        credentials = _credentials_for_machine_in_file(auth_file_path, machine)
+        if credentials:
+            return credentials
+
+    # Nothing matched
+    return None
+
+
+def _credentials_for_machine_in_file(filename, machine):
+    credentials = None
+    try:
+        credentials = netrc.netrc(file=filename).authenticators(machine)
+    except EnvironmentError as e:
+        # Don't error just because the file didn't exist or we didn't have
+        # permission to access it. Catching this situation this way to be
+        # compatible with python 2 and 3.
+        if e.errno not in (errno.ENOENT, errno.EACCES):
+            raise
+    except netrc.NetrcParseError:
+        # If this file had issues, don't error out so we can try fallbacks
+        pass
+
+    return credentials

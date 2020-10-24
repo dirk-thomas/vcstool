@@ -17,6 +17,7 @@ class LogCommand(Command):
         self.limit = args.limit
         self.limit_tag = args.limit_tag
         self.limit_untagged = args.limit_untagged
+        self.merge_only = args.merge_only
         self.verbose = args.verbose
 
 
@@ -34,6 +35,9 @@ def get_parser():
     ex_group.add_argument(
         '--limit-untagged', action='store_true', default=False,
         help='Limit number of log from the head to the last tagged commit')
+    group.add_argument(
+        '--merge-only', action='store_true', default=False,
+        help='Show only merge commits')
     group.add_argument(
         '--verbose', action='store_true', default=False,
         help='Show the full commit message')

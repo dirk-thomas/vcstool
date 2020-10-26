@@ -1,14 +1,8 @@
-#!/usr/bin/env python
-
-import sys
-
 from setuptools import find_packages
 from setuptools import setup
 from vcstool import __version__
 
 install_requires = ['PyYAML', 'setuptools']
-if sys.version_info[0] == 2 and sys.version_info[1] < 7:
-    install_requires.append('argparse')
 
 setup(
     name='vcstool',

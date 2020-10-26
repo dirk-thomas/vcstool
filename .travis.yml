@@ -3,15 +3,11 @@ dist: xenial
 sudo: false
 matrix:
   include:
-    - python: 2.7
-    - python: 3.4
     - python: 3.5
     - python: 3.6
     - python: 3.7
     - python: 3.8
 install:
-  # newer versions of PyYAML dropped support for Python 3.4
-  - if [ $TRAVIS_PYTHON_VERSION == "3.4" ]; then pip install PyYAML==5.2; fi
   - pip install coverage flake8 flake8-docstrings flake8-import-order pytest PyYAML
 script:
   - PYTHONPATH=`pwd` pytest -s -v test

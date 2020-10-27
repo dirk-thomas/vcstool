@@ -1,8 +1,8 @@
 import copy
 import os
+from shutil import which
 
 from .vcs_base import VcsClientBase
-from .vcs_base import which
 from ..util import rmtree
 
 

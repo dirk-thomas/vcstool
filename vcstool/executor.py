@@ -1,11 +1,6 @@
-from __future__ import print_function
-
 import logging
 import os
-try:
-    from queue import Empty, Queue
-except ImportError:
-    from Queue import Empty, Queue
+from queue import Empty, Queue
 import sys
 import threading
 import traceback

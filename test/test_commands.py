@@ -118,10 +118,7 @@ invocation.
         self.assertEqual(output, expected)
 
     def test_pull_api(self):
-        try:
-            from cStringIO import StringIO
-        except ImportError:
-            from io import StringIO
+        from io import StringIO
         from vcstool.commands.pull import main
         stdout_stderr = StringIO()
 

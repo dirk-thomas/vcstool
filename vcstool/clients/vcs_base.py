@@ -2,21 +2,10 @@ import os
 import socket
 import subprocess
 import time
-try:
-    from urllib.request import Request
-    from urllib.request import urlopen
-    from urllib.error import HTTPError
-    from urllib.error import URLError
-except ImportError:
-    from urllib2 import HTTPError
-    from urllib2 import Request
-    from urllib2 import URLError
-    from urllib2 import urlopen
-
-try:
-    from shutil import which  # noqa
-except ImportError:
-    from vcstool.compat.shutil import which  # noqa
+from urllib.error import HTTPError
+from urllib.error import URLError
+from urllib.request import Request
+from urllib.request import urlopen
 
 
 class VcsClientBase(object):

@@ -1,12 +1,6 @@
+from io import BytesIO
 import os
-try:
-    from cStringIO import StringIO as BytesIO
-except ImportError:
-    from io import BytesIO
-try:
-    from urllib.error import URLError
-except ImportError:
-    from urllib2 import URLError
+from urllib.error import URLError
 import zipfile
 
 from .vcs_base import load_url

@@ -1,12 +1,12 @@
-import logging
+# DISABLED: import logging
 import os
 
 from flake8 import configure_logging
 from flake8.api.legacy import StyleGuide
 from flake8.main.application import Application
-from pydocstyle.config import log
-
-log.level = logging.INFO
+# -- DISABLED: Unused, caused import-problems with this test-module.
+# from pydocstyle.config import log
+# log.level = logging.INFO
 
 
 def test_flake8():
@@ -15,7 +15,8 @@ def test_flake8():
         '--extend-ignore=' + ','.join([
             'A003', 'D100', 'D101', 'D102', 'D103', 'D104', 'D105', 'D107']),
         '--exclude', 'vcstool/compat/shutil.py',
-        '--import-order-style=google']
+        # DISABLED: UNRECOGNIZED-OPTION: '--import-order-style=google'
+    ]
     style_guide = get_style_guide(argv)
     base_path = os.path.join(os.path.dirname(__file__), '..')
     paths = [

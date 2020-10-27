@@ -19,9 +19,10 @@ class GitClient(VcsClientBase):
     def get_git_version(cls):
         if cls._git_version is None:
             output = subprocess.check_output(['git', '--version'])
+            # -- HINT: macOS: "git version 2.24.3 (Apple Git-128)"
             prefix = b'git version '
             assert output.startswith(prefix)
-            output = output[len(prefix):].rstrip()
+            output = output[len(prefix):].split()[0]  # First word is VERSION.
             cls._git_version = [
                 int(x) for x in output.split(b'.') if x != b'windows']
         return cls._git_version

@@ -1,12 +1,21 @@
+# -- PRECONDITIONS:
+#   * Internet acces (not checked)
+#   * Git is installed
+#   * OPTIONAL: Subversion (svn) -- checked if installed (or test is skipped)
+#   * OPTIONAL: Mercurial  (hg)  -- checked if installed (or test is skipped)
+
 import os
 import subprocess
 import sys
 import unittest
+import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
-from vcstool.clients.git import GitClient  # noqa: E402
-from vcstool.util import rmtree  # noqa: E402
+from vcstool.clients.git import GitClient   # noqa: E402
+from vcstool.util import rmtree             # noqa: E402
+from program_finder import ProgramFinder    # noqa: E402
+
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS_FILE_URL = \
@@ -295,13 +304,22 @@ invocation.
         self.assertEqual(output, expected)
 
         output = run_command(
-            'validate', ['--input', REPOS2_FILE])
-        expected = get_expected_output('validate2')
-        self.assertEqual(output, expected)
-
-        output = run_command(
             'validate', ['--hide-empty', '--input', REPOS_FILE])
         expected = get_expected_output('validate_hide')
+        self.assertEqual(output, expected)
+
+    # @unittest.skipIf(not ProgramFinder.has_subversion(), "svn is not installed")  # noqa: E501
+    # @unittest.skipIf(not ProgramFinder.has_mercurial(), "hg is not installed")    # noqa: E501
+    @pytest.mark.skipif(not ProgramFinder.has_subversion(), reason="svn is not installed")  # noqa: E501
+    @pytest.mark.skipif(not ProgramFinder.has_mercurial(),  reason="hg  is not installed")  # noqa: E501
+    def test_validate2(self):
+        # -- REQUIRES: subversion (svn), mercurial (hg)
+        print("svn={}".format(ProgramFinder.find_subversion()))
+        print("hg= {}".format(ProgramFinder.find_mercurial()))
+
+        output = run_command(
+            'validate', ['--input', REPOS2_FILE])
+        expected = get_expected_output('validate2')
         self.assertEqual(output, expected)
 
     def test_remote(self):

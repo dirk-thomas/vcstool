@@ -1,0 +1,38 @@
+# ===========================================================================
+# PYTHON / PIP PACKAGE REQUIREMENTS: Simplify development
+# ===========================================================================
+# USAGE: pip install -U -r <THIS_FILE>
+#
+#   Simplifies setup of local workspace / virtual-environment (virtualenv)
+# ===========================================================================
+
+# -- FOR PACKAGE:
+-e .
+PyYAML
+
+# ---------------------------------------------------------------------------
+# DEVELOPMENT and TESTING SUPPORT
+# ---------------------------------------------------------------------------
+# BASED ON CI-BUILDS: .github/ci.yml, .travis.yml
+coverage
+flake8 
+flake8-docstrings 
+flake8-import-order
+pytest
+pytest-html
+tox
+
+# -- NOTE: pydocstyle usage had problems.
+pydocstyle
+pylint
+
+# -- VERSION-CONTROL SYSTEMS:
+# git: should be installed.
+# svn: optional, should be installed.
+mercurial >= 5.5.2  # optional
+
+# ---------------------------------------------------------------------------
+# MORE DEVELOPMENT: Explorative Testing, etc.
+# ---------------------------------------------------------------------------
+virtualenv
+ipython

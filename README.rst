@@ -11,6 +11,11 @@ Note:
   * The file format of ``vcstool export`` uses the relative paths of the repositories as keys in YAML which avoids collisions by design.
   * ``vcstool`` has significantly fewer lines of code than ``vcstools`` including the command line tools built on top.
 
+Python 2.7 / <= 3.4 support
+---------------------------
+
+The latest version supporting Python 2.7 and Python <= 3.4 is 0.2.x from the `0.2.x branch <https://github.com/dirk-thomas/vcstool/tree/0.2.x>`_.
+
 
 How does it work?
 -----------------

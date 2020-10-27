@@ -149,12 +149,24 @@ How to install vcstool?
 =======================
 
 On Debian-based platforms the recommended method is to install the package *python3-vcstool*.
-On Ubuntu this is done using *apt-get*::
+On Ubuntu this is done using *apt-get*:
+
+If you are using `ROS <https://www.ros.org/>`_ you can get the package directly from the ROS repository::
 
   sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
   sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net --recv-key 0xAB17C654
   sudo apt-get update
   sudo apt-get install python3-vcstool
+
+If you are not using ROS or if you want the latest release as soon as possible you can get the package from |packagecloud.io|::
+
+  curl -s https://packagecloud.io/install/repositories/dirk-thomas/vcstool/script.deb.sh | sudo bash
+  sudo apt-get update
+  sudo apt-get install python3-vcstool
+
+.. |packagecloud.io| image:: https://img.shields.io/badge/deb-packagecloud.io-844fec.svg
+  :target: https://packagecloud.io/dirk-thomas/vcstool
+  :alt: packagecloud.io
 
 On other systems, use the `PyPI <http://pypi.python.org>`_ package::
 

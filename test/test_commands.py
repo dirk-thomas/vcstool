@@ -10,8 +10,7 @@ from vcstool.clients.git import GitClient  # noqa: E402
 from vcstool.util import rmtree  # noqa: E402
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
-REPOS_FILE_URL = \
-    'https://raw.githubusercontent.com/dirk-thomas/vcstool/master/test/list.repos'  # noqa: E501
+REPOS_FILE_URL = 'file://' + REPOS_FILE
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')

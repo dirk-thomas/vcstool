@@ -1,0 +1,12 @@
+# ===========================================================================
+# PYTHON / PIP PACKAGE REQUIREMENTS: Version-control system parts
+# ===========================================================================
+# USAGE: pip install -U -r <THIS_FILE>
+#
+#   Simplifies setup of local workspace / virtual-environment (virtualenv)
+# ===========================================================================
+
+# -- VERSION-CONTROL SYSTEMS:
+# git: should be installed.
+# svn: optional, should be installed.
+mercurial >= 5.5.2  # optional

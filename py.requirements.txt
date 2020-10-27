@@ -20,19 +20,3 @@ flake8-docstrings
 flake8-import-order
 pytest
 pytest-html
-tox
-
-# -- NOTE: pydocstyle usage had problems.
-pydocstyle
-pylint
-
-# -- VERSION-CONTROL SYSTEMS:
-# git: should be installed.
-# svn: optional, should be installed.
-mercurial >= 5.5.2  # optional
-
-# ---------------------------------------------------------------------------
-# MORE DEVELOPMENT: Explorative Testing, etc.
-# ---------------------------------------------------------------------------
-virtualenv
-ipython

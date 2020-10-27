@@ -1,0 +1,11 @@
+# ===========================================================================
+# PYTHON / PIP PACKAGE REQUIREMENTS: all
+# ===========================================================================
+# USAGE: pip install -U -r <THIS_FILE>
+#
+#   Simplifies setup of local workspace / virtual-environment (virtualenv)
+# ===========================================================================
+
+-r py.requirements.txt
+-r py.requirements.version_control.txt
+-r py.requirements.more.txt

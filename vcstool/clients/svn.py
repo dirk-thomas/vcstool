@@ -1,7 +1,8 @@
 import os
+from shutil import which
 from xml.etree.ElementTree import fromstring
 
-from .vcs_base import VcsClientBase, which
+from .vcs_base import VcsClientBase
 
 
 class SvnClient(VcsClientBase):

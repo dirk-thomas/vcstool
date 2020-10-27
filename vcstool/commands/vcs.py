@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import sys
 
 from vcstool.commands.help import get_entrypoint

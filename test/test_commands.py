@@ -8,13 +8,14 @@ import os
 import subprocess
 import sys
 import unittest
+
 import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
+from program_finder import ProgramFinder    # noqa: E402
 from vcstool.clients.git import GitClient   # noqa: E402
 from vcstool.util import rmtree             # noqa: E402
-from program_finder import ProgramFinder    # noqa: E402
 
 
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')

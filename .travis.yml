@@ -8,7 +8,7 @@ matrix:
     - python: 3.7
     - python: 3.8
 install:
-  - pip install coverage flake8 flake8-docstrings flake8-import-order pytest PyYAML
+  - pip install coverage flake8 flake8-docstrings flake8-import-order pytest  pytest-html PyYAML
 script:
   - PYTHONPATH=`pwd` pytest -s -v test
 notifications:

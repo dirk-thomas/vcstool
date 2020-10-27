@@ -28,5 +28,5 @@ jobs:
         python -m pip install PyYAML
     - name: Test with pytest
       run: |
-        pip install coverage flake8 flake8-docstrings flake8-import-order pytest
+        pip install coverage flake8 flake8-docstrings flake8-import-order pytest pytest-html
         PYTHONPATH=`pwd` pytest -s -v test

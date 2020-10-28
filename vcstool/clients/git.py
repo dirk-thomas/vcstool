@@ -21,7 +21,7 @@ class GitClient(VcsClientBase):
             output = subprocess.check_output(['git', '--version'])
             prefix = b'git version '
             assert output.startswith(prefix)
-            output = output[len(prefix):].rstrip()
+            output = output[len(prefix):].split(maxsplit=1)[0]
             cls._git_version = [
                 int(x) for x in output.split(b'.') if x != b'windows']
         return cls._git_version

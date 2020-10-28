@@ -36,6 +36,11 @@ def main(args=None, stdout=None, stderr=None):
         print(' '.join([cmd.command for cmd in vcstool_commands]))
         return 0
 
+    if ns.commands_descriptions:
+        print('\n'.join(['{}\t{}'.format(cmd.command, cmd.help)
+                         for cmd in vcstool_commands]))
+        return 0
+
     # output detailed command list
     parser = get_parser_with_command_only()
     parser.print_help()
@@ -57,6 +62,9 @@ def get_parser(add_help=True):
     group.add_argument(
         '--commands', action='store_true', default=False,
         help='Output the available commands for auto-completion')
+    group.add_argument(
+        '--commands-descriptions', action='store_true', default=False,
+        help='Output the available commands along with their descriptions')
     from vcstool import __version__
     group.add_argument(
         '--version', action='version', version='%(prog)s ' + __version__,

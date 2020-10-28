@@ -1,0 +1,6 @@
+complete -xc vcs -n '__fish_use_subcommand' -a '(vcs --commands-descriptions)'
+complete -xc vcs -s h -l help -d 'show this help message and exit'
+complete -xc vcs -l clients -d 'Show the available VCS clients'
+complete -xc vcs -l commands -d 'Output the available commands for auto-completion'
+complete -xc vcs -l commands-descriptions -d 'Output the available commands along with their descriptions for auto-completion'
+complete -xc vcs -l version -d 'Show the vcstool version'

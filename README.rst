@@ -191,6 +191,9 @@ For *zsh* append the following line to the ``~/.zshrc`` file::
 
   source /usr/share/vcstool-completion/vcs.zsh
 
+For *fish* append the following line to the ``~/.config/fishconfig.fish`` file::
+
+  source /usr/share/vcstool-completion/vcs.fish
 
 How to contribute?
 ==================

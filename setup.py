@@ -31,6 +31,7 @@ Currently it supports git, hg, svn and bzr.',
             'vcstool-completion/vcs.bash',
             'vcstool-completion/vcs.tcsh',
             'vcstool-completion/vcs.zsh'
+            'vcstool-completion/vcs.fish'
         ])
     ],
     entry_points={

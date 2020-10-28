@@ -1,4 +1,5 @@
 import os
+from shutil import which
 import subprocess
 import sys
 import unittest
@@ -14,6 +15,14 @@ REPOS_FILE_URL = \
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
+
+svn = which('svn') or False
+hg = which('hg') or False
+if svn and os.system('{svn} --version'.format(svn=svn)):
+    # -- CHECK FOR FAKE-PROGRAM (usecase: macOS, ...)
+    # FAKE-PROGRAM only states that program is not installed (and what to do).
+    # FAKE-PROGRAM has normally EXIT_FAILED exitcode (non-zero).
+    svn = False
 
 
 class TestCommands(unittest.TestCase):
@@ -292,13 +301,22 @@ invocation.
         self.assertEqual(output, expected)
 
         output = run_command(
-            'validate', ['--input', REPOS2_FILE])
-        expected = get_expected_output('validate2')
-        self.assertEqual(output, expected)
-
-        output = run_command(
             'validate', ['--hide-empty', '--input', REPOS_FILE])
         expected = get_expected_output('validate_hide')
+        self.assertEqual(output, expected)
+
+    # @pytest.mark.skipif(not svn, reason="svn is not installed")
+    # @pytest.mark.skipif(not hg,  reason="hg  is not installed")
+    @unittest.skipIf(not svn, "svn is not installed")
+    @unittest.skipIf(not hg, "hg is not installed")
+    def test_validate2(self):
+        # -- TEST REQUIRES: subversion (svn), mercurial (hg)
+        print("svn={}".format(svn))
+        print("hg= {}".format(hg))
+
+        output = run_command(
+            'validate', ['--input', REPOS2_FILE])
+        expected = get_expected_output('validate2')
         self.assertEqual(output, expected)
 
     def test_remote(self):

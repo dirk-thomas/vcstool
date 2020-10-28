@@ -210,5 +210,7 @@ How to try the latest changes?
 Sourcing the ``setup.sh`` file prepends the ``src`` folder to the ``PYTHONPATH`` and the ``scripts`` folder to the ``PATH``.
 Then vcstool can be used with the commands ``vcs-COMMAND`` (note the hyphen between ``vcs`` and ``command`` instead of a space).
 
-Alternatively the *develop* command from Python setuptools can be used:
-  sudo python setup.py develop
+Alternatively the ``-e/--editable`` flag of ``pip`` can be used::
+
+  # from the top level of this repo
+  pip3 install --user -e .

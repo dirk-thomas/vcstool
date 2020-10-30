@@ -16,6 +16,7 @@ REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
+CI = os.environ.get("CI", "false") == "true"  # Travis, Github, ... set: CI=true
 svn = which('svn') or False
 hg = which('hg') or False
 if svn and os.system('{svn} --version'.format(svn=svn)):
@@ -305,10 +306,9 @@ invocation.
         expected = get_expected_output('validate_hide')
         self.assertEqual(output, expected)
 
-    # @pytest.mark.skipif(not svn, reason="svn is not installed")
-    # @pytest.mark.skipif(not hg,  reason="hg  is not installed")
-    @unittest.skipIf(not svn, "svn is not installed")
-    @unittest.skipIf(not hg, "hg is not installed")
+    # -- HINT: Skip is disabled if CI (Travis, Github, ...) is used.
+    @unittest.skipIf(not svn and not CI, "svn is not installed")
+    @unittest.skipIf(not hg and not CI, "hg is not installed")
     def test_validate2(self):
         # -- TEST REQUIRES: subversion (svn), mercurial (hg)
         print("svn={}".format(svn))

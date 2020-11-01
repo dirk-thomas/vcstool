@@ -30,7 +30,7 @@ Currently it supports git, hg, svn and bzr.',
         ('share/vcstool-completion', [
             'vcstool-completion/vcs.bash',
             'vcstool-completion/vcs.tcsh',
-            'vcstool-completion/vcs.zsh'
+            'vcstool-completion/vcs.zsh',
             'vcstool-completion/vcs.fish'
         ])
     ],

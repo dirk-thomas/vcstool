@@ -2,3 +2,4 @@ include vcstool-completion/vcs.bash vcstool-completion/vcs.tcsh vcstool-completi
 include vcstool-completion/vcs.fish
 include test/*.repos
 include test/*.txt
+include test/*.py

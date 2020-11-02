@@ -1,0 +1,9 @@
+repositories:
+  immutable/vcstool_master:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 0.2.15
+  immutable/vcstool_tag:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 0.1.27

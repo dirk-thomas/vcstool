@@ -1,5 +1,6 @@
 import argparse
 import os
+from pathlib import Path
 import sys
 
 from vcstool.crawler import find_repositories
@@ -23,12 +24,17 @@ class ExportCommand(Command):
         super(ExportCommand, self).__init__(args)
         self.exact = args.exact or args.exact_with_tags
         self.with_tags = args.exact_with_tags
+        self.viewpoint = Path(args.viewpoint).absolute()
 
 
 def get_parser():
     parser = argparse.ArgumentParser(
         description='Export the list of repositories', prog='vcs export')
     group = parser.add_argument_group('"export" command parameters')
+    group.add_argument(
+        '--view-point', '--view', dest='viewpoint', default='.',
+        type=Path, metavar="DIRECTORY",
+        help='View point to compute repository names')
     group_exact = group.add_mutually_exclusive_group()
     group_exact.add_argument(
         '--exact', action='store_true', default=False,
@@ -87,9 +93,11 @@ def main(args=None, stdout=None, stderr=None):
     set_streams(stdout=stdout, stderr=stderr)
 
     parser = get_parser()
-    add_common_arguments(parser, skip_hide_empty=True, path_nargs='?')
+    add_common_arguments(parser, skip_hide_empty=True, path_nargs='*')
     args = parser.parse_args(args)
-
+    if not args.viewpoint or not args.viewpoint.is_dir():
+        parser.error("viewpoint={}: directory does not exist".format(
+                     args.viewpoint))
     command = ExportCommand(args)
     clients = find_repositories(command.paths, nested=command.nested)
     if command.output_repos:
@@ -97,19 +105,19 @@ def main(args=None, stdout=None, stderr=None):
     jobs = generate_jobs(clients, command)
     results = execute_jobs(jobs, number_of_workers=args.workers)
 
-    # check if at least one repo was found in the client directory
-    basename = None
+    # -- STEP: Compute repository.path relative to viewpoint.
+    viewpoint = str(command.viewpoint)
+    uses_other_viewpoint = (command.viewpoint != Path.cwd() or
+                            command.paths != [os.curdir])
     for result in results:
-        result['path'] = get_relative_path_of_result(result)
-        if result['path'] == '.':
-            basename = os.path.basename(os.path.abspath(result['client'].path))
-    # in that case prefix all relative paths with the client directory basename
-    if basename is not None:
-        for result in results:
-            if result['path'] == '.':
-                result['path'] = basename
-            else:
-                result['path'] = os.path.join(basename, result['path'])
+        if uses_other_viewpoint:
+            # -- USE VIEW-POINT: repository.path relative from viewpoint.
+            repository_path = os.path.abspath(result['client'].path)
+            repository_path = os.path.relpath(repository_path, viewpoint)
+        else:
+            # -- DEFAULT CASE: viewpoint='.' (CWD)
+            repository_path = get_relative_path_of_result(result)
+        result['path'] = repository_path
 
     print('repositories:')
     output_results(results, output_handler=output_export_data)

@@ -334,14 +334,14 @@ invocation.
         self.assertEqual(output, expected)
 
 
-def run_command(command, args=None, subfolder=None):
+def run_command(command, args=None, cwd=None, subfolder=None):
     repo_root = os.path.dirname(os.path.dirname(__file__))
     script = os.path.join(repo_root, 'scripts', 'vcs-' + command)
     env = dict(os.environ)
     env.update(
         LANG='en_US.UTF-8',
         PYTHONPATH=repo_root + os.pathsep + env.get('PYTHONPATH', ''))
-    cwd = TEST_WORKSPACE
+    cwd = cwd or TEST_WORKSPACE
     if subfolder:
         cwd = os.path.join(cwd, subfolder)
     output = subprocess.check_output(

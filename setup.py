@@ -8,7 +8,11 @@ setup(
     name='vcstool',
     version=__version__,
     install_requires=install_requires,
-    packages=find_packages(),
+    tests_require=[
+        "pytest >= 5.0",
+        "pytest-html >= 1.19.0",
+    ],
+    packages=find_packages(exclude=["test"]),
     author='Dirk Thomas',
     author_email='web@dirk-thomas.net',
     maintainer='Dirk Thomas',

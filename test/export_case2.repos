@@ -1,0 +1,12 @@
+# -- FILE: export_case2.repos (for import)
+# CASE 2A: current-directory contains anchor-repository with sub-repository(s).
+# CASE 2B: parent-directory  contains anchor-repository with sub-repository(s).
+repositories:
+  anchor:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 0.2.15
+  anchor/immutable/tag:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: 0.1.27

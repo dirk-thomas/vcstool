@@ -16,14 +16,16 @@ REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
-CI = os.environ.get("CI", "false") == "true"  # Travis, Github, ... set: CI=true
-svn = which('svn') or False
-hg = which('hg') or False
-if svn and os.system('{svn} --version'.format(svn=svn)):
-    # -- CHECK FOR FAKE-PROGRAM (usecase: macOS, ...)
-    # FAKE-PROGRAM only states that program is not installed (and what to do).
-    # FAKE-PROGRAM has normally EXIT_FAILED exitcode (non-zero).
-    svn = False
+CI = os.environ.get('CI') == 'true'  # Travis CI / Github actions set: CI=true
+svn = which('svn')
+hg = which('hg')
+if svn:
+    # check if the svn executable is usable (on macOS)
+    # and not only exists to state that the program is not installed
+    try:
+        subprocess.check_call([svn, '--version'])
+    except subprocess.CalledProcessError:
+        svn = False
 
 
 class TestCommands(unittest.TestCase):
@@ -306,14 +308,9 @@ invocation.
         expected = get_expected_output('validate_hide')
         self.assertEqual(output, expected)
 
-    # -- HINT: Skip is disabled if CI (Travis, Github, ...) is used.
-    @unittest.skipIf(not svn and not CI, "svn is not installed")
-    @unittest.skipIf(not hg and not CI, "hg is not installed")
-    def test_validate2(self):
-        # -- TEST REQUIRES: subversion (svn), mercurial (hg)
-        print("svn={}".format(svn))
-        print("hg= {}".format(hg))
-
+    @unittest.skipIf(not svn and not CI, '`svn` was not found')
+    @unittest.skipIf(not hg and not CI, '`hg` was not found')
+    def test_validate_svn_and_hg(self):
         output = run_command(
             'validate', ['--input', REPOS2_FILE])
         expected = get_expected_output('validate2')

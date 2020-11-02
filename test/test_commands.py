@@ -1,4 +1,5 @@
 import os
+from shutil import which
 import subprocess
 import sys
 import unittest
@@ -14,6 +15,17 @@ REPOS_FILE_URL = \
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
+
+CI = os.environ.get('CI') == 'true'  # Travis CI / Github actions set: CI=true
+svn = which('svn')
+hg = which('hg')
+if svn:
+    # check if the svn executable is usable (on macOS)
+    # and not only exists to state that the program is not installed
+    try:
+        subprocess.check_call([svn, '--version'])
+    except subprocess.CalledProcessError:
+        svn = False
 
 
 class TestCommands(unittest.TestCase):
@@ -292,13 +304,16 @@ invocation.
         self.assertEqual(output, expected)
 
         output = run_command(
-            'validate', ['--input', REPOS2_FILE])
-        expected = get_expected_output('validate2')
-        self.assertEqual(output, expected)
-
-        output = run_command(
             'validate', ['--hide-empty', '--input', REPOS_FILE])
         expected = get_expected_output('validate_hide')
+        self.assertEqual(output, expected)
+
+    @unittest.skipIf(not svn and not CI, '`svn` was not found')
+    @unittest.skipIf(not hg and not CI, '`hg` was not found')
+    def test_validate_svn_and_hg(self):
+        output = run_command(
+            'validate', ['--input', REPOS2_FILE])
+        expected = get_expected_output('validate2')
         self.assertEqual(output, expected)
 
     def test_remote(self):

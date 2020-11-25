@@ -537,10 +537,10 @@ class GitClient(VcsClientBase):
                 return result_tag
             # output log since nearest tag
             cmd = [GitClient._executable, 'log', '%s..' % result_tag['output']]
-        elif command.merge_only:
-            cmd = [GitClient._executable, 'log', '--merges']
         else:
             cmd = [GitClient._executable, 'log']
+        if command.merge_only:
+            cmd += ['--merges']
         cmd += ['--decorate']
         if command.limit != 0:
             cmd += ['-%d' % command.limit]

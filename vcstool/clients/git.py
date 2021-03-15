@@ -539,6 +539,8 @@ class GitClient(VcsClientBase):
             cmd = [GitClient._executable, 'log', '%s..' % result_tag['output']]
         else:
             cmd = [GitClient._executable, 'log']
+        if command.merge_only:
+            cmd += ['--merges']
         cmd += ['--decorate']
         if command.limit != 0:
             cmd += ['-%d' % command.limit]

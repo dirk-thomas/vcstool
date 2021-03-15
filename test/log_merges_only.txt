@@ -1,0 +1,18 @@
+=== . (git) ===
+commit f01ce3845fa0783bef9f97545e518e0f02cd509a
+Merge: 14f9968 e7770d3
+Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
+
+    Merge pull request #44 from dirk-thomas/fix_loop_exit
+
+commit 418cd63cc242aeb19bff17696adf1617b9c994b7
+Merge: 6fdb8e8 89448bd
+Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
+
+    Merge pull request #42 from dirk-thomas/fix_depends_regression
+
+commit a3c4c33d9e958a5d297e2d1d777fe2d850b2566f
+Merge: a5dfaac 8a7101c
+Author: Dirk Thomas <dirk-thomas@users.noreply.github.com>
+
+    Merge pull request #41 from dirk-thomas/parent_path_dependencies

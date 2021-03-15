@@ -103,6 +103,12 @@ class TestCommands(unittest.TestCase):
         expected = get_expected_output('log_limit')
         self.assertEqual(output, expected)
 
+    def test_log_merge_only(self):
+        output = run_command(
+            'log', args=['--merge-only'], subfolder='immutable/tag')
+        expected = get_expected_output('log_merges_only')
+        self.assertEqual(output, expected)
+
     def test_pull(self):
         output = run_command('pull', args=['--workers', '1'])
         expected = get_expected_output('pull')

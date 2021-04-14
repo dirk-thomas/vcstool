@@ -14,7 +14,10 @@ logging.basicConfig()
 # output POSIX paths, i.e. forward slashes only
 windows_force_posix = \
     sys.platform == 'win32' and '/' in os.environ.get('_', '')
+
+
 def fix_output_path(path):
+    global windows_force_posix
     return path.replace('\\', '/') if windows_force_posix else path
 
 
@@ -23,7 +26,9 @@ def output_repositories(clients):
     ordered_clients = {client.path: client for client in clients}
     for k in sorted(ordered_clients.keys()):
         client = ordered_clients[k]
-        print('%s (%s)' % (fix_output_path(k), client.__class__.type), file=stdout)
+        print(
+            '%s (%s)' % (fix_output_path(k), client.__class__.type),
+            file=stdout)
 
 
 def generate_jobs(clients, command):

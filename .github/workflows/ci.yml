@@ -8,7 +8,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -33,4 +33,4 @@ jobs:
       run: |
         pip install --upgrade coverage flake8 flake8-docstrings flake8-import-order pytest
         git config --global --add init.defaultBranch master
-        PYTHONPATH=`pwd` pytest -s -v test
+        ${{ matrix.os == 'windows-latest' && 'set PYTHONPATH=%cd% &&' || 'PYTHONPATH=`pwd`' }} pytest -s -v test

@@ -440,7 +440,8 @@ class GitClient(VcsClientBase):
 
         if command.recursive:
             cmd_submodule = [
-                GitClient._executable, 'submodule', 'update', '--init']
+                GitClient._executable, 'submodule', 'update', '--init',
+                '--recursive']
             result_submodule = self._run_command(cmd_submodule)
             if result_submodule['returncode']:
                 result_submodule['output'] = \

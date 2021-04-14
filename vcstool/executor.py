@@ -81,11 +81,13 @@ def get_ready_job(jobs):
 def execute_jobs(
     jobs, show_progress=False, number_of_workers=10, debug_jobs=False
 ):
+    global windows_force_posix
     from vcstool.streams import stdout
     if debug_jobs:
         logger.setLevel(logging.DEBUG)
 
-    logger.debug('force POSIX paths on Windows: %s' % windows_force_posix)
+    if windows_force_posix:
+        logger.debug('force POSIX paths on Windows')
 
     results = []
 

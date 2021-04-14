@@ -9,12 +9,26 @@ logger = logging.getLogger(__name__)
 logging.basicConfig()
 
 
+# Detect special Windows shells that do not support mixes of
+# backslashes & forward slashes; for those shells, we want to
+# output POSIX paths, i.e. forward slashes only
+windows_force_posix = \
+    sys.platform == 'win32' and '/' in os.environ.get('_', '')
+
+
+def fix_output_path(path):
+    global windows_force_posix
+    return path.replace('\\', '/') if windows_force_posix else path
+
+
 def output_repositories(clients):
     from vcstool.streams import stdout
     ordered_clients = {client.path: client for client in clients}
     for k in sorted(ordered_clients.keys()):
         client = ordered_clients[k]
-        print('%s (%s)' % (k, client.__class__.type), file=stdout)
+        print(
+            '%s (%s)' % (fix_output_path(k), client.__class__.type),
+            file=stdout)
 
 
 def generate_jobs(clients, command):
@@ -67,9 +81,13 @@ def get_ready_job(jobs):
 def execute_jobs(
     jobs, show_progress=False, number_of_workers=10, debug_jobs=False
 ):
+    global windows_force_posix
     from vcstool.streams import stdout
     if debug_jobs:
         logger.setLevel(logging.DEBUG)
+
+    if windows_force_posix:
+        logger.debug('force POSIX paths on Windows')
 
     results = []
 
@@ -223,7 +241,7 @@ def output_result(result, hide_empty=False):
         client = result['client']
         print(
             ansi('bluef') + '=== ' +
-            ansi('boldon') + client.path + ansi('boldoff') +
+            ansi('boldon') + fix_output_path(client.path) + ansi('boldoff') +
             ' (' + client.__class__.type + ') ===' + ansi('reset'),
             file=stdout)
     if output:

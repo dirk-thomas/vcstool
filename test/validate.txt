@@ -6,8 +6,8 @@ Tarball url 'https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc
 === immutable/hash_zip (zip) ===
 Zip url 'https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.zip' exists
 === immutable/tag (git) ===
-Found git repository 'https://github.com/dirk-thomas/vcstool.git' with ref '0.1.27'
+Found git repository 'https://github.com/dirk-thomas/vcstool.git' with tag '0.1.27'
 === vcstool (git) ===
-Found git repository 'https://github.com/dirk-thomas/vcstool.git' with ref 'master'
+Found git repository 'https://github.com/dirk-thomas/vcstool.git' with branch 'master'
 === without_version (git) ===
 Found git repository 'https://github.com/dirk-thomas/vcstool.git' with default branch

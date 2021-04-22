@@ -14,11 +14,11 @@ repositories:
   immutable/tag:
     type: git
     url: https://github.com/dirk-thomas/vcstool.git
-    version: 0.1.27
+    version: tags/0.1.27
   vcstool:
     type: git
     url: https://github.com/dirk-thomas/vcstool.git
-    version: master
+    version: heads/master
   without_version:
     type: git
     url: https://github.com/dirk-thomas/vcstool.git

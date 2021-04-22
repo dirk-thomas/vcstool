@@ -31,7 +31,7 @@ Initialized empty Git repository in ./immutable/tag/.git/
 
 From https://github.com/dirk-thomas/vcstool
  * [new tag]         0.1.27     -> 0.1.27
-Note: switching to '0.1.27'.
+Note: switching to 'tags/0.1.27'.
 
 You are in 'detached HEAD' state. You can look around, make experimental
 changes and commit them, and you can discard any commits you make in this

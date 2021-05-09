@@ -29,8 +29,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip setuptools wheel
         python -m pip install --upgrade PyYAML
+    - name: Install dependencies (macOS)
+      run: |
+        brew install subversion mercurial
+      if: matrix.os == 'macos-latest'
     - name: Test with pytest
       run: |
         pip install --upgrade coverage flake8 flake8-docstrings flake8-import-order pytest
         git config --global --add init.defaultBranch master
+        git config --global --add advice.detachedHead true
         ${{ matrix.os == 'windows-latest' && 'set PYTHONPATH=%cd% &&' || 'PYTHONPATH=`pwd`' }} pytest -s -v test

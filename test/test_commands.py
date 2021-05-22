@@ -9,8 +9,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from vcstool.clients.git import GitClient  # noqa: E402
 from vcstool.util import rmtree  # noqa: E402
 
+file_uri_scheme = 'file://' if sys.platform != 'win32' else 'file:///'
+
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
-REPOS_FILE_URL = 'file://' + REPOS_FILE
+REPOS_FILE_URL = file_uri_scheme + REPOS_FILE
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
@@ -189,7 +191,12 @@ or --ff-only on the command line to override the configured default per
 invocation.
 """
             output = output.replace(pull_warning, '')
-        expected = get_expected_output('pull').decode()
+        output = adapt_command_output(output.encode())
+        # the output was retrieved through a different way here and
+        # it does not include carriage return characters on Windows
+        if sys.platform == 'win32':
+            output = output.replace(b'\n', b'\r\n')
+        expected = get_expected_output('pull')
         assert output == expected
 
     def test_reimport(self):
@@ -216,6 +223,12 @@ invocation.
         output = run_command(
             'import', ['--force', '--input', REPOS_FILE, '.'])
         expected = get_expected_output('reimport_force')
+        # on Windows, the "Already on 'master'" message is after the
+        # "Your branch is up to date with ..." message, so remove it
+        # from both output and expected strings
+        if sys.platform == 'win32':
+            output = output.replace(b"Already on 'master'\r\n", b'')
+            expected = expected.replace(b"Already on 'master'\r\n", b'')
         # newer git versions don't append three dots after the commit hash
         assert output == expected or output == expected.replace(b'... ', b' ')
 
@@ -339,19 +352,8 @@ invocation.
         self.assertEqual(output, expected)
 
 
-def run_command(command, args=None, subfolder=None):
-    repo_root = os.path.dirname(os.path.dirname(__file__))
-    script = os.path.join(repo_root, 'scripts', 'vcs-' + command)
-    env = dict(os.environ)
-    env.update(
-        LANG='en_US.UTF-8',
-        PYTHONPATH=repo_root + os.pathsep + env.get('PYTHONPATH', ''))
-    cwd = TEST_WORKSPACE
-    if subfolder:
-        cwd = os.path.join(cwd, subfolder)
-    output = subprocess.check_output(
-        [sys.executable, script] + (args or []),
-        stderr=subprocess.STDOUT, cwd=cwd, env=env)
+def adapt_command_output(output, cwd=None):
+    assert type(output) == bytes
     # replace message from older git versions
     output = output.replace(
         b'git checkout -b new_branch_name',
@@ -386,7 +388,40 @@ def run_command(command, args=None, subfolder=None):
     # replace GitHub SSH clone URL
     output = output.replace(
         b'git@github.com:', b'https://github.com/')
+    if sys.platform == 'win32':
+        if cwd:
+            # on Windows, git prints full path to repos
+            # in some messages, so make it relative
+            cwd_abs = os.path.abspath(cwd).replace('\\', '/')
+            output = output.replace(cwd_abs.encode(), b'.')
+        # replace path separators in specific paths;
+        # this is less likely to cause wrong test results
+        paths_to_replace = [
+            (b'.\\immutable', b'./immutable'),
+            (b'.\\vcstool', b'./vcstool'),
+            (b'.\\without_version', b'./without_version'),
+            (b'\\hash', b'/hash'),
+            (b'\\tag', b'/tag'),
+        ]
+        for before, after in paths_to_replace:
+            output = output.replace(before, after)
     return output
+
+
+def run_command(command, args=None, subfolder=None):
+    repo_root = os.path.dirname(os.path.dirname(__file__))
+    script = os.path.join(repo_root, 'scripts', 'vcs-' + command)
+    env = dict(os.environ)
+    env.update(
+        LANG='en_US.UTF-8',
+        PYTHONPATH=repo_root + os.pathsep + env.get('PYTHONPATH', ''))
+    cwd = TEST_WORKSPACE
+    if subfolder:
+        cwd = os.path.join(cwd, subfolder)
+    output = subprocess.check_output(
+        [sys.executable, script] + (args or []),
+        stderr=subprocess.STDOUT, cwd=cwd, env=env)
+    return adapt_command_output(output, cwd)
 
 
 def get_expected_output(name):

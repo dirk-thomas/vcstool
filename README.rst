@@ -217,3 +217,18 @@ Alternatively the ``-e/--editable`` flag of ``pip`` can be used::
 
   # from the top level of this repo
   pip3 install --user -e .
+
+
+Running tests
+--------------
+
+To run the unittests locally you shuld also have the following PyPI packages
+installed:
+
+* coverage
+* flake8
+* flake8-import-order
+* flake8-docstrings
+* pytest
+
+To run the tests, run ``pytest`` from the root of the repository.

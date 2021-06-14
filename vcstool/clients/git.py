@@ -231,6 +231,14 @@ class GitClient(VcsClientBase):
                 'returncode': 1
             }
 
+        if command.subpaths and self.get_git_version() < [2, 25, 0]:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Sparse-checkout requires git >= 2.25",
+                'returncode': 1
+            }
+
         self._check_executable()
         if GitClient.is_repository(self.path):
             # verify that existing repository is the same

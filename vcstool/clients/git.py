@@ -235,11 +235,15 @@ class GitClient(VcsClientBase):
         if GitClient.is_repository(self.path):
             # verify that existing repository is the same
             result_urls = self._get_remote_urls()
+            if command.subpaths:
+                result_patterns = self._get_sparse_patterns()
             if result_urls['returncode']:
                 return result_urls
             for url, remote in result_urls['output']:
                 if url == command.url:
-                    break
+                    if (result_patterns is None) or \
+                            (result_patterns['output'] == command.subpaths):
+                        break
             else:
                 if command.skip_existing:
                     return {
@@ -391,6 +395,8 @@ class GitClient(VcsClientBase):
                     checkout_version = None
                 else:
                     checkout_version = command.version
+                if command.subpaths:
+                    cmd_clone += ['--no-checkout']
                 if command.shallow:
                     cmd_clone += ['--depth', '1']
                 result_clone = self._run_command(
@@ -438,6 +444,42 @@ class GitClient(VcsClientBase):
                 output = '\n'.join([output, result_fetch['output']])
 
                 checkout_version = command.version
+
+        if command.subpaths:
+            cmd_sparse_init = [GitClient._executable, 'sparse-checkout',
+                               'init', '--cone']
+            result_sparse_init = self._run_command(
+                    cmd_sparse_init, retry=command.retry)
+            if result_sparse_init['returncode']:
+                    result_sparse_init['output'] = \
+                        "Could not init sparse checkout for '%s': %s" % \
+                        (command.url, result_sparse_init['output'])
+                    return result_sparse_init
+            cmd_set_sparse = [GitClient._executable, 'sparse-checkout',
+                              'set'] + list(command.subpaths)
+            result_set_sparse = self._run_command(
+                    cmd_set_sparse, retry=command.retry)
+            if result_set_sparse['returncode']:
+                    result_set_sparse['output'] = \
+                        "Could not set sparse checkout patterns for" \
+                        " '%s': %s" % \
+                        (command.url, result_set_sparse['output'])
+                    return result_set_sparse
+
+            missing_patterns = []
+            for pattern in command.subpaths:
+                if not os.path.exists(os.path.join(self.path, pattern)):
+                    missing_patterns.append(pattern)
+            if len(missing_patterns) > 0:
+                return {
+                    'cmd': '',
+                    'cwd': self.path,
+                    'output': "Could not find sparse-checkout pattern(s) in "
+                              "{}: {}. Ensure subpath(s) are correctly "
+                              "specified and exist in specified version."
+                              "".format(command.url, missing_patterns),
+                    'returncode': 1
+                }
 
         if checkout_version:
             cmd_checkout = [
@@ -495,6 +537,23 @@ class GitClient(VcsClientBase):
             'output': (remote_urls if remote_urls else
                        'Could not determine any of the remote urls'),
             'returncode': 0 if remote_urls else 1
+        }
+
+    def _get_sparse_patterns(self):
+        cmd = [GitClient._executable, 'sparse-checkout', 'list']
+        result = self._run_command(cmd)
+        if result['returncode']:
+            result['output'] = 'Could not list sparse patterns: ' \
+                + result
+            return result, None
+        patterns = result['output'].split()
+
+        return {
+            'cmd': result['cmd'],
+            'cwd': self.path,
+            'output': (set(patterns) if patterns else
+                       'Could not find sparse patterns'),
+            'returncode': 0 if patterns else 1
         }
 
     def _check_version_type(self, url, version):

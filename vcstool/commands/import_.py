@@ -24,11 +24,12 @@ class ImportCommand(Command):
     help = 'Import the list of repositories'
 
     def __init__(
-        self, args, url, version=None, recursive=False, shallow=False
+        self, args, url, version=None, subpaths=None, recursive=False, shallow=False
     ):
         super(ImportCommand, self).__init__(args)
         self.url = url
         self.version = version
+        self.subpaths = subpaths
         self.force = args.force
         self.retry = args.retry
         self.skip_existing = args.skip_existing
@@ -107,6 +108,8 @@ def get_repos_in_vcstool_format(repositories):
             repo['url'] = attributes['url']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
+            if 'subpaths' in attributes:
+                repo['subpaths'] = attributes['subpaths']
         except KeyError as e:
             print(
                 ansi('yellowf') + (
@@ -138,6 +141,8 @@ def get_repos_in_rosinstall_format(root):
             repo['url'] = attributes['uri']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
+            if 'subpaths' in attributes:
+                repo['subpaths'] = attributes['subpaths']
         except KeyError as e:
             print(
                 ansi('yellowf') + (
@@ -171,6 +176,7 @@ def generate_jobs(repos, args):
         command = ImportCommand(
             args, repo['url'],
             str(repo['version']) if 'version' in repo else None,
+            set(repo['subpaths']) if 'subpaths' in repo else None,
             recursive=args.recursive, shallow=args.shallow)
         job = {'client': client, 'command': command}
         jobs.append(job)

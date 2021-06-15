@@ -489,21 +489,6 @@ class GitClient(VcsClientBase):
                         (command.url, result_set_sparse['output'])
                     return result_set_sparse
 
-            missing_patterns = []
-            for pattern in command.subpaths:
-                if not os.path.exists(os.path.join(self.path, pattern)):
-                    missing_patterns.append(pattern)
-            if len(missing_patterns) > 0:
-                return {
-                    'cmd': '',
-                    'cwd': self.path,
-                    'output': "Could not find sparse-checkout pattern(s) in "
-                              "{}: {}. Ensure subpath(s) are correctly "
-                              "specified and exist in specified version."
-                              "".format(command.url, missing_patterns),
-                    'returncode': 1
-                }
-
         if checkout_version:
             cmd_checkout = [
                 GitClient._executable, 'checkout', checkout_version, '--']
@@ -519,6 +504,20 @@ class GitClient(VcsClientBase):
                 return result_checkout
             cmd += ' && ' + ' '.join(cmd_checkout)
             output = '\n'.join([output, result_checkout['output']])
+
+        if command.subpaths:
+            # 18.04/Git 2.32.0 required checking out branch after
+            # setting subpaths
+            cmd_checkout = [GitClient._executable, 'checkout']
+            result_checkout = self._run_command(cmd_checkout)
+            if result_checkout['returncode']:
+                result_checkout['output'] = \
+                    "Failed default checkout: %s" % \
+                    (result_checkout['output'])
+                return result_checkout
+            result_check_subpaths = self._check_subpaths(command)
+            if result_check_subpaths['returncode']:
+                return result_check_subpaths
 
         if command.recursive:
             cmd_submodule = [
@@ -858,6 +857,28 @@ class GitClient(VcsClientBase):
             'core.sparsecheckout']
         result = self._run_command(cmd)
         return result['output'] == 'true'
+
+    def _check_subpaths(self, command):
+        missing_patterns = []
+        for pattern in command.subpaths:
+            if not os.path.exists(os.path.join(self.path, pattern)):
+                missing_patterns.append(pattern)
+        if len(missing_patterns) > 0:
+            return {
+                'cmd': '',
+                'cwd': self.path,
+                'output': "Could not find sparse-checkout pattern(s) in "
+                            "{}: {}. Ensure subpath(s) are correctly "
+                            "specified and exist in specified version."
+                            "".format(command.url, missing_patterns),
+                'returncode': 1
+            }
+        return {
+            'cmd': '',
+            'cwd': self.path,
+            'output': "",
+            'returncode': 0
+        }
 
     def _get_hash_ref_tuples(self, ls_remote_output):
         tuples = []

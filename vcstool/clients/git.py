@@ -61,6 +61,7 @@ class GitClient(VcsClientBase):
 
     def export(self, command):
         self._check_executable()
+        check_sparse = self.get_git_version() >= [2, 25]
         exact = command.exact
         if not exact:
             # determine if a specific branch is checked out or ec is detached
@@ -105,6 +106,12 @@ class GitClient(VcsClientBase):
                 return result_url
             url = result_url['output']
 
+            if self._check_sparse():
+                result_patterns = self._get_sparse_patterns()
+                if result_patterns['returncode']:
+                    return result_patterns
+                subpaths = list(result_patterns['output'])
+
             # the result is the remote url and the branch name
             return {
                 'cmd': ' && '.join([
@@ -113,7 +120,8 @@ class GitClient(VcsClientBase):
                 'cwd': self.path,
                 'output': '\n'.join([url, branch_name]),
                 'returncode': 0,
-                'export_data': {'url': url, 'version': branch_name}
+                'export_data': {'url': url, 'version': branch_name,
+                    'subpaths': subpaths}
             }
 
         else:
@@ -197,13 +205,20 @@ class GitClient(VcsClientBase):
                 url = result_url['output']
                 cmds.append(result_url['cmd'])
 
+                if self._check_sparse():
+                    result_patterns = self._get_sparse_patterns()
+                    if result_patterns['returncode']:
+                        return result_patterns
+                    subpaths = list(result_patterns['output'])
+
                 # the result is the remote url and the hash/tag
                 return {
                     'cmd': ' && '.join(cmds),
                     'cwd': self.path,
                     'output': '\n'.join([url, ref]),
                     'returncode': 0,
-                    'export_data': {'url': url, 'version': ref}
+                    'export_data': {'url': url, 'version': ref,
+                                    'subpaths': subpaths}
                 }
 
             return {
@@ -837,6 +852,12 @@ class GitClient(VcsClientBase):
     def _check_executable(self):
         assert GitClient._executable is not None, \
             "Could not find 'git' executable"
+
+    def _check_sparse(self):
+        cmd = [GitClient._executable, 'config', '--get',
+            'core.sparsecheckout']
+        result = self._run_command(cmd)
+        return result['output'] == 'true'
 
     def _get_hash_ref_tuples(self, ls_remote_output):
         tuples = []

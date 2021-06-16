@@ -270,10 +270,13 @@ invocation.
                 b'repository in ' + workdir.encode() + b'/',
                 b'repository in ./')
             expected = get_expected_output('import_shallow')
+            # git 2.28+ gives hints if no default branch is specified
+            expected_2_28 = get_expected_output('import_shallow_default_branch_hints')
             # newer git versions don't append ... after the commit hash
             assert (
                 output == expected or
-                output == expected.replace(b'... ', b' '))
+                output == expected.replace(b'... ', b' ') or
+                output == expected_2_28)
 
             # check that repository history has only one commit
             output = subprocess.check_output(

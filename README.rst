@@ -50,7 +50,7 @@ Exporting and importing sets of repositories
 Vcstool can export and import all the information required to reproduce the versions of a set of repositories.
 Vcstool uses a simple `YAML <http://www.yaml.org/>`_ format to encode this information.
 This format includes a root key ``repositories`` under which each local repository is described by a dictionary keyed by its relative path.
-Each of these dictionaries contains keys ``type``, ``url``, and ``version``. The optional ``subpaths`` key may be used
+Each of these dictionaries contains keys ``type``, ``url``, and ``version``. For git repositories only, the optional ``subpaths`` key may be used
 to specify `sparse-checkout <https://git-scm.com/docs/git-sparse-checkout>`_ directories as a list.
 If the ``version`` key is omitted the default branch is being used.
 

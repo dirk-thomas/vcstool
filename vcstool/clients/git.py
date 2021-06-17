@@ -114,6 +114,11 @@ class GitClient(VcsClientBase):
                 return result_url
             url = result_url['output']
 
+            export_data = {'url': url, 'version': branch_name}
+
+            if subpaths is not None:
+                export_data['subpaths'] = subpaths
+
             # the result is the remote url and the branch name
             return {
                 'cmd': ' && '.join([
@@ -122,8 +127,7 @@ class GitClient(VcsClientBase):
                 'cwd': self.path,
                 'output': '\n'.join([url, branch_name]),
                 'returncode': 0,
-                'export_data': {'url': url, 'version': branch_name,
-                    'subpaths': subpaths}
+                'export_data': export_data
             }
 
         else:
@@ -207,14 +211,18 @@ class GitClient(VcsClientBase):
                 url = result_url['output']
                 cmds.append(result_url['cmd'])
 
+                export_data = {'url': url, 'version': ref}
+
+                if subpaths is not None:
+                    export_data['subpaths'] = subpaths
+
                 # the result is the remote url and the hash/tag
                 return {
                     'cmd': ' && '.join(cmds),
                     'cwd': self.path,
                     'output': '\n'.join([url, ref]),
                     'returncode': 0,
-                    'export_data': {'url': url, 'version': ref,
-                                    'subpaths': subpaths}
+                    'export_data': export_data
                 }
 
             return {
@@ -251,11 +259,14 @@ class GitClient(VcsClientBase):
             }
 
         self._check_executable()
+
+        sparse = command.subpaths is not None
+
         if GitClient.is_repository(self.path):
             # verify that existing repository is the same
             result_urls = self._get_remote_urls()
             result_patterns = None
-            if command.subpaths:
+            if sparse:
                 result_patterns = self._get_sparse_patterns()
             if result_urls['returncode']:
                 return result_urls
@@ -465,7 +476,7 @@ class GitClient(VcsClientBase):
 
                 checkout_version = command.version
 
-        if command.subpaths:
+        if sparse:
             # Initialize as sparse-checkout and set patterns
             cmd_sparse_init = [GitClient._executable, 'sparse-checkout',
                                'init', '--cone']
@@ -503,7 +514,7 @@ class GitClient(VcsClientBase):
             cmd += ' && ' + ' '.join(cmd_checkout)
             output = '\n'.join([output, result_checkout['output']])
 
-        if command.subpaths:
+        if sparse:
             # 18.04/Git 2.32.0 required checking out branch after
             # setting subpaths
             cmd_checkout = [GitClient._executable, 'checkout']
@@ -571,8 +582,7 @@ class GitClient(VcsClientBase):
         return {
             'cmd': result['cmd'],
             'cwd': self.path,
-            'output': (set(patterns) if patterns else
-                       None),
+            'output': set(patterns),
             'returncode': 0
         }
 

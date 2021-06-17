@@ -53,10 +53,13 @@ def output_export_data(result, hide_empty=False):
         lines.append('    url: ' + export_data['url'])
         if 'version' in export_data and export_data['version']:
             lines.append('    version: ' + export_data['version'])
-        if 'subpaths' in export_data and export_data['subpaths']:
-            lines.append('    subpaths: ')
-            for subpath in export_data['subpaths']:
-                lines.append('        - {}'.format(subpath))
+        if 'subpaths' in export_data:
+            if export_data['subpaths']:
+                lines.append('    subpaths: ')
+                for subpath in export_data['subpaths']:
+                    lines.append('        - {}'.format(subpath))
+            else:
+                lines.append('    subpaths: []')
         print('\n'.join(lines))
     except KeyError as e:
         print(

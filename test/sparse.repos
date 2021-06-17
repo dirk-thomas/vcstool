@@ -1,0 +1,22 @@
+repositories:
+  explicit_branch:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: master
+    subpaths:
+      - test
+  implicit_branch:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    subpaths:
+      - test
+  multiple_subpaths:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    subpaths:
+      - test
+      - scripts
+  empty_subpaths:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    subpaths: []

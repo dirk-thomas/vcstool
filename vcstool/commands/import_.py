@@ -24,7 +24,8 @@ class ImportCommand(Command):
     help = 'Import the list of repositories'
 
     def __init__(
-        self, args, url, version=None, subpaths=None, recursive=False, shallow=False
+        self, args, url, version=None, subpaths=None, recursive=False,
+        shallow=False
     ):
         super(ImportCommand, self).__init__(args)
         self.url = url

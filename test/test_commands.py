@@ -118,20 +118,20 @@ class TestCommands(unittest.TestCase):
             for repo in repos:
                 git_dir = os.path.join(workdir, repo, '.git')
                 cmd = ['git', '--git-dir={}'.format(git_dir),
-                    'sparse-checkout', 'list']
+                       'sparse-checkout', 'list']
                 output = subprocess.check_output(
                     cmd, stderr=subprocess.STDOUT,
                     cwd=os.path.join(workdir, repo))
 
                 git_patterns = [pattern.decode('utf-8') for pattern in
-                    output.splitlines()]
+                                output.splitlines()]
                 local_directories = next(
                     os.walk(os.path.join(workdir, repo)))[1]
                 local_directories.remove('.git')
 
                 self.assertEqual(git_patterns, local_directories,
-                    "Local directories do not match sparse pattern for "
-                    "{}".format(repo))
+                                 "Local directories do not match sparse "
+                                 "pattern for {}".format(repo))
         finally:
             rmtree(workdir)
 
@@ -310,7 +310,8 @@ invocation.
                 b'repository in ./')
             expected = get_expected_output('import_shallow')
             # git 2.28+ gives hints if no default branch is specified
-            expected_2_28 = get_expected_output('import_shallow_default_branch_hints')
+            expected_2_28 = get_expected_output(
+                'import_shallow_default_branch_hints')
             # newer git versions don't append ... after the commit hash
             assert (
                 output == expected or

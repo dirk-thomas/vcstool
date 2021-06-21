@@ -65,10 +65,10 @@ class GitClient(VcsClientBase):
         subpaths = None
 
         if self.get_git_version() >= [2, 25] and self._check_sparse():
-                result_patterns = self._get_sparse_patterns()
-                if result_patterns['returncode']:
-                    return result_patterns
-                subpaths = list(result_patterns['output'])
+            result_patterns = self._get_sparse_patterns()
+            if result_patterns['returncode']:
+                return result_patterns
+            subpaths = list(result_patterns['output'])
 
         exact = command.exact
         if not exact:
@@ -483,20 +483,20 @@ class GitClient(VcsClientBase):
             result_sparse_init = self._run_command(
                     cmd_sparse_init, retry=command.retry)
             if result_sparse_init['returncode']:
-                    result_sparse_init['output'] = \
-                        "Could not init sparse checkout for '%s': %s" % \
-                        (command.url, result_sparse_init['output'])
-                    return result_sparse_init
+                result_sparse_init['output'] = \
+                    "Could not init sparse checkout for '%s': %s" % \
+                    (command.url, result_sparse_init['output'])
+                return result_sparse_init
             cmd_set_sparse = [GitClient._executable, 'sparse-checkout',
                               'set'] + list(command.subpaths)
             result_set_sparse = self._run_command(
                     cmd_set_sparse, retry=command.retry)
             if result_set_sparse['returncode']:
-                    result_set_sparse['output'] = \
-                        "Could not set sparse checkout patterns for" \
-                        " '%s': %s" % \
-                        (command.url, result_set_sparse['output'])
-                    return result_set_sparse
+                result_set_sparse['output'] = \
+                    "Could not set sparse checkout patterns for" \
+                    " '%s': %s" % \
+                    (command.url, result_set_sparse['output'])
+                return result_set_sparse
 
         if checkout_version:
             cmd_checkout = [
@@ -862,7 +862,7 @@ class GitClient(VcsClientBase):
 
     def _check_sparse(self):
         cmd = [GitClient._executable, 'config', '--get',
-            'core.sparsecheckout']
+               'core.sparsecheckout']
         result = self._run_command(cmd)
         return result['output'] == 'true'
 
@@ -876,9 +876,9 @@ class GitClient(VcsClientBase):
                 'cmd': '',
                 'cwd': self.path,
                 'output': "Could not find sparse-checkout pattern(s) in "
-                            "{}: {}. Ensure subpath(s) are correctly "
-                            "specified and exist in specified version."
-                            "".format(command.url, missing_patterns),
+                          "{}: {}. Ensure subpath(s) are correctly "
+                          "specified and exist in specified version."
+                          "".format(command.url, missing_patterns),
                 'returncode': 1
             }
         return {

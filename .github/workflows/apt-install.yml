@@ -1,0 +1,33 @@
+name: apt install
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+jobs:
+  apt-install-with-ros:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # https://docs.ros.org/en/rolling/Installation/Ubuntu-Install-Debians.html
+      - name: Install vcstool with ROS
+        run: |
+          sudo apt update && sudo apt install curl gnupg lsb-release
+          sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key  -o /usr/share/keyrings/ros-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+          sudo apt-get update && sudo apt-get install python3-vcstool
+
+  apt-install-without-ros:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install vcstool without ROS
+        run: |
+          curl -s https://packagecloud.io/install/repositories/dirk-thomas/vcstool/script.deb.sh | sudo bash
+          sudo apt-get update
+          sudo apt-get install python3-vcstool

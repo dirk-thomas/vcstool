@@ -1,9 +1,9 @@
 ....
 === hg/branch (hg) ===
-Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset 'cacao'
+Found hg repository 'https://www.mercurial-scm.org/repo/hg-stable' with changeset 'stable'
 === hg/hash (hg) ===
-Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset '97c468298911'
+Found hg repository 'https://www.mercurial-scm.org/repo/hg-stable' with changeset '6d79894d3460'
 === hg/tag (hg) ===
-Found hg repository 'http://icedtea.classpath.org/hg/icedtea8' with changeset 'icedtea-3.0.0'
+Found hg repository 'https://www.mercurial-scm.org/repo/hg-stable' with changeset '5.8'
 === svn/rev (svn) ===
 Found svn repository 'https://github.com/dirk-thomas/vcstool' with revision '3'

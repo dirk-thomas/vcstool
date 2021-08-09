@@ -154,7 +154,8 @@ On Ubuntu this is done using *apt-get*:
 If you are using `ROS <https://www.ros.org/>`_ you can get the package directly from the ROS repository::
 
   sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-  sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net --recv-key 0xAB17C654
+  sudo apt install curl # if you haven't already installed curl
+  curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
   sudo apt-get update
   sudo apt-get install python3-vcstool
 

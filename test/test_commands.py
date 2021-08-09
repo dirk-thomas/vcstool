@@ -352,6 +352,22 @@ invocation.
         self.assertEqual(output, expected)
 
 
+def run_command(command, args=None, subfolder=None):
+    repo_root = os.path.dirname(os.path.dirname(__file__))
+    script = os.path.join(repo_root, 'scripts', 'vcs-' + command)
+    env = dict(os.environ)
+    env.update(
+        LANG='en_US.UTF-8',
+        PYTHONPATH=repo_root + os.pathsep + env.get('PYTHONPATH', ''))
+    cwd = TEST_WORKSPACE
+    if subfolder:
+        cwd = os.path.join(cwd, subfolder)
+    output = subprocess.check_output(
+        [sys.executable, script] + (args or []),
+        stderr=subprocess.STDOUT, cwd=cwd, env=env)
+    return adapt_command_output(output, cwd)
+
+
 def adapt_command_output(output, cwd=None):
     assert type(output) == bytes
     # replace message from older git versions
@@ -406,22 +422,6 @@ def adapt_command_output(output, cwd=None):
         for before, after in paths_to_replace:
             output = output.replace(before, after)
     return output
-
-
-def run_command(command, args=None, subfolder=None):
-    repo_root = os.path.dirname(os.path.dirname(__file__))
-    script = os.path.join(repo_root, 'scripts', 'vcs-' + command)
-    env = dict(os.environ)
-    env.update(
-        LANG='en_US.UTF-8',
-        PYTHONPATH=repo_root + os.pathsep + env.get('PYTHONPATH', ''))
-    cwd = TEST_WORKSPACE
-    if subfolder:
-        cwd = os.path.join(cwd, subfolder)
-    output = subprocess.check_output(
-        [sys.executable, script] + (args or []),
-        stderr=subprocess.STDOUT, cwd=cwd, env=env)
-    return adapt_command_output(output, cwd)
 
 
 def get_expected_output(name):

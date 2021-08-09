@@ -191,12 +191,12 @@ or --ff-only on the command line to override the configured default per
 invocation.
 """
             output = output.replace(pull_warning, '')
-        output = adapt_command_output(output.encode())
-        # the output was retrieved through a different way here and
-        # it does not include carriage return characters on Windows
+        # the output was retrieved through a different way here
+        output = adapt_command_output(output.encode()).decode()
         if sys.platform == 'win32':
-            output = output.replace(b'\n', b'\r\n')
-        expected = get_expected_output('pull')
+            # it does not include carriage return characters on Windows
+            output = output.replace('\n', '\r\n')
+        expected = get_expected_output('pull').decode()
         assert output == expected
 
     def test_reimport(self):

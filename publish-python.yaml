@@ -8,8 +8,8 @@ artifacts:
         config:
           repository: dirk-thomas/vcstool
           distributions:
-            - ubuntu:xenial
             - ubuntu:bionic
             - ubuntu:focal
-            - debian:stretch
+            - ubuntu:jammy
             - debian:buster
+            - debian:bullseye

@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+
+import sys
+
+from vcstool.commands.rm_all import main
+
+sys.exit(main() or 0)

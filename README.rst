@@ -144,6 +144,44 @@ The set of repositories to operate on can optionally be restricted by the type:
 
 If the command should work on multiple repositories make sure to pass only generic arguments which work for all of these repository types.
 
+Extend a repositories file
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is possible to write a ``.repos`` file that extends another one.
+For example, this ``extension.repos`` file:
+
+.. code-block:: yaml
+
+  # extension.repos
+  extends: base.repos
+  repositories:
+    a/repo:
+      type: git
+      url: https://github.com/a/repo.git
+      version: my-branch
+
+extends this ``base.repos`` file:
+
+.. code-block:: yaml
+
+  # base.repos
+  repositories:
+    a/repo:
+      type: git
+      url: https://github.com/a/repo.git
+      version:  master
+    another/repo:
+      type: git
+      url: https://github.com/another/repo.git
+      version: 1.2.3
+
+
+Running ``vcs import --input extension.repos`` would checkout ``a/repo`` @ ``my-branch`` (instead of ``master``) as well as ``another/repo`` @ ``1.2.3``.
+
+If the initial file is passed to ``vcs`` using ``stdin`` (i.e. ``vcs import < extension.repos``), the path to the extended file is relative to the current diretory.
+If the initial file is passed to ``vcs`` using the ``--input`` option, the path to the extended file is relative to the initial file's directory.
+This is applied recursively for any subsequent extended file, i.e. the second extended file's path is relative to the first extended file's directory.
+There is no hard limit as to how many extensions can be performed, as long as there is no loop.
 
 How to install vcstool?
 =======================

@@ -1,0 +1,89 @@
+........
+=== ./immutable/hash (git) ===
+Cloning into '.'...
+Note: switching to '377d5b3d03c212f015cc832fdb368f4534d0d583'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 377d5b3... update changelog
+=== ./immutable/hash_tar (tar) ===
+Downloaded tarball from 'https://github.com/dirk-thomas/vcstool/archive/afb4946c6a96aef37ad7770382b321beff0e0f26.tar.gz' and unpacked it
+=== ./immutable/hash_zip (zip) ===
+Downloaded zipfile from 'https://github.com/dirk-thomas/vcstool/archive/377d5b3d03c212f015cc832fdb368f4534d0d583.zip' and unpacked it
+=== ./immutable/tag (git) ===
+Cloning into '.'...
+Note: switching to '0.2.7'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 80aadd6... 0.2.7
+=== ./vcstool (git) ===
+Cloning into '.'...
+=== ./vcstool-custom (git) ===
+Cloning into '.'...
+Note: switching to '0.2.10'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 865990f... 0.2.10
+=== ./vcstool-old (git) ===
+Cloning into '.'...
+Note: switching to '0.1.2'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 0ac0d6f... 0.1.2
+=== ./without_version (git) ===
+Cloning into '.'...

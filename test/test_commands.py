@@ -14,6 +14,10 @@ file_uri_scheme = 'file://' if sys.platform != 'win32' else 'file:///'
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS_FILE_URL = file_uri_scheme + REPOS_FILE
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
+REPOS_EXTENDS_FILE = os.path.join(
+    os.path.dirname(__file__), 'list_extends.repos')
+REPOS_EXTENDS_LOOP_FILE = os.path.join(
+    os.path.dirname(__file__), 'list_extends_loop.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -350,6 +354,119 @@ invocation.
             b'.\nnothing to commit', b'.\n\nnothing to commit')
         expected = get_expected_output('status')
         self.assertEqual(output, expected)
+
+    def test_import_extends(self):
+        workdir = os.path.join(TEST_WORKSPACE, 'import-extends')
+        os.makedirs(workdir)
+        try:
+            output = run_command(
+                'import', ['--input', REPOS_EXTENDS_FILE, '.'],
+                subfolder='import-extends')
+            # the actual output contains absolute paths
+            output = output.replace(
+                b'repository in ' + workdir.encode() + b'/',
+                b'repository in ./')
+            expected = get_expected_output('import_extends')
+            # newer git versions don't append three dots after the commit hash
+            assert output == expected or \
+                output == expected.replace(b'... ', b' ')
+        finally:
+            rmtree(workdir)
+
+    def test_import_extends_loop(self):
+        with self.assertRaises(subprocess.CalledProcessError) as e:
+            run_command(
+                'import', ['--input', REPOS_EXTENDS_LOOP_FILE, '.'])
+        self.assertIn(
+            b'Infinite loop in repos extensions', e.exception.output)
+
+    def test_import_extends_merge(self):
+        from vcstool.commands.import_ import merge_repositories
+        # only one set of repos
+        repos = [
+            {
+                'some/path': {
+                    'type': 'git',
+                    'url': 'https://github.com/user/repo',
+                    'version': 'master',
+                },
+            },
+        ]
+        merged_repos = merge_repositories(repos)
+        self.assertDictEqual(repos[0], merged_repos)
+        # multiple sets repos
+        repos = [
+            {
+                'a/b/c': {
+                    'type': 'git',
+                    'url': 'https://github.com/a/bc',
+                    'version': '1.0.0',
+                },
+                'd/e': {
+                    'type': 'hg',
+                    'url': 'very.old.com',
+                    'version': '-1',
+                },
+                'f': {
+                    'type': 'svn',
+                    'url': 'https://gitlab.com/f/f',
+                    'version': 'master',
+                },
+                'g/h': {
+                    'type': 'git',
+                    'url': 'https://gitlab.com/g/h',
+                    'version': '2.7',
+                },
+            },
+            {
+                'a/b/c': {
+                    'type': 'git',
+                    'url': 'https://github.com/a/bc',
+                    'version': 'master',
+                },
+                'i/j': {
+                    'type': 'git',
+                    'url': 'https://some.website',
+                    'version': '42',
+                },
+            },
+            {
+                'g/h': {
+                    'type': 'git',
+                    'url': 'https://gitlab.com/custom/h',
+                    'version': '2.8',
+                },
+            },
+        ]
+        expected_merged_repos = {
+            'a/b/c': {
+                'type': 'git',
+                'url': 'https://github.com/a/bc',
+                'version': 'master',
+            },
+            'd/e': {
+                'type': 'hg',
+                'url': 'very.old.com',
+                'version': '-1',
+            },
+            'f': {
+                'type': 'svn',
+                'url': 'https://gitlab.com/f/f',
+                'version': 'master',
+            },
+            'g/h': {
+                'type': 'git',
+                'url': 'https://gitlab.com/custom/h',
+                'version': '2.8',
+            },
+            'i/j': {
+                'type': 'git',
+                'url': 'https://some.website',
+                'version': '42',
+            },
+        }
+        merged_repos = merge_repositories(repos)
+        self.assertDictEqual(expected_merged_repos, merged_repos)
 
 
 def run_command(command, args=None, subfolder=None):

@@ -1,0 +1,6 @@
+extends: list_extends_loop2.repos
+repositories:
+  vcstool:
+    type: git
+    url: https://github.com/dirk-thomas/vcstool.git
+    version: master

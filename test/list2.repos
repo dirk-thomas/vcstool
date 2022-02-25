@@ -1,16 +1,16 @@
 repositories:
   hg/branch:
     type: hg
-    url: http://icedtea.classpath.org/hg/icedtea8
-    version: cacao
+    url: https://www.mercurial-scm.org/repo/hg-stable
+    version: stable
   hg/hash:
     type: hg
-    url: http://icedtea.classpath.org/hg/icedtea8
-    version: 97c468298911
+    url: https://www.mercurial-scm.org/repo/hg-stable
+    version: 6d79894d3460
   hg/tag:
     type: hg
-    url: http://icedtea.classpath.org/hg/icedtea8
-    version: icedtea-3.0.0
+    url: https://www.mercurial-scm.org/repo/hg-stable
+    version: 5.8
   svn/rev:
     type: svn
     url: https://github.com/dirk-thomas/vcstool

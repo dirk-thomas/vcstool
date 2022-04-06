@@ -7,6 +7,7 @@ from .log import LogCommand
 from .pull import PullCommand
 from .push import PushCommand
 from .remotes import RemotesCommand
+from .repos import ReposCommand
 from .status import StatusCommand
 from .validate import ValidateCommand
 
@@ -20,6 +21,7 @@ vcstool_commands.append(LogCommand)
 vcstool_commands.append(PullCommand)
 vcstool_commands.append(PushCommand)
 vcstool_commands.append(RemotesCommand)
+vcstool_commands.append(ReposCommand)
 vcstool_commands.append(StatusCommand)
 vcstool_commands.append(ValidateCommand)
 

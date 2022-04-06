@@ -1,4 +1,5 @@
 import os
+import pathlib
 from shutil import which
 import subprocess
 
@@ -620,6 +621,60 @@ class GitClient(VcsClientBase):
         self._check_executable()
         cmd = [GitClient._executable, 'remote', '-v']
         return self._run_command(cmd)
+
+    def repos(self, command):
+        self._check_executable()
+        while command.hide_empty:
+            # check if ahead
+            cmd = [GitClient._executable, 'log', '@{push}..']
+            result = self._run_command(cmd)
+            if not result['returncode'] and result['output']:
+                # ahead, do not hide
+                break
+            # check if behind
+            cmd = [GitClient._executable, 'log', '..@{upstream}']
+            result = self._run_command(cmd)
+            if not result['returncode'] and result['output']:
+                # behind, do not hide
+                break
+            cmd = [GitClient._executable, 'status', '-s']
+            if command.quiet:
+                cmd += ['--untracked-files=no']
+            result = self._run_command(cmd)
+            if result['returncode'] or not result['output']:
+                return result
+            break
+        cmd = [GitClient._executable, 'status']
+        self._check_color(cmd)
+        if command.quiet:
+            cmd += ['--untracked-files=no']
+        output = self._run_command(cmd)
+        localname = pathlib.Path(output["cwd"]).relative_to(pathlib.Path.cwd())
+        cmd = [GitClient._executable, 'status', '-s']
+        output = self._run_command(cmd)
+        # Empty status string means no changes.
+        status = output["output"]
+        if status:
+            status = output["output"].split()[0]
+        else:
+            status = "-"
+        scm = "git"
+        cmd = [GitClient._executable, 'branch', '--show-current']
+        output = self._run_command(cmd)
+        version = output["output"]
+        cmd = [GitClient._executable, 'rev-parse', 'HEAD']
+        output = self._run_command(cmd)
+        uid = output["output"][:12]
+        cmd = [GitClient._executable, 'config', 'remote.origin.url']
+        output = self._run_command(cmd)
+        uri = output["output"]
+        output["localname"] = localname
+        output["status"] = status
+        output["scm"] = scm
+        output["version"] = version
+        output["uid"] = uid
+        output["uri"] = uri
+        return output
 
     def status(self, command):
         self._check_executable()

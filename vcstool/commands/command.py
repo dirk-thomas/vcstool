@@ -3,7 +3,7 @@ from multiprocessing import cpu_count
 import os
 
 from vcstool.crawler import find_repositories
-from vcstool.executor import execute_jobs
+from vcstool.executor import execute_jobs, output_result, wstool_info_result
 from vcstool.executor import generate_jobs
 from vcstool.executor import output_repositories
 from vcstool.executor import output_results
@@ -96,7 +96,10 @@ def simple_main(parser, command_class, args=None):
         jobs, show_progress=True, number_of_workers=args.workers,
         debug_jobs=args.debug)
 
-    output_results(results, hide_empty=args.hide_empty)
+    output_handler = output_result
+    if args.wstool_info:
+        output_handler = wstool_info_result
+    output_results(results, output_handler=output_handler, hide_empty=args.hide_empty)
 
     any_error = any(r['returncode'] for r in results)
     return 1 if any_error else 0

@@ -222,6 +222,23 @@ class Worker(threading.Thread):
             }
 
 
+def wstool_info_result(result, hide_empty=False):
+    from vcstool.streams import stdout
+    if result:
+        output = f"{str(result['localname']):30} " \
+            f"{result['status']:<3} " \
+            f"{result['scm']:<8} " \
+            f"{result['version']:<15}" \
+            f"{result['uid']:<15}" \
+            f"{result['uri']:<}"
+        try:
+            print(f"{output}", file=stdout)
+        except UnicodeEncodeError:
+            print(
+                output.encode(sys.getdefaultencoding(), 'replace'),
+                file=stdout)
+
+
 def output_result(result, hide_empty=False):
     from vcstool.streams import stdout
     output = result['output']
@@ -258,6 +275,10 @@ def output_results(results, output_handler=output_result, hide_empty=False):
     path_to_idx = {
         result['client'].path: i for i, result in enumerate(results)}
     idxs_in_order = [path_to_idx[path] for path in sorted(path_to_idx.keys())]
+    if output_handler == wstool_info_result:
+        print(
+            f"{'Localname':30} {'S':<3} {'SCM':<8} {'Version':<14} {'UID':<14} {'URI':<}"
+        )
     for i in idxs_in_order:
         output_handler(results[i], hide_empty=hide_empty)
 

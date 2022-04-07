@@ -662,6 +662,15 @@ class GitClient(VcsClientBase):
         cmd = [GitClient._executable, 'branch', '--show-current']
         output = self._run_command(cmd)
         version = output["output"]
+        if not version:
+            cmd = [
+                GitClient._executable,
+                'describe',
+                '--tags',
+                '--exact-match'
+            ]
+            output = self._run_command(cmd)
+            version = output["output"]
         cmd = [GitClient._executable, 'rev-parse', 'HEAD']
         output = self._run_command(cmd)
         uid = output["output"][:12]

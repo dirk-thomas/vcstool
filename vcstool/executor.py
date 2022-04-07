@@ -222,21 +222,40 @@ class Worker(threading.Thread):
             }
 
 
-def wstool_info_result(result, hide_empty=False):
+def wstool_info_result(result, widths, hide_empty=False):
     from vcstool.streams import stdout
     if result:
-        output = f"{str(result['localname']):30} " \
-            f"{result['status']:<3} " \
-            f"{result['scm']:<8} " \
-            f"{result['version']:<15}" \
-            f"{result['uid']:<15}" \
-            f"{result['uri']:<}"
+        output = f"{str(result['localname']):{widths['localname']}} " \
+            f"{result['status']:<{widths['status']}} " \
+            f"{result['scm']:<{widths['scm']}} " \
+            f"{result['version']:<{widths['version']}} " \
+            f"{result['uid']:<{widths['uid']}} " \
+            f"{result['uri']:<{widths['uri']}}"
         try:
             print(f"{output}", file=stdout)
         except UnicodeEncodeError:
             print(
                 output.encode(sys.getdefaultencoding(), 'replace'),
                 file=stdout)
+
+
+def output_wstool_header(widths):
+    print(
+        f"{'Localname':{widths['localname']}} "
+        f"{'S':<{widths['status']}} "
+        f"{'SCM':<{widths['scm']}} "
+        f"{'Version':<{widths['version']}} "
+        f"{'UID':<{widths['uid']}} "
+        f"{'URI':<{widths['uri']}}"
+    )
+    print(
+        f"{'---------':{widths['localname']}} "
+        f"{'-':<{widths['status']}} "
+        f"{'---':<{widths['scm']}} "
+        f"{'-------':<{widths['version']}} "
+        f"{'---':<{widths['uid']}} "
+        f"{'---':<{widths['uri']}}"
+    )
 
 
 def output_result(result, hide_empty=False):
@@ -275,12 +294,40 @@ def output_results(results, output_handler=output_result, hide_empty=False):
     path_to_idx = {
         result['client'].path: i for i, result in enumerate(results)}
     idxs_in_order = [path_to_idx[path] for path in sorted(path_to_idx.keys())]
+    widths = get_column_widths(results)
     if output_handler == wstool_info_result:
-        print(
-            f"{'Localname':30} {'S':<3} {'SCM':<8} {'Version':<14} {'UID':<14} {'URI':<}"
-        )
+        output_wstool_header(widths)
     for i in idxs_in_order:
-        output_handler(results[i], hide_empty=hide_empty)
+        output_handler(results[i], widths, hide_empty=hide_empty)
+
+
+def get_column_widths(results):
+    widths = {}
+    widths["localname"] = len("localname")
+    widths["status"] = len("status")
+    widths["scm"] = len("scm")
+    widths["version"] = len("version")
+    widths["uid"] = len("uid")
+    widths["uri"] = len("uri")
+
+    for result in results:
+        if "localname" in result:
+            widths["localname"] = max(
+                widths["localname"],
+                len(str(result["localname"]))
+            )
+        if "status" in result:
+            widths["status"] = max(widths["status"], len(result["status"]))
+        if "scm" in result:
+            widths["scm"] = max(widths["scm"], len(result["scm"]))
+        if "version" in result:
+            widths["version"] = max(widths["version"], len(result["version"]))
+        if "uid" in result:
+            widths["uid"] = max(widths["uid"], len(result["uid"]))
+        if "uri" in result:
+            widths["uri"] = max(widths["uri"], len(result["uri"]))
+
+    return widths
 
 
 USE_COLOR = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()

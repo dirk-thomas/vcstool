@@ -18,6 +18,7 @@ class Command(object):
         self.hide_empty = args.hide_empty if 'hide_empty' in args else False
         self.nested = args.nested if 'nested' in args else False
         self.output_repos = args.repos if 'repos' in args else False
+        self.wstool_info = args.wstool_info if 'wstool_info' in args else False
         if 'paths' in args:
             self.paths = args.paths
         else:
@@ -97,9 +98,13 @@ def simple_main(parser, command_class, args=None):
         debug_jobs=args.debug)
 
     output_handler = output_result
-    if args.wstool_info:
+    if command.wstool_info:
         output_handler = wstool_info_result
-    output_results(results, output_handler=output_handler, hide_empty=args.hide_empty)
+    output_results(
+        results,
+        output_handler=output_handler,
+        hide_empty=args.hide_empty
+    )
 
     any_error = any(r['returncode'] for r in results)
     return 1 if any_error else 0

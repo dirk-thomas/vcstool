@@ -298,7 +298,10 @@ def output_results(results, output_handler=output_result, hide_empty=False):
     if output_handler == wstool_info_result:
         output_wstool_header(widths)
     for i in idxs_in_order:
-        output_handler(results[i], widths, hide_empty=hide_empty)
+        if output_handler == wstool_info_result:
+            output_handler(results[i], widths, hide_empty=hide_empty)
+        else:
+            output_handler(results[i], hide_empty=hide_empty)
 
 
 def get_column_widths(results):

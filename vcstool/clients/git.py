@@ -725,6 +725,8 @@ class GitClient(VcsClientBase):
             else:
                 for _hash in hashes:
                     if _hash.startswith(command.version):
+                        version_type = 'hash'
+                        version_name = command.version
                         break
                 else:
                     cmd = result_ls_remote['cmd']

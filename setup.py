@@ -2,12 +2,21 @@ from setuptools import find_packages
 from setuptools import setup
 from vcstool import __version__
 
-install_requires = ['PyYAML', 'setuptools']
-
 setup(
     name='vcstool',
     version=__version__,
-    install_requires=install_requires,
+    install_requires=[
+        'PyYAML',
+        'setuptools'],
+    extras_require={
+        'test': [
+            'flake8 >= 3.7, < 5',
+            'flake8-docstrings',
+            'flake8-import-order',
+            'pycodestyle < 2.9.0',
+            'pyflakes < 2.5.0',
+            'pytest']
+        },
     packages=find_packages(),
     author='Dirk Thomas',
     author_email='web@dirk-thomas.net',

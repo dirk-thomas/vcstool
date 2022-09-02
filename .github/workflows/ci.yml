@@ -12,12 +12,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
         include:
         - os: macos-latest
-          python-version: 3.8
+          python-version: "3.10"
         - os: windows-latest
-          python-version: 3.8
+          python-version: "3.8"
+        - os: windows-latest
+          python-version: "3.10"
 
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +37,8 @@ jobs:
       if: matrix.os == 'macos-latest'
     - name: Test with pytest
       run: |
-        pip install --upgrade coverage flake8 flake8-docstrings flake8-import-order pytest
+        pip install --upgrade .[test]
+        pip install --upgrade coverage
         git config --global --add init.defaultBranch master
         git config --global --add advice.detachedHead true
         ${{ matrix.os == 'windows-latest' && 'set PYTHONPATH=%cd% &&' || 'PYTHONPATH=`pwd`' }} pytest -s -v test

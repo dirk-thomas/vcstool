@@ -170,26 +170,46 @@ class BzrClient(VcsClientBase):
         return self._get_parent_branch()
 
     def repos(self, command):
+        retval  = {}
+        retval ["localname"] = 'localname'
+        retval ["status"] = '-'
+        retval ["scm"] = 'bzr'
+        retval ["version"] = 'version'
+        retval ["uid"] = 'uid'
+        retval ["uri"] = 'uri'
+        retval ["returncode"] = 1
+
         self._check_executable()
-        cmd = [BzrClient._executable, 'status']
+        output = self.remotes(command)
+
+        if output["returncode"]:
+            return retval
+
+        cmd = [BzrClient._executable, 'status', '-S']
         output = self._run_command(cmd)
         localname = pathlib.Path(output["cwd"]).relative_to(pathlib.Path.cwd())
         returncode = output['returncode']
         if output['output']:
-            status = output["output"][0].upper()
+            status = output["output"].split()[0].upper()
         else:
             status = "-"
+        cmd = [BzrClient._executable, 'version-info']
+        output = self._run_command(cmd)
+        version = output['output'].split()[11]
+        uid = output['output'].split()[1].split('-')[2]
+        cmd = [BzrClient._executable, 'info']
+        output = self._run_command(cmd)
+        url = output['output'].split()[7]
 
-        output = {}
-        output["localname"] = localname
-        output["status"] = status
-        output["scm"] = 'bzr'
-        output["version"] = 'version'
-        output["uid"] = 'uid'
-        output["uri"] = 'url'
-        output["returncode"] = returncode
+        retval ["localname"] = localname
+        retval ["status"] = status
+        retval ["scm"] = 'bzr'
+        retval ["version"] = version
+        retval ["uid"] = uid
+        retval ["uri"] = self.remotes(command)
+        retval ["returncode"] = returncode
 
-        return output
+        return retval
 
     def status(self, _command):
         self._check_executable()

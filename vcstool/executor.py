@@ -225,6 +225,7 @@ class Worker(threading.Thread):
 def wstool_info_result(result, widths, hide_empty=False):
     from vcstool.streams import stdout
     if result:
+        logger.debug(f'wstool info result: {result}')
         output = f"{str(result['localname']):{widths['localname']}} " \
             f"{result['status']:<{widths['status']}} " \
             f"{result['scm']:<{widths['scm']}} " \

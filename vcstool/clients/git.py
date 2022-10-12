@@ -671,6 +671,8 @@ class GitClient(VcsClientBase):
             ]
             output = self._run_command(cmd)
             version = output["output"]
+        if version.startswith('fatal: no tag exactly matches'):
+            version = '<detached>'
         cmd = [GitClient._executable, 'rev-parse', 'HEAD']
         output = self._run_command(cmd)
         uid = output["output"][:12]
@@ -683,6 +685,8 @@ class GitClient(VcsClientBase):
         output["version"] = version
         output["uid"] = uid
         output["uri"] = uri
+        output["returncode"] = 0
+
         return output
 
     def status(self, command):

@@ -1,5 +1,6 @@
 import copy
 import os
+import pathlib
 from shutil import which
 
 from .vcs_base import VcsClientBase
@@ -167,6 +168,27 @@ class BzrClient(VcsClientBase):
     def remotes(self, _command):
         self._check_executable()
         return self._get_parent_branch()
+
+    def repos(self, command):
+        self._check_executable()
+        cmd = [BzrClient._executable, 'status']
+        self._check_color(cmd)
+        output = self._run_command(cmd)
+        localname = pathlib.Path(output["cwd"]).relative_to(pathlib.Path.cwd())
+        print(f"localname: {localname}")
+        # cmd = [BzrClient._executable, 'status']
+        # status = self._run_command(cmd)
+
+        output = {}
+        output["localname"] = localname
+        output["status"] = 'status'
+        output["scm"] = 'bzr'
+        output["version"] = 'version'
+        output["uid"] = 'uid'
+        output["uri"] = 'url'
+        output["returncode"] = 0
+
+        return output
 
     def status(self, _command):
         self._check_executable()

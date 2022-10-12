@@ -1,4 +1,5 @@
 import os
+import pathlib
 from shutil import which
 from threading import Lock
 
@@ -235,6 +236,38 @@ class HgClient(VcsClientBase):
         self._check_executable()
         cmd = [HgClient._executable, 'paths']
         return self._run_command(cmd)
+
+    def repos(self, command):
+        self._check_executable()
+        cmd = [HgClient._executable, 'status']
+        self._check_color(cmd)
+        if command.quiet:
+            cmd += ['--untracked-files=no']
+        output = self._run_command(cmd)
+        localname = pathlib.Path(output["cwd"]).relative_to(pathlib.Path.cwd())
+        if output['output']:
+            status = output["output"][0]
+        else:
+            status = "-"
+        result_url = self._get_url()
+        url = result_url['output']
+        cmd = [HgClient._executable, 'branch']
+        output = self._run_command(cmd)
+        version = output['output']
+        cmd = [HgClient._executable, 'id']
+        output = self._run_command(cmd)
+        uid = output['output'].split()[0]
+
+        output = {}
+        output["localname"] = localname
+        output["status"] = status
+        output["scm"] = 'hg'
+        output["version"] = version
+        output["uid"] = uid
+        output["uri"] = url
+        output["returncode"] = 0
+
+        return output
 
     def status(self, command):
         self._check_executable()

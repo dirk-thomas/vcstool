@@ -172,21 +172,22 @@ class BzrClient(VcsClientBase):
     def repos(self, command):
         self._check_executable()
         cmd = [BzrClient._executable, 'status']
-        self._check_color(cmd)
         output = self._run_command(cmd)
         localname = pathlib.Path(output["cwd"]).relative_to(pathlib.Path.cwd())
-        print(f"localname: {localname}")
-        # cmd = [BzrClient._executable, 'status']
-        # status = self._run_command(cmd)
+        returncode = output['returncode']
+        if output['output']:
+            status = output["output"][0].upper()
+        else:
+            status = "-"
 
         output = {}
         output["localname"] = localname
-        output["status"] = 'status'
+        output["status"] = status
         output["scm"] = 'bzr'
         output["version"] = 'version'
         output["uid"] = 'uid'
         output["uri"] = 'url'
-        output["returncode"] = 0
+        output["returncode"] = returncode
 
         return output
 

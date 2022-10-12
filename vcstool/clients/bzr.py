@@ -171,7 +171,7 @@ class BzrClient(VcsClientBase):
 
     def repos(self, command):
         retval  = {}
-        retval ["localname"] = 'localname'
+        retval ["localname"] = 'placeholder'
         retval ["status"] = '-'
         retval ["scm"] = 'bzr'
         retval ["version"] = 'version'
@@ -180,9 +180,10 @@ class BzrClient(VcsClientBase):
         retval ["returncode"] = 1
 
         self._check_executable()
-        output = self.remotes(command)
+        cmd = [BzrClient._executable, 'info']
+        output = self._run_command(cmd)
 
-        if output["returncode"]:
+        if output["output"].startswith('Shared'):
             return retval
 
         cmd = [BzrClient._executable, 'status', '-S']
@@ -206,7 +207,7 @@ class BzrClient(VcsClientBase):
         retval ["scm"] = 'bzr'
         retval ["version"] = version
         retval ["uid"] = uid
-        retval ["uri"] = self.remotes(command)
+        retval ["uri"] = url
         retval ["returncode"] = returncode
 
         return retval

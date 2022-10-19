@@ -170,14 +170,14 @@ class BzrClient(VcsClientBase):
         return self._get_parent_branch()
 
     def repos(self, command):
-        retval  = {}
-        retval ["localname"] = 'placeholder'
-        retval ["status"] = '-'
-        retval ["scm"] = 'bzr'
-        retval ["version"] = 'version'
-        retval ["uid"] = 'uid'
-        retval ["uri"] = 'uri'
-        retval ["returncode"] = 1
+        retval = {}
+        retval["localname"] = 'placeholder'
+        retval["status"] = '-'
+        retval["scm"] = 'bzr'
+        retval["version"] = 'version'
+        retval["uid"] = 'uid'
+        retval["uri"] = 'uri'
+        retval["returncode"] = 1
 
         self._check_executable()
         cmd = [BzrClient._executable, 'info']
@@ -203,13 +203,13 @@ class BzrClient(VcsClientBase):
         cmd = [BzrClient._executable, 'info']
         output = self._run_command(cmd)
 
-        retval ["localname"] = localname
-        retval ["status"] = status
-        retval ["scm"] = 'bzr'
-        retval ["version"] = version
-        retval ["uid"] = uid
-        retval ["uri"] = url
-        retval ["returncode"] = returncode
+        retval["localname"] = localname
+        retval["status"] = status
+        retval["scm"] = 'bzr'
+        retval["version"] = version
+        retval["uid"] = uid
+        retval["uri"] = url
+        retval["returncode"] = returncode
 
         return retval
 

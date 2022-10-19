@@ -186,6 +186,8 @@ class BzrClient(VcsClientBase):
         if output["output"].startswith('Shared'):
             return retval
 
+        url = output['output'].split()[12]
+
         cmd = [BzrClient._executable, 'status', '-S']
         output = self._run_command(cmd)
         localname = pathlib.Path(output["cwd"]).relative_to(pathlib.Path.cwd())
@@ -200,7 +202,6 @@ class BzrClient(VcsClientBase):
         uid = output['output'].split()[1].split('-')[2]
         cmd = [BzrClient._executable, 'info']
         output = self._run_command(cmd)
-        url = output['output'].split()[7]
 
         retval ["localname"] = localname
         retval ["status"] = status

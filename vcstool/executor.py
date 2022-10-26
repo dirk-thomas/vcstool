@@ -4,6 +4,7 @@ from queue import Empty, Queue
 import sys
 import threading
 import traceback
+from tabulate import tabulate
 
 logger = logging.getLogger(__name__)
 logging.basicConfig()
@@ -222,41 +223,8 @@ class Worker(threading.Thread):
             }
 
 
-def wstool_info_result(result, widths, hide_empty=False):
-    from vcstool.streams import stdout
-    if result:
-        logger.debug(f'wstool info result: {result}')
-        output = f"{str(result['localname']):{widths['localname']}} " \
-            f"{result['status']:<{widths['status']}} " \
-            f"{result['scm']:<{widths['scm']}} " \
-            f"{result['version']:<{widths['version']}} " \
-            f"{result['uid']:<{widths['uid']}} " \
-            f"{result['uri']:<{widths['uri']}}"
-        try:
-            print(f"{output}", file=stdout)
-        except UnicodeEncodeError:
-            print(
-                output.encode(sys.getdefaultencoding(), 'replace'),
-                file=stdout)
-
-
-def output_wstool_header(widths):
-    print(
-        f"{'Localname':{widths['localname']}} "
-        f"{'S':<{widths['status']}} "
-        f"{'SCM':<{widths['scm']}} "
-        f"{'Version':<{widths['version']}} "
-        f"{'UID':<{widths['uid']}} "
-        f"{'URI':<{widths['uri']}}"
-    )
-    print(
-        f"{'---------':{widths['localname']}} "
-        f"{'-':<{widths['status']}} "
-        f"{'---':<{widths['scm']}} "
-        f"{'-------':<{widths['version']}} "
-        f"{'---':<{widths['uid']}} "
-        f"{'---':<{widths['uri']}}"
-    )
+def wstool_info_result(repo_info):
+    print(tabulate(repo_info, headers="keys", tablefmt="pretty", stralign="left"))
 
 
 def output_result(result, hide_empty=False):
@@ -290,48 +258,32 @@ def output_result(result, hide_empty=False):
                 file=stdout)
 
 
+def get_repo_info(result):
+    retval = {}
+    retval["localname"] = result["localname"]
+    retval["status"] = result["status"]
+    retval["scm"] = result["scm"]
+    retval["version"] = result["version"]
+    retval["uid"] = result["uid"]
+    retval["uri"] = result["uri"]
+
+    return retval
+
+
 def output_results(results, output_handler=output_result, hide_empty=False):
     # output results in alphabetic order
     path_to_idx = {
         result['client'].path: i for i, result in enumerate(results)}
     idxs_in_order = [path_to_idx[path] for path in sorted(path_to_idx.keys())]
-    widths = get_column_widths(results)
-    if output_handler == wstool_info_result:
-        output_wstool_header(widths)
+    repo_info = []
     for i in idxs_in_order:
         if output_handler == wstool_info_result:
-            output_handler(results[i], widths, hide_empty=hide_empty)
+            repo_info.append(get_repo_info(results[i]))
         else:
             output_handler(results[i], hide_empty=hide_empty)
 
-
-def get_column_widths(results):
-    widths = {}
-    widths["localname"] = len("localname")
-    widths["status"] = len("status")
-    widths["scm"] = len("scm")
-    widths["version"] = len("version")
-    widths["uid"] = len("uid")
-    widths["uri"] = len("uri")
-
-    for result in results:
-        if "localname" in result:
-            widths["localname"] = max(
-                widths["localname"],
-                len(str(result["localname"]))
-            )
-        if "status" in result:
-            widths["status"] = max(widths["status"], len(result["status"]))
-        if "scm" in result:
-            widths["scm"] = max(widths["scm"], len(result["scm"]))
-        if "version" in result:
-            widths["version"] = max(widths["version"], len(result["version"]))
-        if "uid" in result:
-            widths["uid"] = max(widths["uid"], len(result["uid"]))
-        if "uri" in result:
-            widths["uri"] = max(widths["uri"], len(result["uri"]))
-
-    return widths
+    if output_handler == wstool_info_result:
+        output_handler(repo_info)
 
 
 USE_COLOR = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()

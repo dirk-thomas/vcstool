@@ -1,7 +1,7 @@
 import os
 from shutil import which
 import subprocess
-
+from urllib.parse import urlparse
 from vcstool.executor import USE_COLOR
 
 from .vcs_base import VcsClientBase
@@ -100,7 +100,7 @@ class GitClient(VcsClientBase):
                 remote = remote[len(prefix):]
 
             # determine url of remote
-            result_url = self._get_remote_url(remote)
+            result_url = self._get_remote_url(remote, os.path.abspath(self.path))
             if result_url['returncode']:
                 return result_url
             url = result_url['output']
@@ -213,14 +213,42 @@ class GitClient(VcsClientBase):
                 'returncode': 1,
             }
 
-    def _get_remote_url(self, remote):
+    def _get_remote_url(self, remote, cwd=None):
         cmd_url = [
             GitClient._executable, 'config', '--get', 'remote.%s.url' % remote]
-        result_url = self._run_command(cmd_url)
+        result_url = self._run_command(cmd_url, cwd)
         if result_url['returncode']:
             result_url['output'] = 'Could not determine remote url: ' + \
                 result_url['output']
         return result_url
+
+    def _resolve_relative_urls(self, url):
+
+        if url.startswith('git@'):
+            return url
+        elif urlparse(url).scheme:
+            return url
+        elif os.path.isabs(url):
+            return url
+        else:
+            # Look for an appropriate remote url
+            remote = 'origin'
+
+            # Find .git repo somewhere up the tree and take the containing folder as base path
+            base_path = os.path.abspath(self.path)
+            while base_path != '/':
+                base_path = os.path.realpath(os.path.join(base_path, '..'))
+                if os.path.exists(os.path.join(base_path, '.git')):
+                    break
+
+            result_remote_url = self._get_remote_url(remote, base_path)
+            
+            if result_remote_url['returncode']:
+                # Could not resolve abs path
+                return url
+
+            resolved_url = os.path.relpath(os.path.join(result_remote_url['output'], url))
+            return resolved_url
 
     def import_(self, command):
         if not command.url:
@@ -230,6 +258,9 @@ class GitClient(VcsClientBase):
                 'output': "Repository data lacks the 'url' value",
                 'returncode': 1
             }
+
+        # Resolve relative git urls
+        command.url = self._resolve_relative_urls(command.url)
 
         self._check_executable()
         if GitClient.is_repository(self.path):

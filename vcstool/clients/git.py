@@ -2,6 +2,9 @@ import os
 from shutil import which
 import subprocess
 from urllib.parse import urlparse
+import  urllib.parse
+import urllib
+
 from vcstool.executor import USE_COLOR
 
 from .vcs_base import VcsClientBase
@@ -103,7 +106,7 @@ class GitClient(VcsClientBase):
             result_url = self._get_remote_url(remote, os.path.abspath(self.path))
             if result_url['returncode']:
                 return result_url
-            url = result_url['output']
+            url = self._to_relative_url(result_url['output'])
 
             # the result is the remote url and the branch name
             return {
@@ -222,32 +225,57 @@ class GitClient(VcsClientBase):
                 result_url['output']
         return result_url
 
-    def _resolve_relative_urls(self, url):
+    def _get_base_url(self):
+        # Find a containing git repo
+        base_path = os.path.abspath(self.path)
+        while base_path != '/':
+            base_path = os.path.realpath(os.path.join(base_path, '..'))
+            if os.path.exists(os.path.join(base_path, '.git')):
+                break
+        base_path = os.path.abspath(self.path) if base_path == '/' else base_path
+            
+        # Use git to look for an appropriate remote url
+        remote = 'origin'
+        result_remote_url = self._get_remote_url(remote, base_path)
+        if result_remote_url['returncode']:
+            # Could not resolve abs path
+            return ''
+            
+        return result_remote_url['output']
 
+    def _to_relative_url(self, url):
+        # We need to check if relative resolution is possible
+        base_url = self._get_base_url()
+
+        # Then we need to specify the relative path from base_repo to this url
+        base_url_parse = urlparse(base_url)
+        url_parse = urlparse(url)
+
+        if base_url_parse.scheme == url_parse.scheme:
+            common_url = os.path.commonprefix([base_url_parse.path, url_parse.path])
+            if common_url == '/':
+                # no relative path found
+                return url 
+            else:
+                return os.path.relpath(url_parse.path, common_url)
+        else:
+            # no relative path found
+            return url
+
+
+    def _resolve_relative_urls(self, url):
         if url.startswith('git@'):
             return url
         elif urlparse(url).scheme:
             return url
         elif os.path.isabs(url):
             return url
-        else:
-            # Look for an appropriate remote url
-            remote = 'origin'
-
+        else: # Looks as if we have a relative path
             # Find .git repo somewhere up the tree and take the containing folder as base path
-            base_path = os.path.abspath(self.path)
-            while base_path != '/':
-                base_path = os.path.realpath(os.path.join(base_path, '..'))
-                if os.path.exists(os.path.join(base_path, '.git')):
-                    break
-
-            result_remote_url = self._get_remote_url(remote, base_path)
+            base_url = self._get_base_url()
             
-            if result_remote_url['returncode']:
-                # Could not resolve abs path
-                return url
-
-            resolved_url = os.path.relpath(os.path.join(result_remote_url['output'], url))
+            # Resolve relative expressions
+            resolved_url = urllib.parse.urljoin(base_url, url)
             return resolved_url
 
     def import_(self, command):

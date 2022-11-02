@@ -33,9 +33,10 @@ class VcsClientBase(object):
             'returncode': NotImplemented
         }
 
-    def _run_command(self, cmd, env=None, retry=0):
+    def _run_command(self, cmd, cwd=None, env=None, retry=0):
+        cwd = cwd if cwd else os.path.abspath(self.path)
         for i in range(retry + 1):
-            result = run_command(cmd, os.path.abspath(self.path), env=env)
+            result = run_command(cmd, cwd, env=env)
             if not result['returncode']:
                 # return successful result
                 break

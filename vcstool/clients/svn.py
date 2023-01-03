@@ -1,4 +1,5 @@
 import os
+import pathlib
 from shutil import which
 from xml.etree.ElementTree import fromstring
 
@@ -202,6 +203,33 @@ class SvnClient(VcsClientBase):
             'output': url,
             'returncode': 0,
         }
+
+    def repos(self, command):
+        self._check_executable()
+        cmd = [SvnClient._executable, 'status']
+        if command.quiet:
+            cmd += ['--quiet']
+        output = self._run_command(cmd)
+        localname = pathlib.Path(output["cwd"]).relative_to(pathlib.Path.cwd())
+        status = output["output"]
+        if status:
+            status = output["output"].split()[0]
+        else:
+            status = "-"
+        cmd = [SvnClient._executable, 'info']
+        output = self._run_command(cmd)
+        info = output['output'].split()
+
+        output = {}
+        output["localname"] = localname
+        output["status"] = status
+        output["scm"] = 'svn'
+        output["version"] = info[19]
+        output["uid"] = info[17]
+        output["uri"] = info[8]
+        output["returncode"] = 0
+
+        return output
 
     def status(self, command):
         self._check_executable()

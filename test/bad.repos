@@ -1,0 +1,4 @@
+repositories:
+  empty_entry:
+  missing_url:
+    type: git

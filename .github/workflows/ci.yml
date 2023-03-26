@@ -38,4 +38,4 @@ jobs:
         pip install --upgrade coverage flake8 flake8-docstrings flake8-import-order pytest
         git config --global --add init.defaultBranch master
         git config --global --add advice.detachedHead true
-        ${{ matrix.os == 'windows-latest' && 'set PYTHONPATH=%cd% &&' || 'PYTHONPATH=`pwd`' }} pytest -s -v test
+        ${{ matrix.os == 'windows-latest' && 'set PYTHONPATH=%cd% &&' || 'PYTHONPATH=`pwd`' }} pytest -s -v test ${{ matrix.os != 'ubuntu-latest' && '-k "not test_flake8"' || '' }}

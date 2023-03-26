@@ -3,7 +3,6 @@ from shutil import which
 import subprocess
 
 from vcstool.executor import USE_COLOR
-
 from .vcs_base import VcsClientBase
 from ..util import rmtree
 

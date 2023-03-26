@@ -1,5 +1,6 @@
 from setuptools import find_packages
 from setuptools import setup
+
 from vcstool import __version__
 
 install_requires = ['PyYAML', 'setuptools']

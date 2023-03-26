@@ -2,7 +2,6 @@ import argparse
 import sys
 
 from vcstool.streams import set_streams
-
 from .command import Command
 from .command import simple_main
 

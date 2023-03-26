@@ -9,7 +9,6 @@ from vcstool.executor import generate_jobs
 from vcstool.executor import output_repositories
 from vcstool.executor import output_results
 from vcstool.streams import set_streams
-
 from .command import add_common_arguments
 from .command import Command
 

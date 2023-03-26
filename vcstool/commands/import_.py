@@ -4,6 +4,8 @@ from shutil import which
 import sys
 import urllib.request as request
 
+import yaml
+
 from vcstool import __version__ as vcstool_version
 from vcstool.clients import vcstool_clients
 from vcstool.clients.vcs_base import run_command
@@ -12,8 +14,6 @@ from vcstool.executor import execute_jobs
 from vcstool.executor import output_repositories
 from vcstool.executor import output_results
 from vcstool.streams import set_streams
-import yaml
-
 from .command import add_common_arguments
 from .command import Command
 

@@ -15,6 +15,7 @@ def test_flake8():
         '--extend-ignore=' + ','.join([
             'A003', 'D100', 'D101', 'D102', 'D103', 'D104', 'D105', 'D107']),
         '--exclude', 'vcstool/compat/shutil.py',
+        '--application-import-names=vcstool',
         '--import-order-style=google']
     style_guide = get_style_guide(argv)
     base_path = os.path.join(os.path.dirname(__file__), '..')
@@ -38,27 +39,46 @@ def get_style_guide(argv=None):
     # to allow passing command line argument
     application = Application()
     if hasattr(application, 'parse_preliminary_options'):
+        # flake8 <6.0.0
         prelim_opts, remaining_args = application.parse_preliminary_options(
             argv)
         from flake8 import configure_logging
         configure_logging(prelim_opts.verbose, prelim_opts.output_file)
         from flake8.options import config
-        config_finder = config.ConfigFileFinder(
-            application.program, prelim_opts.append_config,
-            config_file=prelim_opts.config,
-            ignore_config_files=prelim_opts.isolated)
-        application.find_plugins(config_finder)
-        application.register_plugin_options()
-        application.parse_configuration_and_cli(config_finder, remaining_args)
+        try:
+            # flake8 4.0
+            config_finder = config.ConfigFileFinder(
+                application.program, prelim_opts.append_config,
+                config_file=prelim_opts.config,
+                ignore_config_files=prelim_opts.isolated)
+            application.find_plugins(config_finder)
+            application.register_plugin_options()
+            application.parse_configuration_and_cli(
+                config_finder, remaining_args)
+        except AttributeError:
+            # flake8 5.0 (ConfigFileFinder doesn't exist)
+            cfg, cfg_dir = config.load_config(
+                config=prelim_opts.config,
+                extra=prelim_opts.append_config,
+                isolated=prelim_opts.isolated)
+            application.find_plugins(
+                cfg,
+                cfg_dir,
+                enable_extensions=prelim_opts.enable_extensions,
+                require_plugins=prelim_opts.require_plugins)
+            application.register_plugin_options()
+            application.parse_configuration_and_cli(
+                cfg, cfg_dir, remaining_args)
+        application.make_formatter()
+        application.make_guide()
+        application.make_file_checker_manager()
     else:
-        application.parse_preliminary_options_and_args([])
-        application.make_config_finder()
-        application.find_plugins()
-        application.register_plugin_options()
-        application.parse_configuration_and_cli(argv)
-    application.make_formatter()
-    application.make_guide()
-    application.make_file_checker_manager()
+        # flake8 >=6.0.0
+        from flake8.options.parse_args import parse_args
+        application.plugins, application.options = parse_args(argv)
+        application.make_formatter()
+        application.make_guide()
+        application.make_file_checker_manager([])
     return StyleGuide(application)
 
 

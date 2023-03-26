@@ -7,7 +7,6 @@ from vcstool.executor import ansi
 from vcstool.executor import execute_jobs
 from vcstool.executor import output_results
 from vcstool.streams import set_streams
-
 from .command import add_common_arguments
 from .command import Command
 

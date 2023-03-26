@@ -102,6 +102,12 @@ def get_repos_in_vcstool_format(repositories):
     for path in repositories:
         repo = {}
         attributes = repositories[path]
+        if not attributes:
+            print(
+                ansi('yellowf') + (
+                    "Repository '%s' is empty" % path) + ansi('reset'),
+                file=sys.stderr)
+            continue
         try:
             repo['type'] = attributes['type']
             repo['url'] = attributes['url']

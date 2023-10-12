@@ -83,7 +83,7 @@ def main(args=None, stdout=None, stderr=None):
         output_repositories(clients)
     jobs = generate_jobs(clients, command)
     results = execute_jobs(
-        jobs, show_progress=True, number_of_workers=args.workers,
+        jobs, show_progress=True, number_of_workers=args.workers, delay_time=args.delay,
         debug_jobs=args.debug)
 
     output_results(results, hide_empty=args.hide_empty)

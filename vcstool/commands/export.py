@@ -95,7 +95,7 @@ def main(args=None, stdout=None, stderr=None):
     if command.output_repos:
         output_repositories(clients)
     jobs = generate_jobs(clients, command)
-    results = execute_jobs(jobs, number_of_workers=args.workers)
+    results = execute_jobs(jobs, number_of_workers=args.workers, delay_time=args.delay)
 
     # check if at least one repo was found in the client directory
     basename = None

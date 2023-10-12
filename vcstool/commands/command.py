@@ -59,6 +59,7 @@ def add_common_arguments(
     group.add_argument(
         '-w', '--workers', type=check_greater_zero, metavar='N',
         default=default_workers, help='Number of parallel worker threads')
+    group.add_argument("-d", "--delay", type=float, default=0.0, help="Delay between job processing to prevent DOS")
     group.add_argument(
         '--repos', action='store_true', default=False,
         help='List repositories which the command operates on')
@@ -93,7 +94,7 @@ def simple_main(parser, command_class, args=None):
         output_repositories(clients)
     jobs = generate_jobs(clients, command)
     results = execute_jobs(
-        jobs, show_progress=True, number_of_workers=args.workers,
+        jobs, show_progress=True, number_of_workers=args.workers, delay_time=args.delay,
         debug_jobs=args.debug)
 
     output_results(results, hide_empty=args.hide_empty)

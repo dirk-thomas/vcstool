@@ -3,6 +3,7 @@ import os
 from queue import Empty, Queue
 import sys
 import threading
+from time import sleep
 import traceback
 
 logger = logging.getLogger(__name__)
@@ -79,7 +80,7 @@ def get_ready_job(jobs):
 
 
 def execute_jobs(
-    jobs, show_progress=False, number_of_workers=10, debug_jobs=False
+    jobs, show_progress=False, number_of_workers=10, debug_jobs=False, delay_time=0.0,
 ):
     global windows_force_posix
     from vcstool.streams import stdout
@@ -97,7 +98,7 @@ def execute_jobs(
     # create worker threads
     workers = []
     for _ in range(min(number_of_workers, len(jobs))):
-        worker = Worker(job_queue, result_queue)
+        worker = Worker(job_queue, result_queue, delay_time)
         workers.append(worker)
 
     # fill job_queue with jobs for each worker
@@ -157,12 +158,13 @@ def execute_jobs(
 
 class Worker(threading.Thread):
 
-    def __init__(self, job_queue, result_queue):
+    def __init__(self, job_queue, result_queue, delay_time=0.0):
         super(Worker, self).__init__()
         self.daemon = True
         self.done = False
         self.job_queue = job_queue
         self.result_queue = result_queue
+        self.delay_time = delay_time
 
     def run(self):
         # process all incoming jobs
@@ -174,6 +176,8 @@ class Worker(threading.Thread):
                 result = self.process_job(job)
                 # send result
                 self.result_queue.put((job, result))
+                if self.delay_time > 0.0:
+                    sleep(self.delay_time)
             except Empty:
                 pass
 

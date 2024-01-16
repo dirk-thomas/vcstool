@@ -585,7 +585,7 @@ class GitClient(VcsClientBase):
 
     def pull(self, _command):
         self._check_executable()
-        cmd = [GitClient._executable, 'pull']
+        cmd = [GitClient._executable, 'pull', '--quiet']
         self._check_color(cmd)
         result = self._run_command(cmd)
 

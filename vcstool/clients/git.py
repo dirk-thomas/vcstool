@@ -215,11 +215,11 @@ class GitClient(VcsClientBase):
 
     def _get_remote_url(self, remote):
         cmd_url = [
-            GitClient._executable, 'config', '--get', 'remote.%s.url' % remote]
+            GitClient._executable, 'ls-remote', '--get-url', '%s' % remote]
         result_url = self._run_command(cmd_url)
         if result_url['returncode']:
-            result_url['output'] = 'Could not determine remote url: ' + \
-                result_url['output']
+            result_url['output'] = f'Could not resolve url for remote {remote}: ' + \
+                                   result_url['output']
         return result_url
 
     def import_(self, command):

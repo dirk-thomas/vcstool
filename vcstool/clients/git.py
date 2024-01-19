@@ -2,7 +2,7 @@ import os
 from shutil import which
 import subprocess
 
-from vcstool.executor import USE_COLOR
+from vcstool.executor import USE_COLOR, ansi
 
 from .vcs_base import VcsClientBase
 from ..util import rmtree
@@ -230,6 +230,15 @@ class GitClient(VcsClientBase):
                 'output': "Repository data lacks the 'url' value",
                 'returncode': 1
             }
+
+        # Check if the url will be modified by insteadOf
+        resolved_cmd_url = self._get_remote_url(command.url)
+        if resolved_cmd_url['returncode']:
+            return resolved_cmd_url
+
+        if resolved_cmd_url['output'] != command.url:
+            print(ansi('yellowf') + f"url {command.url} was resolved to {resolved_cmd_url['output']} by insteadOf")
+            command.url = resolved_cmd_url['output']
 
         self._check_executable()
         if GitClient.is_repository(self.path):

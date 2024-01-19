@@ -236,8 +236,6 @@ class GitClient(VcsClientBase):
             return resolved_cmd_url
 
         if resolved_cmd_url['output'] != command.url:
-            print(
-                ansi('yellowf') + 'url %s was resolved to %s' % (command.url, resolved_cmd_url['output']))
             command.url = resolved_cmd_url['output']
 
         self._check_executable()

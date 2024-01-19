@@ -9,7 +9,6 @@ from ..util import rmtree
 
 
 class GitClient(VcsClientBase):
-
     type = 'git'
     _executable = None
     _git_version = None
@@ -69,7 +68,7 @@ class GitClient(VcsClientBase):
             result_branch = self._run_command(cmd_branch)
             if result_branch['returncode']:
                 result_branch['output'] = 'Could not determine ref: ' + \
-                    result_branch['output']
+                                          result_branch['output']
                 return result_branch
             branch_name = result_branch['output']
             exact = branch_name == 'HEAD'  # is detached
@@ -82,7 +81,7 @@ class GitClient(VcsClientBase):
             result_remote = self._run_command(cmd_remote)
             if result_remote['returncode']:
                 result_remote['output'] = 'Could not determine ref: ' + \
-                    result_remote['output']
+                                          result_remote['output']
                 return result_remote
             branch_with_remote = result_remote['output']
 
@@ -122,7 +121,7 @@ class GitClient(VcsClientBase):
             result_ref = self._run_command(cmd_ref)
             if result_ref['returncode']:
                 result_ref['output'] = 'Could not determine ref: ' + \
-                    result_ref['output']
+                                       result_ref['output']
                 return result_ref
             ref = result_ref['output']
 
@@ -131,7 +130,7 @@ class GitClient(VcsClientBase):
             result_remotes = self._run_command(cmd_remotes)
             if result_remotes['returncode']:
                 result_remotes['output'] = 'Could not determine remotes: ' + \
-                    result_remotes['output']
+                                           result_remotes['output']
                 return result_remotes
             remotes = result_remotes['output'].splitlines()
 
@@ -218,7 +217,7 @@ class GitClient(VcsClientBase):
             GitClient._executable, 'ls-remote', '--get-url', '%s' % remote]
         result_url = self._run_command(cmd_url)
         if result_url['returncode']:
-            result_url['output'] = f'Could not resolve url for remote {remote}: ' + \
+            result_url['output'] = 'Could not resolve url for remote %s: ' % remote + \
                                    result_url['output']
         return result_url
 
@@ -237,7 +236,8 @@ class GitClient(VcsClientBase):
             return resolved_cmd_url
 
         if resolved_cmd_url['output'] != command.url:
-            print(ansi('yellowf') + f"url {command.url} was resolved to {resolved_cmd_url['output']} by insteadOf")
+            print(
+                ansi('yellowf') + 'url %s was resolved to %s' % (command.url, resolved_cmd_url['output']))
             command.url = resolved_cmd_url['output']
 
         self._check_executable()
@@ -489,7 +489,7 @@ class GitClient(VcsClientBase):
         result_remote = self._run_command(cmd_remote)
         if result_remote['returncode']:
             result_remote['output'] = 'Could not determine remotes: ' + \
-                result_remote['output']
+                                      result_remote['output']
             return result_remote
         remote_urls = []
         cmd = result_remote['cmd']
@@ -526,7 +526,7 @@ class GitClient(VcsClientBase):
         result = self._run_command(cmd)
         if result['returncode']:
             result['output'] = 'Could not determine ref type of version: ' + \
-                result['output']
+                               result['output']
             return result, None
         if not result['output']:
             result['version_type'] = 'hash'
@@ -542,7 +542,7 @@ class GitClient(VcsClientBase):
             if refs[tag_ref] != refs[branch_ref]:
                 result['returncode'] = 1
                 result['output'] = 'The version ref is a branch as well as ' \
-                    'tag but with different hashes'
+                                   'tag but with different hashes'
                 return result, None
         if tag_ref in refs:
             result['version_type'] = 'tag'
@@ -605,7 +605,7 @@ class GitClient(VcsClientBase):
             result_rev_parse = self._run_command(cmd_rev_parse)
             if result_rev_parse['returncode']:
                 result_rev_parse['output'] = 'Could not determine ref: ' + \
-                    result_rev_parse['output']
+                                             result_rev_parse['output']
                 return result_rev_parse
             detached = result_rev_parse['output'] == 'HEAD'
 
@@ -691,7 +691,7 @@ class GitClient(VcsClientBase):
             branches = []
 
             for hash_and_ref in self._get_hash_ref_tuples(
-                result_ls_remote['output']
+                    result_ls_remote['output']
             ):
                 hashes.append(hash_and_ref[0])
 
@@ -708,26 +708,26 @@ class GitClient(VcsClientBase):
                 version_type = 'ref'
                 version_name = command.version
             elif (
-                command.version.startswith('heads/') and
-                command.version[6:] in branches
+                    command.version.startswith('heads/') and
+                    command.version[6:] in branches
             ):
                 version_type = 'branch'
                 version_name = command.version[6:]
             elif (
-                command.version.startswith('tags/') and
-                command.version[5:] in tags
+                    command.version.startswith('tags/') and
+                    command.version[5:] in tags
             ):
                 version_type = 'tag'
                 version_name = command.version[5:]
             elif (
-                command.version in branches and
-                command.version not in tags
+                    command.version in branches and
+                    command.version not in tags
             ):
                 version_type = 'branch'
                 version_name = command.version
             elif (
-                command.version in tags and
-                command.version not in branches
+                    command.version in tags and
+                    command.version not in branches
             ):
                 version_type = 'tag'
                 version_name = command.version
@@ -738,8 +738,8 @@ class GitClient(VcsClientBase):
                 else:
                     cmd = result_ls_remote['cmd']
                     output = "Found git repository '%s' but " % command.url + \
-                        'unable to verify non-branch / non-tag ref ' + \
-                        "'%s' without cloning the repo" % command.version
+                             'unable to verify non-branch / non-tag ref ' + \
+                             "'%s' without cloning the repo" % command.version
 
                     return {
                         'cmd': cmd,
@@ -750,11 +750,11 @@ class GitClient(VcsClientBase):
 
             cmd = result_ls_remote['cmd']
             output = "Found git repository '%s' with %s '%s'" % \
-                (command.url, version_type, version_name)
+                     (command.url, version_type, version_name)
         else:
             cmd = result_ls_remote['cmd']
             output = "Found git repository '%s' with default branch" % \
-                command.url
+                     command.url
 
         return {
             'cmd': cmd,

@@ -1,0 +1,3 @@
+=== ./vcstool (git) ===
+origin	https://github.com/dirk-thomas/vcstool.git (fetch)
+origin	https://github.com/dirk-thomas/vcstool.git (push)

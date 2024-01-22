@@ -14,6 +14,7 @@ file_uri_scheme = 'file://' if sys.platform != 'win32' else 'file:///'
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS_FILE_URL = file_uri_scheme + REPOS_FILE
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
+REPOS_SSH_FILE = os.path.join(os.path.dirname(__file__), 'list_ssh.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -315,6 +316,36 @@ invocation.
         finally:
             rmtree(workdir)
 
+    def test_import_insteadof(self):
+        """
+        Imports an ssh repo with a ssh->https indexOf rule. Checks if remote was changed
+        """
+        workdir = os.path.join(TEST_WORKSPACE, 'import-insteadof')
+        os.makedirs(workdir)
+
+        try:
+            # git doesn't make it easy to change the location of the global .gitconfig
+            # It will look for HOME/.gitconfig, so I have to override HOME and
+            # put a new gitconfig there.  The thought of overwriting the user's .gitconfig
+            # scares me, so check/write the file manually
+            gitconfig_file = os.path.join(workdir, '.gitconfig')
+            self.assertFalse(os.path.exists(gitconfig_file))
+            with open(gitconfig_file, 'w') as f:
+                f.write('[url "https://github.com/"]\n\tinsteadOf = git@github.com:\n')
+
+            run_command(
+                'import', ['--input', REPOS_SSH_FILE, '.'],
+                subfolder='import-insteadof', envs={'HOME': workdir})
+
+            # Need the raw output to see if the ssh url was changed to https
+            output = run_command('remotes', subfolder='import-insteadof',
+                                 envs={'HOME': workdir}, raw_output=True)
+
+            expected = get_expected_output('remotes_insteadof')
+            self.assertEqual(output, expected)
+        finally:
+            rmtree(workdir)
+
     def test_validate(self):
         output = run_command(
             'validate', ['--input', REPOS_FILE])
@@ -352,20 +383,23 @@ invocation.
         self.assertEqual(output, expected)
 
 
-def run_command(command, args=None, subfolder=None):
+def run_command(command, args=None, subfolder=None, envs=None, raw_output=False):
     repo_root = os.path.dirname(os.path.dirname(__file__))
     script = os.path.join(repo_root, 'scripts', 'vcs-' + command)
     env = dict(os.environ)
     env.update(
         LANG='en_US.UTF-8',
         PYTHONPATH=repo_root + os.pathsep + env.get('PYTHONPATH', ''))
+    if envs is not None:
+        env.update(envs)
+
     cwd = TEST_WORKSPACE
     if subfolder:
         cwd = os.path.join(cwd, subfolder)
     output = subprocess.check_output(
         [sys.executable, script] + (args or []),
         stderr=subprocess.STDOUT, cwd=cwd, env=env)
-    return adapt_command_output(output, cwd)
+    return output if raw_output else adapt_command_output(output, cwd)
 
 
 def adapt_command_output(output, cwd=None):

@@ -1,0 +1,5 @@
+repositories:  
+  vcstool:
+    type: git
+    url: git@github.com:dirk-thomas/vcstool.git
+    version: heads/master  

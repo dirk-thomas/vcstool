@@ -325,11 +325,13 @@ invocation.
 
         try:
             # git doesn't make it easy to change the location of the global .gitconfig
-            # Change HOME to avoid messing with the user's .gitconfig
-            subprocess.check_output(
-                ['git', 'config',
-                 '--global', 'url.https://github.com/.insteadof', 'git@github.com:'],
-                stderr=subprocess.STDOUT, cwd=workdir, env={'HOME': workdir})
+            # It will look for HOME/.gitconfig, so I have to override HOME and
+            # put a new gitconfig there.  The thought of overwriting the user's .gitconfig
+            # scares me, so check/write the file manually
+            gitconfig_file = os.path.join(workdir, '.gitconfig')
+            self.assertFalse(os.path.exists(gitconfig_file))
+            with open(gitconfig_file, 'w') as f:
+                f.write('[url "https://github.com/"]\n\tinsteadOf = git@github.com:\n')
 
             run_command(
                 'import', ['--input', REPOS_SSH_FILE, '.'],

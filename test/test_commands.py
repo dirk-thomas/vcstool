@@ -14,6 +14,7 @@ file_uri_scheme = 'file://' if sys.platform != 'win32' else 'file:///'
 REPOS_FILE = os.path.join(os.path.dirname(__file__), 'list.repos')
 REPOS_FILE_URL = file_uri_scheme + REPOS_FILE
 REPOS2_FILE = os.path.join(os.path.dirname(__file__), 'list2.repos')
+REPOS_SSH_FILE = os.path.join(os.path.dirname(__file__), 'list_ssh.repos')
 TEST_WORKSPACE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'test_workspace')
 
@@ -312,6 +313,34 @@ invocation.
             assert (
                 output == expected or
                 output == expected.replace(b'... ', b' '))
+        finally:
+            rmtree(workdir)
+
+    def test_import_insteadof(self):
+        """
+        Imports an ssh repo with a ssh->https indexOf rule. Checks if remote was changed
+        """
+        workdir = os.path.join(TEST_WORKSPACE, 'import-insteadof')
+        os.makedirs(workdir)
+
+        try:
+            # git doesn't make it easy to change the location of the global .gitconfig
+            # Change HOME to avoid messing with the user's .gitconfig
+            subprocess.check_output(
+                ['git', 'config',
+                 '--global', 'url.https://github.com/.insteadof', 'git@github.com:'],
+                stderr=subprocess.STDOUT, cwd=workdir, env={'HOME': workdir})
+
+            run_command(
+                'import', ['--input', REPOS_SSH_FILE, '.'],
+                subfolder='import-insteadof', envs={'HOME': workdir})
+
+            # Need the raw output to see if the ssh url was changed to https
+            output = run_command('remotes', subfolder='import-insteadof',
+                                 envs={'HOME': workdir}, raw_output=True)
+
+            expected = get_expected_output('remotes_insteadof')
+            self.assertEqual(output, expected)
         finally:
             rmtree(workdir)
 

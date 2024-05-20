@@ -46,7 +46,7 @@ def output_export_data(result, hide_empty=False):
         return
 
     try:
-        lines = []
+        lines = ["---"]
         lines.append('  %s:' % result['path'])
         lines.append('    type: ' + result['client'].__class__.type)
         export_data = result['export_data']

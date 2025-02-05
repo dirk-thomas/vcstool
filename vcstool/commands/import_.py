@@ -34,6 +34,7 @@ class ImportCommand(Command):
         self.skip_existing = args.skip_existing
         self.recursive = recursive
         self.shallow = shallow
+        self.partial_clone = args.partial_clone
 
 
 def get_parser():
@@ -60,6 +61,10 @@ def get_parser():
         '--skip-existing', action='store_true', default=False,
         help="Don't overwrite existing directories or change custom checkouts "
              'in repos using the same URL (but fetch repos with same URL)')
+    group.add_argument(
+        '--partial-clone', action='store_true', default=False,
+        help="Only clone the partial git first, then checkout to the target version"
+    )
 
     return parser
 

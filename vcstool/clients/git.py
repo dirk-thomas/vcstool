@@ -313,6 +313,8 @@ class GitClient(VcsClientBase):
 
             # fetch updates for existing repo
             cmd_fetch = [GitClient._executable, 'fetch', remote]
+            if command.partial_clone:
+                cmd_fetch.append("--filter=blob:none")
             if command.shallow:
                 result_version_type, version_name = self._check_version_type(
                     command.url, checkout_version)

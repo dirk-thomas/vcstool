@@ -145,6 +145,43 @@ The set of repositories to operate on can optionally be restricted by the type:
 If the command should work on multiple repositories make sure to pass only generic arguments which work for all of these repository types.
 
 
+Authorization for Fetching ZIP or TAR Repositories
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Credentials for ZIP and TAR repositories can be provided using environment variables.
+
+1. Define a Credentials Key in the Repository Configuration
+
+Add a ``credentials_key`` field in your repository configuration:
+
+.. code-block:: yaml
+
+   repositories:
+     contents/example:
+       type: zip
+       url: https://127.0.0.1/content.zip
+       credentials_key: <KEY>
+
+2. Set Environment Variables with Credentials
+
+Use appropriate environment variables to pass authentication details:
+
+- ``VCS_<KEY>_AUTHENTICATION_METHOD`` – Authentication method:  
+  - ``Basic`` for username and password.  
+  - ``Bearer`` or ``Token`` for token-based authentication.
+- ``VCS_<KEY>_USERNAME`` – Username for ``Basic`` authentication.
+- ``VCS_<KEY>_PASSWORD`` – Password for ``Basic`` authentication.
+- ``VCS_<KEY>_TOKEN`` – Token for ``Bearer`` or ``Token`` authentication.
+
+3. (Optional) Disable SSL Certificate Verification
+
+To disable SSL certificate verification, set the following environment variable:
+
+.. code-block:: bash
+
+   export VCS_IGNORE_SSL_CERTIFICATE=True
+
+
 How to install vcstool?
 =======================
 

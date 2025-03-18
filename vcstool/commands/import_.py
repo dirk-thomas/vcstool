@@ -24,7 +24,7 @@ class ImportCommand(Command):
     help = 'Import the list of repositories'
 
     def __init__(
-        self, args, url, version=None, recursive=False, shallow=False
+        self, args, url, version=None, recursive=False, shallow=False, credentials_key=None
     ):
         super(ImportCommand, self).__init__(args)
         self.url = url
@@ -34,6 +34,7 @@ class ImportCommand(Command):
         self.skip_existing = args.skip_existing
         self.recursive = recursive
         self.shallow = shallow
+        self.credentials_key = credentials_key
 
 
 def get_parser():
@@ -107,6 +108,8 @@ def get_repos_in_vcstool_format(repositories):
             repo['url'] = attributes['url']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
+            if 'credentials_key' in attributes:
+                repo['credentials_key'] = attributes['credentials_key']
         except KeyError as e:
             print(
                 ansi('yellowf') + (
@@ -138,6 +141,8 @@ def get_repos_in_rosinstall_format(root):
             repo['url'] = attributes['uri']
             if 'version' in attributes:
                 repo['version'] = attributes['version']
+            if 'credentials_key' in attributes:
+                repo['credentials_key'] = attributes['credentials_key']
         except KeyError as e:
             print(
                 ansi('yellowf') + (
@@ -171,7 +176,8 @@ def generate_jobs(repos, args):
         command = ImportCommand(
             args, repo['url'],
             str(repo['version']) if 'version' in repo else None,
-            recursive=args.recursive, shallow=args.shallow)
+            recursive=args.recursive, shallow=args.shallow, 
+            credentials_key=repo['credentials_key'] if 'credentials_key' in repo else None)
         job = {'client': client, 'command': command}
         jobs.append(job)
     return jobs

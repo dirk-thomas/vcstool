@@ -44,7 +44,7 @@ class ZipClient(VcsClientBase):
 
         # download zipfile
         try:
-            data = load_url(command.url, retry=command.retry)
+            data = load_url(command.url, retry=command.retry, credentials_key=command.credentials_key)
         except URLError as e:
             return {
                 'cmd': '',
